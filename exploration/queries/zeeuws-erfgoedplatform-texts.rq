@@ -1,0 +1,32 @@
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <https://schema.org/>
+
+# Texts of museum objects that mention a village name or drowning ("verdronken", ...).
+# Places are mostly free text in this dataset, so all descriptive fields are searched.
+# The NAMES and CONTEXT placeholders are replaced by the script with regular expressions. One REGEX
+# per text is much faster than VALUES ?name with CONTAINS, which Comunica evaluates as a cross
+# product of names and texts. The script then decides per text which villages it is about.
+SELECT ?object ?field ?text WHERE {
+  ?object a crm:E22_Human-Made_Object .
+  {
+    ?object rdfs:label ?text .
+    BIND("title" AS ?field)
+  } UNION {
+    ?object schema:abstract ?text .
+    BIND("abstract" AS ?field)
+  } UNION {
+    ?object schema:description ?text .
+    BIND("description" AS ?field)
+  } UNION {
+    ?object crm:P2_has_type/rdfs:label ?text .
+    BIND("type" AS ?field)
+  } UNION {
+    ?object crm:P108i_was_produced_by/crm:P7_took_place_at/rdfs:label ?text .
+    BIND("productionPlace" AS ?field)
+  } UNION {
+    ?object crm:P67i_is_referred_to_by/crm:P190_has_symbolic_content ?text .
+    BIND("reference" AS ?field)
+  }
+  FILTER(REGEX(STR(?text), "{{NAMES}}") || REGEX(STR(?text), "{{CONTEXT}}", "i"))
+}

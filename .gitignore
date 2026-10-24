@@ -1,2 +1,7 @@
 tmp/
 dumps/*
+!dumps/.gitkeep
+data/*
+!data/.gitkeep
+node_modules/
+.env

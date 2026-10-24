@@ -1,0 +1,190 @@
+{
+  "@graph": [
+    {
+      "@id": "_:autos1",
+      "@type": "http://schema.org/DataCatalog",
+      "http://schema.org/name": {
+        "@language": "nl",
+        "@value": "Linked Data Zeeuws erfgoedplatform"
+      },
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Catalogus met de linked data sets van het Zeeuws erfgoedplatform."
+      },
+      "http://schema.org/publisher": {
+        "@id": "https://collectiezeeland.nl/"
+      },
+      "http://schema.org/dataset": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/dataset/Zeeuws+erfgoedplatform+-+Museum+objecten"
+      }
+    },
+    {
+      "@id": "_:autos2",
+      "@type": "http://schema.org/ContactPoint",
+      "http://schema.org/name": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform"
+      },
+      "http://schema.org/email": "info@collectiezeeland.nl",
+      "http://schema.org/contactType": {
+        "@language": "nl",
+        "@value": "Info"
+      }
+    },
+    {
+      "@id": "_:autos3",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.n3"
+      },
+      "http://schema.org/encodingFormat": "text/n3",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .n3"
+      }
+    },
+    {
+      "@id": "_:autos4",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.ttl"
+      },
+      "http://schema.org/encodingFormat": "text/turtle",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .ttl"
+      }
+    },
+    {
+      "@id": "_:autos5",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.nq"
+      },
+      "http://schema.org/encodingFormat": "application/n-quads",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .nq"
+      }
+    },
+    {
+      "@id": "_:autos6",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.jsonld"
+      },
+      "http://schema.org/encodingFormat": "application/ld+json",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .jsonld"
+      }
+    },
+    {
+      "@id": "_:autos7",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.csv"
+      },
+      "http://schema.org/encodingFormat": "text/csv",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .csv"
+      }
+    },
+    {
+      "@id": "_:autos8",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.nt"
+      },
+      "http://schema.org/encodingFormat": "application/n-triples",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .nt"
+      }
+    },
+    {
+      "@id": "_:autos9",
+      "@type": "http://schema.org/DataDownload",
+      "http://schema.org/contentUrl": {
+        "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/set/Zeeuws+erfgoedplatform+-+Museum+objecten.rdf"
+      },
+      "http://schema.org/encodingFormat": "application/rdf+xml",
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten beschikbaar als .rdf"
+      }
+    },
+    {
+      "@id": "https://collectiezeeland.nl/",
+      "@type": "http://schema.org/Organization",
+      "http://schema.org/name": {
+        "@language": "nl",
+        "@value": "Linked Data Zeeuws erfgoedplatform"
+      },
+      "http://schema.org/contactPoint": {
+        "@id": "_:autos2"
+      }
+    },
+    {
+      "@id": "https://zoeken.collectiezeeland.nl/AtlantisPubliek/data/dataset/Zeeuws+erfgoedplatform+-+Museum+objecten",
+      "@type": "http://schema.org/Dataset",
+      "http://schema.org/name": {
+        "@language": "nl",
+        "@value": "Zeeuws erfgoedplatform - Museum objecten"
+      },
+      "http://schema.org/inLanguage": "nl",
+      "http://schema.org/license": {
+        "@id": "https://creativecommons.org/publicdomain/zero/1.0/"
+      },
+      "http://schema.org/description": {
+        "@language": "nl",
+        "@value": "Een lijst van alle beschikbare museale objecten van het Zeeuws erfgoedplatform. \n"
+      },
+      "http://schema.org/creator": {
+        "@id": "https://collectiezeeland.nl/"
+      },
+      "http://schema.org/dateCreated": {
+        "@value": "2024-12-17",
+        "@type": "http://www.w3.org/2001/XMLSchema#date"
+      },
+      "http://schema.org/datePublished": {
+        "@value": "2024-12-17",
+        "@type": "http://www.w3.org/2001/XMLSchema#date"
+      },
+      "http://schema.org/dateModified": {
+        "@value": "2026-10-11",
+        "@type": "http://www.w3.org/2001/XMLSchema#date"
+      },
+      "http://schema.org/spatialCoverage": {
+        "@id": "https://sws.geonames.org/6255148/"
+      },
+      "http://schema.org/distribution": [
+        {
+          "@id": "_:autos3"
+        },
+        {
+          "@id": "_:autos4"
+        },
+        {
+          "@id": "_:autos5"
+        },
+        {
+          "@id": "_:autos6"
+        },
+        {
+          "@id": "_:autos7"
+        },
+        {
+          "@id": "_:autos8"
+        },
+        {
+          "@id": "_:autos9"
+        }
+      ],
+      "http://schema.org/publisher": {
+        "@id": "https://collectiezeeland.nl/"
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "verdronkendorpen",
+  "private": true,
+  "description": "Linked Data Minecraft experience about the drowned villages of Zeeland",
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "check": "biome check",
+    "check:fix": "biome check --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.2"
+  }
+}

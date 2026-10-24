@@ -1,0 +1,12 @@
+PREFIX schema: <http://schema.org/>
+
+# The Turtle download of the dataset, with its licence and modification date, from the dataset
+# description in exploration/datasets/ (schema.org, as published in the NDE Datasetregister).
+SELECT ?dataset ?url ?license ?modified WHERE {
+  ?dataset a schema:Dataset ;
+    schema:distribution ?distribution .
+  ?distribution schema:encodingFormat "text/turtle" ;
+    schema:contentUrl ?url .
+  OPTIONAL { ?dataset schema:license ?license }
+  OPTIONAL { ?dataset schema:dateModified ?modified }
+}

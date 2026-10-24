@@ -1,0 +1,29 @@
+{
+  "name": "@verdronkendorpen/exploration",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Scripts that explore and fetch data sources about the drowned villages of Zeeland",
+  "type": "module",
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "fetch:backbone": "node scripts/01-fetch-backbone.ts",
+    "fetch:wikidata": "node scripts/02-wikidata-villages.ts",
+    "fetch:zeeuws-erfgoedplatform": "node scripts/03-zeeuws-erfgoedplatform.ts",
+    "fetch:all": "pnpm run fetch:backbone && pnpm run fetch:wikidata && pnpm run fetch:zeeuws-erfgoedplatform",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@comunica/query-sparql": "^5.4.1",
+    "@comunica/query-sparql-file": "^5.4.1",
+    "env-schema": "^8.0.1",
+    "n3": "^2.13.12"
+  },
+  "devDependencies": {
+    "@rdfjs/types": "^2.0.1",
+    "@types/n3": "^1.26.5",
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

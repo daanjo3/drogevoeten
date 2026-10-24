@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dcat="http://www.w3.org/ns/dcat#"
+   xmlns:dct="http://purl.org/dc/terms/"
+   xmlns:donl="https://data.overheid.nl/dcat.rdf#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:v="http://www.w3.org/2006/vcard/"
+>
+  <rdf:Description rdf:about="https://data.overheid.nl/dataset/84129-verdronken-dorpen">
+    <dcat:keyword xml:lang="nl">cultuurlandschappen</dcat:keyword>
+    <dct:identifier>https://nationaalgeoregister.nl/geonetwork?uuid=6eb9a0b2-b751-40a3-9a7d-5f3ed9d78a8b</dct:identifier>
+    <dct:title xml:lang="nl">Verdronken dorpen</dct:title>
+    <dct:license rdf:resource="http://standaarden.overheid.nl/owms/terms/licentieonbekend"/>
+    <dct:description xml:lang="nl">In 2018 werd de Kaart van de Verdronken Dorpen voor Zeeland herzien. De lijst van verdronken locaties is uitgebreid en met name door meer archiefonderzoek, archeologisch onderzoek en nieuwe technieken tot stand gekomen.
+Doel van vervaardiging: inzicht krijgen in de geschiedenis van Zeeland</dct:description>
+    <dcat:keyword xml:lang="nl">waardevolle-gebieden</dcat:keyword>
+    <dcat:distribution rdf:nodeID="dataset.84129-verdronken-dorpen.distribution.0"/>
+    <dcat:distribution rdf:nodeID="dataset.84129-verdronken-dorpen.distribution.2"/>
+    <dct:publisher rdf:resource="http://standaarden.overheid.nl/owms/terms/Zeeland_(provincie)"/>
+    <dct:creator rdf:resource="http://standaarden.overheid.nl/owms/terms/Zeeland_(provincie)"/>
+    <donl:status rdf:resource="http://data.overheid.nl/status/beschikbaar"/>
+    <dcat:keyword xml:lang="nl">verdronken-dorpen</dcat:keyword>
+    <dcat:contactPoint rdf:nodeID="dataset.84129-verdronken-dorpen.contactPoint"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+    <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/RESTRICTED"/>
+    <dcat:keyword xml:lang="nl">archeologie</dcat:keyword>
+    <dcat:theme rdf:resource="http://standaarden.overheid.nl/owms/terms/Cultuur_en_recreatie"/>
+    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/NLD"/>
+    <dcat:keyword xml:lang="nl">cultuurhistorie</dcat:keyword>
+    <donl:sourceCatalog rdf:resource="https://nationaalgeoregister.nl"/>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2018-06-18T00:00:00</dct:modified>
+    <dcat:distribution rdf:nodeID="dataset.84129-verdronken-dorpen.distribution.1"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.84129-verdronken-dorpen.distribution.0">
+    <dct:license rdf:resource="http://standaarden.overheid.nl/owms/terms/licentieonbekend"/>
+    <dct:description xml:lang="nl">Verdronken dorpen</dct:description>
+    <dcat:accessURL rdf:resource="https://opengeodata.zeeland.nl/geoserver/chs/wms?request=GetCapabilities"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/WMS_SRVC"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-19T09:51:35</dct:issued>
+    <dct:title xml:lang="nl">geocmd_vrddrppnt</dct:title>
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/xml"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.84129-verdronken-dorpen.distribution.2">
+    <dct:license rdf:resource="http://standaarden.overheid.nl/owms/terms/licentieonbekend"/>
+    <dct:title xml:lang="nl">Gegenereerde grafische weergave</dct:title>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:description xml:lang="nl">Dit is een grafische representatie van de dataset die via het NationaalGeoregister.nl aangeboden wordt. 
+
+Het is mogelijk dat deze grafische representatie geen weerspiegeling van de data is, maar dient als ondersteunende afbeelding. Indien de dataset via een OGC:WMS service aangeboden wordt, is het mogelijk om zelf een grafische weergave van de dataset te genereren.</dct:description>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/PNG"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-19T09:51:35</dct:issued>
+    <donl:distributionType rdf:resource="https://data.overheid.nl/distributiontype/visualization"/>
+    <dcat:accessURL rdf:resource="https://opengeodata.zeeland.nl/geoserver/chs/wms?service=WMS&amp;version=1.1.0&amp;request=GetMap&amp;layers=chs%3Ageocmd_vrddrppnt&amp;bbox=13278.0%2C361710.0%2C77295.0%2C417504.0&amp;width=768&amp;height=669&amp;srs=EPSG%3A28992&amp;format=image%2Fpng"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.84129-verdronken-dorpen.distribution.1">
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/xml"/>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/WFS_SRVC"/>
+    <dct:license rdf:resource="http://standaarden.overheid.nl/owms/terms/licentieonbekend"/>
+    <dct:title xml:lang="nl">geocmd_vrddrppnt</dct:title>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-19T09:51:35</dct:issued>
+    <dct:description xml:lang="nl">Verdronken dorpen</dct:description>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dcat:accessURL rdf:resource="https://opengeodata.zeeland.nl/geoserver/chs/wfs?request=GetCapabilities"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.84129-verdronken-dorpen.contactPoint">
+    <v:tel>+31118631011</v:tel>
+    <rdf:type rdf:resource="http://www.w3.org/2006/vcard/Kind"/>
+    <v:email>mailto:cultuur_erfgoed@zeeland.nl</v:email>
+    <v:web rdf:resource="https://www.zeeland.nl"/>
+    <v:fn xml:lang="nl">Provincie Zeeland</v:fn>
+  </rdf:Description>
+</rdf:RDF>
