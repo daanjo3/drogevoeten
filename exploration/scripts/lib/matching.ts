@@ -153,7 +153,9 @@ export async function loadHomonyms(): Promise<Set<string>> {
  * not a tie.
  */
 export const locationGroup = (village: Village): string =>
-  numberless(village.name) === village.name ? village.id : spellingKey(numberless(village.name));
+  // Prefixed, so a village id ("koudekerke") never equals the group of numbered locations of another
+  // village with a similar name ("Coudekerke 1" and "2").
+  numberless(village.name) === village.name ? `village:${village.id}` : `name:${spellingKey(numberless(village.name))}`;
 
 export function distanceKm([lon1, lat1]: [number, number], [lon2, lat2]: [number, number]): number {
   const rad = Math.PI / 180;

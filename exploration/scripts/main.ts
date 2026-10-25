@@ -23,6 +23,7 @@ interface Step {
 const STEPS: Step[] = [
   { name: 'wikidata' },
   { name: 'zeeuws-erfgoedplatform', uses: ['wikidata'] },
+  { name: 'rijksmuseum', uses: ['wikidata'] },
   // Loads a Zeeland subset of the RCE dump (about 3 million triples) into memory.
   { name: 'rce', uses: ['wikidata'], nodeOptions: ['--max-old-space-size=8192'] },
 ];

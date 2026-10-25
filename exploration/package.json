@@ -12,6 +12,7 @@
     "fetch:backbone": "node scripts/backbone.ts",
     "fetch:wikidata": "node scripts/wikidata.ts",
     "fetch:zeeuws-erfgoedplatform": "node scripts/zeeuws-erfgoedplatform.ts",
+    "fetch:rijksmuseum": "node scripts/rijksmuseum.ts",
     "fetch:rce": "node --max-old-space-size=8192 scripts/rce.ts",
     "typecheck": "tsc"
   },
@@ -19,12 +20,14 @@
     "@comunica/query-sparql": "^5.4.1",
     "@comunica/query-sparql-file": "^5.4.1",
     "env-schema": "^8.0.1",
-    "n3": "^2.13.12"
+    "n3": "^2.13.12",
+    "yauzl": "^3.4.0"
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",
     "@types/n3": "^1.26.5",
     "@types/node": "^26.6.5",
+    "@types/yauzl": "^3.4.0",
     "typescript": "^7.0.2"
   }
 }

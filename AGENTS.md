@@ -28,6 +28,13 @@ Before exploring, fetching or querying a data source, **read [`docs/exploration-
 - **Query each source as few times as possible.** Batch the villages with `VALUES` instead of running one query per village.
 - For small datasets, download a dump into `dumps/` once and query it locally instead of querying the remote service repeatedly.
 
+### Request budget
+
+- **A pipeline run sends at most 10 requests to any remote endpoint (host).** Every request counts: queries, search pages, lookups of single records, metadata calls and downloads. Many small requests get the project blocked, even when they are throttled.
+- Count the requests of a planned step before writing it. Look for batching (`VALUES`, OR search, bulk endpoints) and for dumps, including old or "historical" dumps that a dataset description doesn't list.
+- If a source can't be covered within the budget and has no dump, drop it: record it in the SOP's source notes and don't work around the limit.
+- Exploring a source by hand, before a step exists, also stays small: a handful of test requests, not a crawl.
+
 ### Workspace
 
 - The repository is a **pnpm workspace** (`pnpm-workspace.yaml`). Use `pnpm`, not npm or yarn, and run `pnpm install` from the repository root.
