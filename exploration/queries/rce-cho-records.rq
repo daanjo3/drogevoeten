@@ -1,0 +1,19 @@
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+PREFIX edm: <http://www.europeana.eu/schemas/edm/>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+# A summary of the selected records for matches.json: number, name, present-day place, and the
+# number of images.
+# The RECORDS placeholder is replaced by the script with the record IRIs.
+SELECT ?record ?class (SAMPLE(?number) AS ?objectNumber) (SAMPLE(?monument) AS ?monumentNumber) (SAMPLE(?name) AS ?label)
+  (SAMPLE(?place) AS ?woonplaats) (COUNT(DISTINCT ?image) AS ?images) WHERE {
+  VALUES ?record { {{RECORDS}} }
+  ?record a ?class .
+  OPTIONAL { ?record ceo:cultuurhistorischObjectnummer ?number }
+  OPTIONAL { ?record ceo:rijksmonumentnummer ?monument }
+  OPTIONAL { { ?record ceo:heeftNaam/ceo:naam ?name } UNION { ?record ceo:naam ?name } }
+  OPTIONAL { ?record ceo:heeftBasisregistratieRelatie/ceo:heeftBAGRelatie/ceo:woonplaatsnaam ?place }
+  OPTIONAL { ?image edm:aggregatedCHO ?record ; foaf:depiction ?thumbnail }
+}
+GROUP BY ?record ?class

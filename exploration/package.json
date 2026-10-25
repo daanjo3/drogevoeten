@@ -12,6 +12,7 @@
     "fetch:backbone": "node scripts/backbone.ts",
     "fetch:wikidata": "node scripts/wikidata.ts",
     "fetch:zeeuws-erfgoedplatform": "node scripts/zeeuws-erfgoedplatform.ts",
+    "fetch:rce": "node --max-old-space-size=8192 scripts/rce.ts",
     "typecheck": "tsc"
   },
   "dependencies": {

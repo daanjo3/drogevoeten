@@ -15,6 +15,10 @@ const COMBINED_PREFIXES = {
   crm: 'http://www.cidoc-crm.org/cidoc-crm/',
   aat: 'http://vocab.getty.edu/aat/',
   hdl: 'https://hdl.handle.net/21.12128/',
+  ceo: 'https://linkeddata.cultureelerfgoed.nl/def/ceo#',
+  edm: 'http://www.europeana.eu/schemas/edm/',
+  foaf: 'http://xmlns.com/foaf/0.1/',
+  geo: 'http://www.opengis.net/ont/geosparql#',
 };
 
 async function parseTurtle(path: string, blankNodePrefix: string): Promise<Quad[]> {

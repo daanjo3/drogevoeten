@@ -1,0 +1,30 @@
+PREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>
+
+# Texts of RCE records (rijksmonumenten, archeologische terreinen, vondstlocaties, onderzoeksgebieden,
+# complexen, gezichten) that mention a village name or drowning, from the Zeeland subset of the dump.
+# The fields "name", "locationName" and "locationDescription" are structured place fields; the
+# descriptions are free text. The present-day BAG place (woonplaatsnaam) is left out: it always
+# names the place as it is now.
+# The CLASSES, NAMES and CONTEXT placeholders are replaced by the script.
+SELECT ?record ?class ?field ?text WHERE {
+  VALUES ?class { {{CLASSES}} }
+  ?record a ?class .
+  {
+    ?record ceo:heeftNaam/ceo:naam ?text .
+    BIND("name" AS ?field)
+  } UNION {
+    ?record ceo:naam ?text .
+    BIND("name" AS ?field)
+  } UNION {
+    ?record ceo:heeftLocatieAanduiding/ceo:locatienaam ?text .
+    BIND("locationName" AS ?field)
+  } UNION {
+    ?record ceo:heeftLocatieAanduiding/ceo:locatieomschrijving ?text .
+    BIND("locationDescription" AS ?field)
+  } UNION {
+    ?description ceo:heeftBetrekkingOp ?record ;
+      ceo:omschrijving ?text .
+    BIND("description" AS ?field)
+  }
+  FILTER(REGEX(STR(?text), "{{NAMES}}") || REGEX(STR(?text), "{{CONTEXT}}", "i"))
+}

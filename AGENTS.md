@@ -57,6 +57,18 @@ Before exploring, fetching or querying a data source, **read [`docs/exploration-
 - Scripts must fail loudly on error responses (such as an `ows:ExceptionReport` or an HTTP error) and never write them out as data.
 - **Configuration** goes through environment variables, validated with [`env-schema`](https://github.com/fastify/env-schema) in `exploration/scripts/lib/config.ts`. They can also be set in `exploration/.env` (gitignored; see `.env.example`). Add new options to the schema with a default, so the scripts work without any configuration.
 
+### Large datasets and memory
+
+Lessons from the RCE dump (60 million triples, 850 MB gzipped N-Triples). Follow them for any source with more than about a million triples:
+
+- **Comunica's file source loads the whole file into memory.** About 3 million triples already take roughly 4 GB of memory and 12 to 20 seconds to parse. A full dump of tens of millions of triples can't be queried this way at all.
+- **Stream large dumps, don't load them.** Download with `downloadFile` (`lib/http.ts`), which streams to disk via a `.part` file, never with `fetchText`, which buffers the whole response. Read dumps line by line with `forEachTriple` (`lib/ntriples.ts`) and filter them to the part that's relevant to the villages. Cache that subset in `dumps/` and rebuild it only when the dump is newer (see `lib/rce-cho.ts`).
+- **Parse a subset once.** With a file source, every Comunica query parses the file again. Load the subset once into an N3 `Store` and pass the store as the query source (`sources: [store]`).
+- **Avoid heavy SPARQL over a large store.** A CONSTRUCT with nested UNIONs and OPTIONALs over a thousand records and millions of triples ran Node out of heap, even with an 8 GB limit: the process aborts with `FATAL ERROR: ... JavaScript heap out of memory` and exit code 134. Keep queries over large stores simple, such as one pattern with a `VALUES` filter, and collect related resources by walking the store with `store.getQuads()` instead (`describeRecords` in `lib/rce-cho.ts`).
+- **Give heavy steps more heap.** Node's default heap limit is about 4 GB. Set `--max-old-space-size` both in the step's package script and in its `nodeOptions` in `STEPS` (`main.ts`), because `main.ts` starts every step in its own process.
+- **Recognize out-of-memory crashes.** Exit code 134 (abort) with `JavaScript heap out of memory` at the end of stderr means V8 ran out of heap. Exit code 137 without a message would mean the operating system's out-of-memory killer. Log before every heavy stage (loading, each query, describing), so the last line in the log shows where a process stopped. Check the exit code: `main.ts` reports a failing step and stops. When testing, run heavy steps in the foreground with `timeout` and capture stderr, and wait for the process to end before reading its log. A crash message comes last and is easy to miss while the process is still running.
+- **Keep notebooks small.** A SPARQL Notebook cell also loads its endpoint files into memory, so point notebooks for large sources at the step's output (the found records), not at the dump or the subset.
+
 ### Verification
 
 - Verify claims about libraries, endpoints and public APIs against current documentation or a test request before relying on them.

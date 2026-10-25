@@ -1,0 +1,116 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# RCE: Cultuurhistorische Objecten\n\nExplores what the `rce` step found in the RCE dataset [Cultuurhistorische Objecten](https://linkeddata.cultureelerfgoed.nl/rce/cho) (CC BY 4.0): rijksmonumenten, archeologische terreinen, vondstlocaties, archeologische onderzoeksgebieden and gezichten in and around Zeeland, matched to the backbone villages.\n\n**Before running:** `pnpm --filter @verdronkendorpen/exploration run fetch:rce`. The full dump (`dumps/rce-cho.nt.gz`, 60 million triples) and the Zeeland subset (`dumps/rce-cho-zeeland.nt`, about 3 million triples, 600 MB) are too large for a notebook, so every cell queries:\n\n- `data/rce/records.ttl`: the full descriptions of every record with a candidate, in the Cultureel Erfgoed Ontologie (`ceo:`);\n- `data/rce/matches.ttl`: the candidates (`vd:Candidate`), with status, match key and distance;\n- `data/backbone/villages.ttl`: the villages, with the date of drowning.\n\nThe model: a record (`ceo:Rijksmonument`, `ceo:ArcheologischTerrein`, `ceo:Vondstlocatie`, ...) has a geometry (`ceo:heeftGeometrie/geo:asWKT`, WGS84), a location (`ceo:heeftLocatieAanduiding/ceo:locatienaam`), events with datings (`ceo:heeftGebeurtenis/ceo:heeftDatering`), and finds (`ceo:bevatObject`). Descriptions and names point to the record with `ceo:heeftBetrekkingOp`, images with `edm:aggregatedCHO`. Thesaurus terms (`https://data.cultureelerfgoed.nl/term/...`) have their `skos:prefLabel`.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Overview\n\nThe found records per class and candidate status.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?class ?status (COUNT(DISTINCT ?record) AS ?records) WHERE {\n  ?candidate vd:record ?record ;\n    vd:status ?statusConcept .\n  ?record a ?classIri .\n  FILTER(STRSTARTS(STR(?classIri), STR(ceo:)))\n  BIND(STRAFTER(STR(?classIri), \"#\") AS ?class)\n  BIND(STRAFTER(STR(?statusConcept), \"#status-\") AS ?status)\n}\nGROUP BY ?class ?status\nORDER BY ?class ?status",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Candidates by match key and status, with the reason for review or rejection.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?key ?status ?reason (COUNT(?candidate) AS ?candidates) WHERE {\n  ?candidate a vd:Candidate ;\n    vd:matchedBy ?keyConcept .\n  OPTIONAL { ?candidate vd:status ?statusConcept }\n  OPTIONAL { ?candidate vd:statusReason ?reasonConcept }\n  BIND(STRAFTER(STR(?keyConcept), \"#key-\") AS ?key)\n  BIND(COALESCE(STRAFTER(STR(?statusConcept), \"#status-\"), \"none\") AS ?status)\n  BIND(STRAFTER(STR(?reasonConcept), \"#reason-\") AS ?reason)\n}\nGROUP BY ?key ?status ?reason\nORDER BY ?key ?status DESC(?candidates)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Accepted records per village\n\nThe villages with the most accepted records, with the classes of those records. Numbered locations of one village share their records.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?name ?drownedEndYear (COUNT(DISTINCT ?record) AS ?records) (GROUP_CONCAT(DISTINCT ?class; separator=\", \") AS ?classes) WHERE {\n  ?candidate vd:village ?village ;\n    vd:record ?record ;\n    vd:status vd:status-accepted .\n  ?village rdfs:label ?name .\n  OPTIONAL { ?village vd:drownedEndYear ?drownedEndYear }\n  ?record a ?classIri .\n  FILTER(STRSTARTS(STR(?classIri), STR(ceo:)))\n  BIND(STRAFTER(STR(?classIri), \"#\") AS ?class)\n}\nGROUP BY ?name ?drownedEndYear\nORDER BY DESC(?records) ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "The accepted records with their location name, the match key, the distance from the backbone point and the start of their description.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?name ?record ?class ?key ?distanceKm (SAMPLE(?location) AS ?locationName) (SAMPLE(SUBSTR(?text, 1, 200)) AS ?description) WHERE {\n  ?candidate vd:village ?village ;\n    vd:record ?record ;\n    vd:status vd:status-accepted ;\n    vd:matchedBy ?keyConcept .\n  OPTIONAL { ?candidate vd:distanceKm ?distanceKm }\n  ?village rdfs:label ?name .\n  ?record a ?classIri .\n  FILTER(STRSTARTS(STR(?classIri), STR(ceo:)))\n  BIND(STRAFTER(STR(?classIri), \"#\") AS ?class)\n  BIND(STRAFTER(STR(?keyConcept), \"#key-\") AS ?key)\n  OPTIONAL { ?record ceo:heeftLocatieAanduiding/ceo:locatienaam ?location }\n  OPTIONAL { ?d ceo:heeftBetrekkingOp ?record ; ceo:omschrijving ?text }\n}\nGROUP BY ?name ?record ?class ?key ?distanceKm\nORDER BY ?name ?distanceKm",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## What the records add\n\nThe datings of the accepted records: events (`ceo:Kennisregistratie` with `ceo:heeftGebeurtenisNaam`, pointing to the record) with a begin and end dating, as a date (`ceo:datum`) or a thesaurus period (`ceo:heeftPeriode`). Useful next to the date of drowning of the village.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?name ?drownedEndYear ?record (GROUP_CONCAT(DISTINCT ?periodLabel; separator=\" | \") AS ?periods) WHERE {\n  ?candidate vd:village ?village ;\n    vd:record ?record ;\n    vd:status vd:status-accepted .\n  ?village rdfs:label ?name .\n  OPTIONAL { ?village vd:drownedEndYear ?drownedEndYear }\n  ?event ceo:heeftBetrekkingOp ?record ;\n    ceo:heeftDatering ?datering .\n  OPTIONAL { ?event ceo:heeftGebeurtenisNaam/skos:prefLabel ?eventLabel . FILTER(LANG(?eventLabel) IN (\"nl\", \"\")) }\n  {\n    ?datering ceo:heeftBeginDatering|ceo:heeftEindDatering ?point .\n    ?point ceo:heeftPeriode/skos:prefLabel ?label .\n    FILTER(LANG(?label) IN (\"nl\", \"\"))\n  } UNION {\n    ?datering ceo:heeftBeginDatering|ceo:heeftEindDatering ?point .\n    ?point ceo:datum ?date .\n    BIND(STR(YEAR(?date)) AS ?label)\n  }\n  BIND(CONCAT(COALESCE(?eventLabel, \"?\"), \": \", ?label) AS ?periodLabel)\n}\nGROUP BY ?name ?drownedEndYear ?record\nORDER BY ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "The finds (`ceo:bevatObject`) in the accepted find locations and sites, with their types.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?name ?type (COUNT(DISTINCT ?find) AS ?finds) WHERE {\n  ?candidate vd:village ?village ;\n    vd:record ?record ;\n    vd:status vd:status-accepted .\n  ?village rdfs:label ?name .\n  ?record ceo:bevatObject ?find .\n  ?find ceo:heeftType/ceo:heeftTypeNaam ?typeTerm .\n  ?typeTerm skos:prefLabel ?typeLabel .\n  FILTER(LANG(?typeLabel) IN (\"nl\", \"\"))\n  BIND(STR(?typeLabel) AS ?type)\n}\nGROUP BY ?name ?type\nORDER BY ?name DESC(?finds)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Images of the found records (only rijksmonumenten have them): the thumbnail (`foaf:depiction`), the full image on Commons (`edm:isShownBy`) and the licence.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?name ?status ?record ?title ?thumbnail ?image ?rights WHERE {\n  ?candidate vd:village ?village ;\n    vd:record ?record ;\n    vd:status ?statusConcept .\n  ?village rdfs:label ?name .\n  ?img edm:aggregatedCHO ?record ;\n    foaf:depiction ?thumbnail .\n  OPTIONAL { ?img edm:isShownBy ?image }\n  OPTIONAL { ?img <http://purl.org/dc/elements/1.1/title> ?title }\n  OPTIONAL { ?img <http://purl.org/dc/elements/1.1/rights> ?rights }\n  BIND(STRAFTER(STR(?statusConcept), \"#status-\") AS ?status)\n}\nORDER BY ?status ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## To review\n\nCandidates to review, with the reason: `homonym` (a present-day place with the same name, without drowning context near the name), `tie` (a name shared by several villages), and `weak-key` (a name without context, or an archaeological record within 1 km that mentions drowning but names no village). Accept or reject them in `exploration/resources/match-overrides.json` with `\"source\": \"rce\"`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?reason ?name ?record ?key ?distanceKm (SAMPLE(?matched) AS ?matchedName) (SAMPLE(SUBSTR(?text, 1, 160)) AS ?description) WHERE {\n  ?candidate vd:village ?village ;\n    vd:record ?record ;\n    vd:status vd:status-review ;\n    vd:statusReason ?reasonConcept ;\n    vd:matchedBy ?keyConcept .\n  OPTIONAL { ?candidate vd:distanceKm ?distanceKm }\n  OPTIONAL { ?candidate vd:matchedName ?matched }\n  ?village rdfs:label ?name .\n  BIND(STRAFTER(STR(?reasonConcept), \"#reason-\") AS ?reason)\n  BIND(STRAFTER(STR(?keyConcept), \"#key-\") AS ?key)\n  OPTIONAL { ?d ceo:heeftBetrekkingOp ?record ; ceo:omschrijving ?text }\n}\nGROUP BY ?reason ?name ?record ?key ?distanceKm\nORDER BY ?reason ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Generic records: about drowning, but naming no village from the name index and not close to one. Possibly about villages under another name, or about drowned land in general.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/rce/records.ttl]\n# [endpoint=../../data/rce/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX ceo: <https://linkeddata.cultureelerfgoed.nl/def/ceo#>\nPREFIX edm: <http://www.europeana.eu/schemas/edm/>\nPREFIX foaf: <http://xmlns.com/foaf/0.1/>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?record ?class (GROUP_CONCAT(DISTINCT ?suggested; separator=\", \") AS ?suggestions) (SAMPLE(SUBSTR(?text, 1, 200)) AS ?description) WHERE {\n  ?candidate vd:matchedBy vd:key-generic ;\n    vd:record ?record .\n  OPTIONAL { ?candidate vd:suggestedVillage/rdfs:label ?suggested }\n  ?record a ?classIri .\n  FILTER(STRSTARTS(STR(?classIri), STR(ceo:)))\n  BIND(STRAFTER(STR(?classIri), \"#\") AS ?class)\n  OPTIONAL { ?d ceo:heeftBetrekkingOp ?record ; ceo:omschrijving ?text }\n}\nGROUP BY ?record ?class\nORDER BY ?class ?record",
+    "metadata": {}
+  }
+]

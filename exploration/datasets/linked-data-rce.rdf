@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dcat="http://www.w3.org/ns/dcat#"
+   xmlns:dct="http://purl.org/dc/terms/"
+   xmlns:donl="https://data.overheid.nl/dcat.rdf#"
+   xmlns:foaf="http://xmlns.com/foaf/0.1/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:v="http://www.w3.org/2006/vcard/"
+>
+  <rdf:Description rdf:about="https://data.overheid.nl/dataset/linked-data-rce">
+    <dcat:distribution rdf:nodeID="dataset.linked-data-rce.distribution.0"/>
+    <foaf:page rdf:resource="https://linkeddata.cultureelerfgoed.nl/rce/-/stories/Linked-Open-Data-Rijksdienst-voor-het-Cu"/>
+    <dct:publisher rdf:resource="http://standaarden.overheid.nl/owms/terms/Rijksdienst_voor_het_Cultureel_Erfgoed"/>
+    <dcat:theme rdf:resource="http://standaarden.overheid.nl/owms/terms/Cultuur_(thema)"/>
+    <dcat:distribution rdf:nodeID="dataset.linked-data-rce.distribution.1"/>
+    <dcat:keyword xml:lang="nl">Cultureel Erfgoed</dcat:keyword>
+    <dct:title xml:lang="nl">Linked Data RCE</dct:title>
+    <donl:sourceCatalog rdf:resource="https://data.overheid.nl"/>
+    <dct:creator rdf:resource="http://standaarden.overheid.nl/owms/terms/Rijksdienst_voor_het_Cultureel_Erfgoed"/>
+    <dcat:contactPoint rdf:nodeID="dataset.linked-data-rce.contactPoint"/>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2024-11-26T11:02:34</dct:modified>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by/4.0/deed.nl"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+    <donl:status rdf:resource="http://data.overheid.nl/status/beschikbaar"/>
+    <foaf:page rdf:resource="https://linkeddata.cultureelerfgoed.nl/rce/-/stories/Test-story-voor-RCE-dataset"/>
+    <dcat:theme rdf:resource="http://standaarden.overheid.nl/owms/terms/Rijksoverheid"/>
+    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/NLD"/>
+    <dcat:keyword xml:lang="nl">HVD</dcat:keyword>
+    <dct:description xml:lang="nl"># Linked Open Data van de Rijksdienst voor het Cultureel Erfgoed&#13;
+&#13;
+Deze Linked Open Dataset omvat de gegevens die afkomstig zijn van de RCE-database, waarin de identificatie en informatie over cultureel-historische objecten (CHO's) worden vastgelegd. Deze dataset bevat informatie over diverse CHO's, waaronder rijksmonumenten, werelderfgoed, stads- en dorpsgezichten en archeologische sites.&#13;
+&#13;
+De data bevat in het bijzonder gegevens van rijksmonumenten, complexen, archeologische complexen, werelderfgoed, stads- en dorpsgezichten (gezichten), archeologische vondsten, archeologische onderzoeksgebieden, archeologische grondsporen en archeologische terreinen.&#13;
+&#13;
+Deze gegevens zijn verzameld tijdens verschillende processen gedurende de geschiedenis van de RCE en zijn voorgangers.&#13;
+&#13;
+De Linked Open Dataset van de RCE bevat ook de High Value Datasets. Rijksmonumenten, Werelderfgoed en Gezichten. Een klikbare link met meer informatie hierover is hier te vinden: [Meer informatie over High Value Datasets](https://linkeddata.cultureelerfgoed.nl/rce/-/stories/High-Value-datasets).&#13;
+</dct:description>
+    <dcat:keyword xml:lang="nl">Monumenten</dcat:keyword>
+    <dcat:keyword xml:lang="nl">Beschermde gebieden</dcat:keyword>
+    <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+    <dcat:landingPage rdf:resource="https://linkeddata.cultureelerfgoed.nl"/>
+    <dcat:keyword xml:lang="nl">Archeologie</dcat:keyword>
+    <dct:identifier>https://data.overheid.nl/dataset/linked-data-rce</dct:identifier>
+    <dcat:keyword xml:lang="nl">LOD</dcat:keyword>
+    <dcat:keyword xml:lang="nl">Linked Open Data</dcat:keyword>
+    <dct:accrualPeriodicity rdf:resource="http://publications.europa.eu/resource/authority/frequency/DAILY"/>
+    <dcat:keyword xml:lang="nl">inspire</dcat:keyword>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.linked-data-rce.distribution.1">
+    <dct:title xml:lang="nl">High Value Datasets</dct:title>
+    <dcat:accessURL rdf:resource="https://linkeddata.cultureelerfgoed.nl/rce/-/stories/High-Value-datasets"/>
+    <dct:description xml:lang="nl">##### HVDL Datasets van de Rijksdienst voor het Cultureel Erfgoed&#13;
+&#13;
+###### Dataset van beschermde stads- en dorpsgezichten&#13;
+In deze dataset zijn alle rijksbeschermde stads- en dorpsgezichten opgenomen. Een beschermd gezicht is een landelijke erkenning van de cultuurhistorische waarde van een gebied.&#13;
+&#13;
+###### Werelderfgoed in Nederland&#13;
+De Nederlandse werelderfgoederen vertellen veel over de geschiedenis en cultuur van Nederland en onze positie in de wereld. Momenteel telt Nederland 13 werelderfgoederen.&#13;
+&#13;
+###### Rijksmonumenten&#13;
+In deze dataset zijn de gegevens opgenomen van alle monumenten in Nederland die door het Rijk zijn aangewezen als beschermd monument. Deze rijksmonumenten zijn van nationale betekenis. De gegevens in de dataset zijn ontleend aan het Rijksmonumentenregister zoals beheerd door de Rijksdienst voor het Cultureel Erfgoed. NB Ook gemeenten en provincies kunnen monumenten beschermen. Deze zijn echter niet in deze lijsten te vinden.&#13;
+&#13;
+###### API om datasets te downloaden&#13;
+Op deze pagina worden ook de API's getoond om de datasets te downloaden.&#13;
+&#13;
+Meer informatie over de High Value Datasets is beschikbaar [hier](https://linkeddata.cultureelerfgoed.nl/rce/-/stories/High-Value-datasets).&#13;
+&#13;
+</dct:description>
+    <donl:distributionType rdf:resource="https://data.overheid.nl/distributiontype/download"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2024-07-08T19:42:10</dct:issued>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by/4.0/deed.nl"/>
+    <dcat:downloadURL rdf:resource="https://api.linkeddata.cultureelerfgoed.nl/queries/rce/werelderfgoed-hvdl/run?werelderfgoedstatus=werelderfgoed&amp;page=1&amp;pageSize=20"/>
+    <dcat:downloadURL rdf:resource="https://api.linkeddata.cultureelerfgoed.nl/queries/rce/rest-api-rijksmonumenten/run?status=rijksmonument&amp;page=1&amp;pageSize=20"/>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/JSON"/>
+    <dcat:downloadURL rdf:resource="https://api.linkeddata.cultureelerfgoed.nl/queries/rce/gezichten-hvdl/run?gezichtsstatus=rijksbeschermd+stads-+of+dorpsgezicht&amp;page=1&amp;pageSize=20"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.linked-data-rce.contactPoint">
+    <v:tel>033 421 7421</v:tel>
+    <v:web rdf:resource="https://www.cultureelerfgoed.nl"/>
+    <v:fn xml:lang="nl">Informatievoorziening</v:fn>
+    <rdf:type rdf:resource="http://www.w3.org/2006/vcard/Kind"/>
+    <v:email>mailto:info@cultureelerfgoed.nl</v:email>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.linked-data-rce.distribution.0">
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2023-05-03T09:42:01</dct:issued>
+    <dcat:downloadURL rdf:resource="https://linkeddata.cultureelerfgoed.nl"/>
+    <dcat:accessURL rdf:resource="https://linkeddata.cultureelerfgoed.nl"/>
+    <donl:distributionType rdf:resource="https://data.overheid.nl/distributiontype/download"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by/4.0/deed.nl"/>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE"/>
+    <dct:title xml:lang="nl">Linked Open Data met betrekking tot Rijksmonumenten en Archeologie</dct:title>
+    <dct:description xml:lang="nl">Op linkeddata.cultureelerfgoed.nl is de linked data van de RCE over cultuurhistorische objecten te vinden. Het gaat hierbij om data van gebouwde en archeologische rijksmonumenten, vondsten, vondstlocaties, (archeologische) complexen, onderzoeksgebieden en terreinen.&#13;
+De data wordt sinds 1962 verzameld.&#13;
+&#13;
+Met sparql query's is de data te doorzoeken.&#13;
+Het resultaat is downloadbaar als csv of als json</dct:description>
+  </rdf:Description>
+</rdf:RDF>

@@ -14,11 +14,18 @@ interface Step {
   name: string;
   /** Optional outputs of earlier steps the step uses when they exist; documentation only. */
   uses?: string[];
+  /** Extra Node options for the step, such as a larger heap. */
+  nodeOptions?: string[];
 }
 
 // The order in which the steps run. Steps don't depend on each other's outputs, but a step that
 // uses another step's output gets better results when it runs after that step.
-const STEPS: Step[] = [{ name: 'wikidata' }, { name: 'zeeuws-erfgoedplatform', uses: ['wikidata'] }];
+const STEPS: Step[] = [
+  { name: 'wikidata' },
+  { name: 'zeeuws-erfgoedplatform', uses: ['wikidata'] },
+  // Loads a Zeeland subset of the RCE dump (about 3 million triples) into memory.
+  { name: 'rce', uses: ['wikidata'], nodeOptions: ['--max-old-space-size=8192'] },
+];
 
 const BACKBONE = 'backbone';
 
@@ -30,12 +37,16 @@ if (unknown.length) {
 const selected = positionals.length ? STEPS.filter((s) => positionals.includes(s.name)) : STEPS;
 const forwarded = values.refresh ? ['--refresh'] : [];
 
-for (const name of [BACKBONE, ...selected.map((s) => s.name)]) {
+for (const { name, nodeOptions = [] } of [{ name: BACKBONE } as Step, ...selected]) {
   console.log(`\n=== ${name} ===`);
   const started = Date.now();
-  const { status, signal } = spawnSync(process.execPath, [join(import.meta.dirname, `${name}.ts`), ...forwarded], {
-    stdio: 'inherit',
-  });
+  const { status, signal } = spawnSync(
+    process.execPath,
+    [...nodeOptions, join(import.meta.dirname, `${name}.ts`), ...forwarded],
+    {
+      stdio: 'inherit',
+    },
+  );
   if (status !== 0) {
     console.error(`Step ${name} failed (${signal ?? `exit code ${status}`}); stopping.`);
     process.exit(status ?? 1);

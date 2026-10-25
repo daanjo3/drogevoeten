@@ -21,8 +21,23 @@ import {
   villageIri,
 } from './vocab.ts';
 
-/** Words that tie a text to drowned land. */
-export const CONTEXT_PATTERN = 'verdronk|verdwen|verzwolg|verzonk|overspoeld';
+/**
+ * Words that tie a text to drowned land. "Verdwenen" alone is too common ("de ramen zijn verdwenen"),
+ * so it only counts for a vanished settlement.
+ */
+export const CONTEXT_PATTERN = 'verdronk|verzwolg|verzonk|overspoel|verdwenen (dorp|stad|parochie|nederzetting|kerk)';
+
+/** How close, in characters, drowning words must be to a name in the same text to count as its context. */
+export const CONTEXT_WINDOW = 150;
+
+const contextRegExp = new RegExp(CONTEXT_PATTERN, 'i');
+
+/** Whether the text mentions drowning anywhere. */
+export const mentionsDrowning = (text: string): boolean => contextRegExp.test(text);
+
+/** Whether drowning words occur within CONTEXT_WINDOW characters of the name at `index` in the text. */
+export const contextNear = (text: string, index: number, length: number): boolean =>
+  contextRegExp.test(text.slice(Math.max(0, index - CONTEXT_WINDOW), index + length + CONTEXT_WINDOW));
 
 /** Default distance threshold between a record's coordinates and the backbone point. */
 export const MAX_DISTANCE_KM = 5;
@@ -171,19 +186,25 @@ export interface Candidate {
  */
 export function statusFor(
   matchedBy: MatchKey,
-  { homonym = false, editDistance = 0 }: { homonym?: boolean; editDistance?: number } = {},
+  {
+    homonym = false,
+    context = false,
+    editDistance = 0,
+  }: { homonym?: boolean; context?: boolean; editDistance?: number } = {},
 ): Pick<Candidate, 'status' | 'statusReason'> {
   if (matchedBy === 'generic') return { status: null };
   if (editDistance > 0) return { status: 'review', statusReason: 'spelling' };
   switch (matchedBy) {
     case 'identifier':
-    case 'place-geo':
       return { status: 'accepted' };
+    case 'place-geo':
     case 'place-name':
-      // Without coordinates, a place field can't tell a present-day place from the drowned village.
-      return homonym ? { status: 'review', statusReason: 'homonym' } : { status: 'accepted' };
+      // A place field on its own can't tell a present-day place from the drowned village next to it,
+      // not even with coordinates: Schore and Borssele lie right next to their drowned namesakes.
+      return homonym && !context ? { status: 'review', statusReason: 'homonym' } : { status: 'accepted' };
     case 'text-context':
-      return homonym ? { status: 'review', statusReason: 'homonym' } : { status: 'accepted' };
+      // Drowning words next to the name: "verdronken dorp Westdorpe".
+      return { status: 'accepted' };
     case 'location':
     case 'text-name':
       return { status: 'review', statusReason: homonym ? 'homonym' : 'weak-key' };

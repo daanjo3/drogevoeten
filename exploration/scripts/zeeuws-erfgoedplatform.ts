@@ -36,10 +36,12 @@ import {
   buildNameIndex,
   type Candidate,
   CONTEXT_PATTERN,
+  contextNear,
   countBy,
   loadHomonyms,
   loadWikidataLabels,
   locationGroup,
+  mentionsDrowning,
   ORIGIN_STRENGTH,
   statusFor,
   villageQuad,
@@ -121,7 +123,6 @@ const groupOf = new Map(villages.map((v) => [v.id, locationGroup(v)]));
 const allNames = [...nameIndex.keys()].sort((a, b) => b.length - a.length);
 const alternation = allNames.map(escapeRegExp).join('|');
 const nameRegExp = new RegExp(`(?<![\\p{L}\\p{N}])(${alternation})(?![\\p{L}\\p{N}])`, 'gu');
-const contextRegExp = new RegExp(CONTEXT_PATTERN, 'i');
 
 // Suggestions for texts without an exact name: capitalized words that are spelled almost like a name.
 const MIN_FUZZY_LENGTH = 6;
@@ -157,21 +158,37 @@ for (const row of rows) {
 const candidates: Candidate[] = [];
 const suggestionsByObject = new Map<string, ReturnType<typeof possibleVillages>>();
 for (const [object, texts] of textsByObject) {
-  const hasContext = texts.some(({ text }) => contextRegExp.test(text));
+  const hasContext = texts.some(({ text }) => mentionsDrowning(text));
   const found = new Map<
     string,
-    { names: Set<string>; origins: Set<Candidate['nameOrigin']>; fields: Set<string>; shared: boolean[] }
+    {
+      names: Set<string>;
+      origins: Set<Candidate['nameOrigin']>;
+      fields: Set<string>;
+      shared: boolean[];
+      context: boolean;
+    }
   >();
   for (const { field, text } of texts) {
-    for (const [, name] of text.matchAll(nameRegExp)) {
+    for (const match of text.matchAll(nameRegExp)) {
+      const name = match[1];
+      const near = contextNear(text, match.index, name.length);
       const entries = nameIndex.get(name) ?? [];
       for (const { villageId, origin } of entries) {
-        if (origin === 'stem' && !hasContext) continue;
-        const hit = found.get(villageId) ?? { names: new Set(), origins: new Set(), fields: new Set(), shared: [] };
+        // On its own, a name without "Oud-"/"Nieuw-" names the present-day village.
+        if (origin === 'stem' && !near) continue;
+        const hit = found.get(villageId) ?? {
+          names: new Set(),
+          origins: new Set(),
+          fields: new Set(),
+          shared: [],
+          context: false,
+        };
         hit.names.add(name);
         hit.origins.add(origin);
         hit.fields.add(field);
         hit.shared.push(new Set(entries.map((e) => groupOf.get(e.villageId))).size > 1);
+        hit.context ||= near;
         found.set(villageId, hit);
       }
     }
@@ -194,14 +211,14 @@ for (const [object, texts] of textsByObject) {
   for (const [villageId, hit] of found) {
     const matchedBy = [...hit.fields].some((f) => PLACE_FIELDS.has(f))
       ? 'place-name'
-      : hasContext
+      : hit.context
         ? 'text-context'
         : 'text-name';
     const nameOrigin = [...hit.origins].reduce((a, b) =>
       a && ORIGIN_STRENGTH[a] >= ORIGIN_STRENGTH[b ?? 'stem'] ? a : b,
     );
     const homonym = [...hit.names].every((name) => homonyms.has(name));
-    let status = statusFor(matchedBy, { homonym });
+    let status = statusFor(matchedBy, { homonym, context: hit.context });
     // A name that several backbone villages share (Westkerke, Oostkerke) doesn't tell them apart.
     if (status.status === 'accepted' && hit.shared.every(Boolean)) status = { status: 'review', statusReason: 'tie' };
     candidates.push({
