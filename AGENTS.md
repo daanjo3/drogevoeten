@@ -8,7 +8,7 @@ A Linked Data Minecraft experience about the drowned villages ("verdronken dorpe
 
 ## Exploratory tasks
 
-Before exploring, fetching or querying a data source, **read [`docs/exploration-sop.md`](docs/exploration-sop.md)** and follow it. It describes the procedure per source, the script layout, matching strategies and known source quirks. Record any new findings about a source in `docs/sources.md`, and update the SOP when the procedure changes.
+Before exploring, fetching or querying a data source, **read [`docs/exploration-sop.md`](docs/exploration-sop.md)** and follow it. It describes the procedure per source, the script layout, matching strategies and known source quirks. Record any new findings about a source in the SOP's source notes, and update the SOP when the procedure changes.
 
 ## Project-wide requirements
 
@@ -48,9 +48,12 @@ Before exploring, fetching or querying a data source, **read [`docs/exploration-
 
 ### Scripts and reproducibility
 
-- **One source per script.** Scripts live in `exploration/scripts/`, are numbered (`NN-<source>.ts`) and run sequentially. A later script may read the outputs of earlier ones.
+- **One source per step.** Each step is a script `exploration/scripts/<source>.ts`, named after its source and its `data/<source>/` directory, without a number. The backbone step (`backbone.ts`) runs first and is the only one every step depends on; it is also the only one that combines two sources (the WFS layer and the Wikipedia list).
+- **The run order lives in `exploration/scripts/main.ts`** (`STEPS`), which `fetch:all` runs. Steps don't depend on each other: a step may use another step's output when it exists, but must still work, with a warning, without it.
+- **Matching** a source to the villages follows the SOP's "Matching villages", with the shared helpers in `exploration/scripts/lib/matching.ts`. Every step writes its candidates to `matches.ttl` and its accepted matches to `accepted.ttl`, which together with the backbone make up `data/combined.ttl`. Manual review decisions go in `exploration/resources/match-overrides.json`.
+- **Vocabulary.** Every custom (`vd:`) term is defined in `vocab/vd.ttl`. Define a new term there before using it: the scripts refuse to write RDF with undefined `vd:` terms.
 - Keep SPARQL queries in separate `.rq` files under `exploration/queries/`.
-- `data/` (results) and `dumps/` (raw downloads) live at the repository root and are not committed. Scripts resolve them relative to the repository root. Running the scripts in order must fully recreate them.
+- `data/` (results) and `dumps/` (raw downloads) live at the repository root and are not committed. Scripts resolve them relative to the repository root. Running `fetch:all` must fully recreate them.
 - Scripts must fail loudly on error responses (such as an `ows:ExceptionReport` or an HTTP error) and never write them out as data.
 - **Configuration** goes through environment variables, validated with [`env-schema`](https://github.com/fastify/env-schema) in `exploration/scripts/lib/config.ts`. They can also be set in `exploration/.env` (gitignored; see `.env.example`). Add new options to the schema with a default, so the scripts work without any configuration.
 

@@ -1,0 +1,122 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Findings per village\n\nSummarizes `data/combined.ttl`: what we know about each backbone village from all sources together, and which villages have the most to show in the interactive experience (text and images).\n\n**Before running:** `pnpm --filter @verdronkendorpen/exploration run fetch:all`. Every cell queries `data/combined.ttl` and, for the labels of concepts such as the causes of drowning, `vocab/vd.ttl`.\n\n`combined.ttl` only holds **accepted** matches (see the SOP, \"Combined output\"): the backbone villages with the date of drowning, causes and article from the Wikipedia list, the Wikidata item (`skos:exactMatch`) with its triples, and records about the village (`schema:subjectOf`) with their descriptions. Candidates that need review are only in the sources' `matches.ttl`, so accepting them with an override makes the villages here richer.\n\nNote the two schema.org namespaces: our own triples and Wikidata use `http://schema.org/` (`schema:`), the museum dump uses `https://schema.org/` (`sdo:`).",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Overview\n\nHow many villages have each kind of information.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT (COUNT(DISTINCT ?village) AS ?villages) (COUNT(DISTINCT ?withDate) AS ?drowningDate) (COUNT(DISTINCT ?withCause) AS ?cause)\n  (COUNT(DISTINCT ?withArticle) AS ?wikipediaArticle) (COUNT(DISTINCT ?withItem) AS ?wikidataItem)\n  (COUNT(DISTINCT ?withImage) AS ?image) (COUNT(DISTINCT ?withObject) AS ?objects) WHERE {\n  ?village a vd:Village .\n  OPTIONAL { ?village vd:drownedEndYear ?end . BIND(?village AS ?withDate) }\n  OPTIONAL { ?village vd:drowningCause ?c . BIND(?village AS ?withCause) }\n  OPTIONAL { ?village vd:wikipediaArticle ?a . BIND(?village AS ?withArticle) }\n  OPTIONAL { ?village skos:exactMatch ?i . BIND(?village AS ?withItem) }\n  OPTIONAL {\n    { ?village skos:exactMatch/wdt:P18 ?img } UNION { ?village schema:subjectOf/sdo:image ?img . FILTER(isLiteral(?img)) }\n    BIND(?village AS ?withImage)\n  }\n  OPTIONAL { ?village schema:subjectOf ?o . BIND(?village AS ?withObject) }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Summary per village\n\nEvery village with the number of findings per kind, richest first. `richness` weighs what the experience needs most: 3 per object about the village, 2 per image, 1 per Wikipedia article and Wikidata item, and 1 each for a date and a cause of drowning.\n\nNumbered locations of one village (\"Saeftinghe 1\", \"Saefthinge 2\") are separate backbone villages and share their findings, so they appear side by side.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?gemeente ?drownedEndYear ?causes ?articles ?wikidataItems ?images ?objects ?richness WHERE {\n  {\n    SELECT ?village (SAMPLE(?label) AS ?name) (SAMPLE(?municipality) AS ?gemeente) (SAMPLE(?end) AS ?drownedEndYear)\n      (COUNT(DISTINCT ?cause) AS ?causes) (COUNT(DISTINCT ?article) AS ?articles) (COUNT(DISTINCT ?item) AS ?wikidataItems)\n      (COUNT(DISTINCT ?image) AS ?images) (COUNT(DISTINCT ?object) AS ?objects)\n    WHERE {\n      ?village a vd:Village ;\n        rdfs:label ?label .\n      OPTIONAL { ?village vd:municipality ?municipality }\n      OPTIONAL { ?village vd:drownedEndYear ?end }\n      OPTIONAL { ?village vd:drowningCause ?cause }\n      OPTIONAL { { ?village vd:wikipediaArticle ?article } UNION { ?village skos:exactMatch ?wdItem . ?article schema:about ?wdItem } }\n      OPTIONAL { ?village skos:exactMatch ?item }\n      OPTIONAL {\n        { ?village skos:exactMatch/wdt:P18 ?image }\n        UNION\n        { ?village schema:subjectOf/sdo:image ?image . FILTER(isLiteral(?image)) }\n      }\n      OPTIONAL { ?village schema:subjectOf ?object }\n    }\n    GROUP BY ?village\n  }\n  BIND((IF(BOUND(?drownedEndYear), 1, 0) + IF(?causes > 0, 1, 0) + ?articles + ?wikidataItems + 2 * ?images + 3 * ?objects) AS ?richness)\n}\nORDER BY DESC(?richness) ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Showcase candidates\n\nThe ten richest villages with everything the experience can use: the date of drowning as written, the causes, the texts (Wikipedia articles) and the images. Wikidata images are Commons `Special:FilePath` URLs; add `?width=800` for a scaled version. Museum objects have a thumbnail and a IIIF manifest (see the next cells).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?richness (SAMPLE(?note) AS ?drowned) (GROUP_CONCAT(DISTINCT ?causeLabel; separator=\", \") AS ?causes)\n  (GROUP_CONCAT(DISTINCT STR(?article); separator=\" \") AS ?texts) (GROUP_CONCAT(DISTINCT STR(?image); separator=\" \") AS ?imageUrls)\n  (GROUP_CONCAT(DISTINCT ?objectTitle; separator=\" | \") AS ?objectTitles) WHERE {\n  {\n    SELECT ?village ?name ?richness WHERE {\n  {\n        SELECT ?village (SAMPLE(?label) AS ?name) (SAMPLE(?municipality) AS ?gemeente) (SAMPLE(?end) AS ?drownedEndYear)\n          (COUNT(DISTINCT ?cause) AS ?causes) (COUNT(DISTINCT ?article) AS ?articles) (COUNT(DISTINCT ?item) AS ?wikidataItems)\n          (COUNT(DISTINCT ?image) AS ?images) (COUNT(DISTINCT ?object) AS ?objects)\n        WHERE {\n          ?village a vd:Village ;\n            rdfs:label ?label .\n          OPTIONAL { ?village vd:municipality ?municipality }\n          OPTIONAL { ?village vd:drownedEndYear ?end }\n          OPTIONAL { ?village vd:drowningCause ?cause }\n          OPTIONAL { { ?village vd:wikipediaArticle ?article } UNION { ?village skos:exactMatch ?wdItem . ?article schema:about ?wdItem } }\n          OPTIONAL { ?village skos:exactMatch ?item }\n          OPTIONAL {\n            { ?village skos:exactMatch/wdt:P18 ?image }\n            UNION\n            { ?village schema:subjectOf/sdo:image ?image . FILTER(isLiteral(?image)) }\n          }\n          OPTIONAL { ?village schema:subjectOf ?object }\n        }\n        GROUP BY ?village\n      }\n      BIND((IF(BOUND(?drownedEndYear), 1, 0) + IF(?causes > 0, 1, 0) + ?articles + ?wikidataItems + 2 * ?images + 3 * ?objects) AS ?richness)\n    }\n    ORDER BY DESC(?richness) ?name\n    LIMIT 10\n  }\n  OPTIONAL { ?village vd:drownedNote ?note }\n  OPTIONAL { ?village vd:drowningCause/skos:prefLabel ?causeLabel . FILTER(LANG(?causeLabel) = \"nl\") }\n  OPTIONAL { { ?village vd:wikipediaArticle ?article } UNION { ?village skos:exactMatch ?wdItem . ?article schema:about ?wdItem } }\n  OPTIONAL {\n    { ?village skos:exactMatch/wdt:P18 ?image }\n    UNION\n    { ?village schema:subjectOf/sdo:image ?image . FILTER(isLiteral(?image)) }\n  }\n  OPTIONAL { ?village schema:subjectOf ?object . ?object rdfs:label ?objectTitle }\n}\nGROUP BY ?name ?richness\nORDER BY DESC(?richness) ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Images\n\nEvery image per village, with where it comes from: the Wikidata image (`wdt:P18`), or a museum object's thumbnail and IIIF manifest (for zoomable images in the experience). The Commons category of the Wikidata item (`wdt:P373`) leads to more images.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?kind ?url ?about WHERE {\n  ?village a vd:Village ;\n    rdfs:label ?name .\n  {\n    ?village skos:exactMatch ?item .\n    ?item wdt:P18 ?url .\n    BIND(\"wikidata image\" AS ?kind)\n    BIND(?item AS ?about)\n  } UNION {\n    ?village skos:exactMatch ?item .\n    ?item wdt:P373 ?category .\n    BIND(IRI(CONCAT(\"https://commons.wikimedia.org/wiki/Category:\", ENCODE_FOR_URI(?category))) AS ?url)\n    BIND(\"commons category\" AS ?kind)\n    BIND(?item AS ?about)\n  } UNION {\n    ?village schema:subjectOf ?about .\n    ?about sdo:image ?url .\n    FILTER(isLiteral(?url))\n    BIND(\"object thumbnail\" AS ?kind)\n  } UNION {\n    ?village schema:subjectOf ?about .\n    ?about sdo:image/sdo:contentUrl ?url .\n    BIND(\"object IIIF manifest\" AS ?kind)\n  }\n}\nORDER BY ?name ?kind",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Texts\n\nThe texts per village: the date of drowning as written in the Wikipedia list, the article linked from the list (which can be about a successor village, such as Kortgene for Oud-Kortgene), the nlwiki article of the Wikidata item, and the titles of the objects.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?kind ?text ?link WHERE {\n  ?village a vd:Village ;\n    rdfs:label ?name .\n  {\n    ?village vd:drownedNote ?text .\n    BIND(\"drowned (Wikipedia list)\" AS ?kind)\n  } UNION {\n    ?village vd:wikipediaArticle ?link .\n    BIND(\"article linked from the Wikipedia list\" AS ?kind)\n  } UNION {\n    ?village skos:exactMatch ?item .\n    ?link schema:about ?item ;\n      schema:name ?text .\n    BIND(\"nlwiki article of the Wikidata item\" AS ?kind)\n  } UNION {\n    ?village schema:subjectOf ?link .\n    ?link rdfs:label ?text .\n    BIND(\"object title\" AS ?kind)\n  }\n}\nORDER BY ?name ?kind",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Objects\n\nThe records about each village (`schema:subjectOf`), with their title, thumbnail and IIIF manifest.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?object ?title ?thumbnail ?manifest WHERE {\n  ?village schema:subjectOf ?object ;\n    rdfs:label ?name .\n  OPTIONAL { ?object rdfs:label ?title }\n  OPTIONAL { ?object sdo:image ?thumbnail . FILTER(isLiteral(?thumbnail)) }\n  OPTIONAL { ?object sdo:image/sdo:contentUrl ?manifest }\n}\nORDER BY ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## When and why\n\nThe villages by the century in which they drowned (the end year of the last date in the Wikipedia list; 1500 to 1599 is the 16th century, as in the backbone), and the causes of drowning that the list mentions.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?century (COUNT(?village) AS ?villages) (GROUP_CONCAT(?name; separator=\", \") AS ?names) WHERE {\n  ?village vd:drownedEndYear ?end ;\n    rdfs:label ?name .\n  BIND(xsd:integer(FLOOR(?end / 100)) + 1 AS ?century)\n}\nGROUP BY ?century\nORDER BY ?century",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?cause (COUNT(?village) AS ?villages) (GROUP_CONCAT(?name; separator=\", \") AS ?names) WHERE {\n  ?village vd:drowningCause ?concept ;\n    rdfs:label ?name .\n  ?concept skos:prefLabel ?cause .\n  FILTER(LANG(?cause) = \"nl\")\n}\nGROUP BY ?cause\nORDER BY DESC(?villages)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Map\n\nEvery village with its coordinates and richness, for a map in the experience. Villages without anything beyond the backbone have a richness of 0.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?latitude ?longitude ?drownedEndYear ?richness WHERE {\n  {\n    SELECT ?village (SAMPLE(?label) AS ?name) (SAMPLE(?municipality) AS ?gemeente) (SAMPLE(?end) AS ?drownedEndYear)\n      (COUNT(DISTINCT ?cause) AS ?causes) (COUNT(DISTINCT ?article) AS ?articles) (COUNT(DISTINCT ?item) AS ?wikidataItems)\n      (COUNT(DISTINCT ?image) AS ?images) (COUNT(DISTINCT ?object) AS ?objects)\n    WHERE {\n      ?village a vd:Village ;\n        rdfs:label ?label .\n      OPTIONAL { ?village vd:municipality ?municipality }\n      OPTIONAL { ?village vd:drownedEndYear ?end }\n      OPTIONAL { ?village vd:drowningCause ?cause }\n      OPTIONAL { { ?village vd:wikipediaArticle ?article } UNION { ?village skos:exactMatch ?wdItem . ?article schema:about ?wdItem } }\n      OPTIONAL { ?village skos:exactMatch ?item }\n      OPTIONAL {\n        { ?village skos:exactMatch/wdt:P18 ?image }\n        UNION\n        { ?village schema:subjectOf/sdo:image ?image . FILTER(isLiteral(?image)) }\n      }\n      OPTIONAL { ?village schema:subjectOf ?object }\n    }\n    GROUP BY ?village\n  }\n  BIND((IF(BOUND(?drownedEndYear), 1, 0) + IF(?causes > 0, 1, 0) + ?articles + ?wikidataItems + 2 * ?images + 3 * ?objects) AS ?richness)\n  ?village schema:latitude ?latitude ;\n    schema:longitude ?longitude .\n}\nORDER BY DESC(?richness) ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Gaps\n\nVillages with nothing beyond the backbone: no row in the Wikipedia list, no Wikidata item and no records. These are the ones to look for in the next sources, or to check in the review candidates of `matches.ttl`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/combined.ttl]\n# [endpoint=../../vocab/vd.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX wdt: <http://www.wikidata.org/prop/direct/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\nPREFIX schema: <http://schema.org/>\nPREFIX sdo: <https://schema.org/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\nSELECT ?name ?gemeente (GROUP_CONCAT(?altName; separator=\", \") AS ?altNames) WHERE {\n  ?village a vd:Village ;\n    rdfs:label ?name .\n  OPTIONAL { ?village vd:municipality ?gemeente }\n  OPTIONAL { ?village skos:altLabel ?altName }\n  FILTER NOT EXISTS { ?village vd:wikipediaArticle|vd:drownedEndYear|skos:exactMatch|schema:subjectOf ?anything }\n}\nGROUP BY ?name ?gemeente\nORDER BY ?gemeente ?name",
+    "metadata": {}
+  }
+]

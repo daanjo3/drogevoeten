@@ -6,6 +6,8 @@ export const EXPLORATION_ROOT = join(REPO_ROOT, 'exploration');
 export const QUERIES_DIR = join(EXPLORATION_ROOT, 'queries');
 export const DATA_DIR = join(REPO_ROOT, 'data');
 export const DUMPS_DIR = join(REPO_ROOT, 'dumps');
+export const VOCAB_FILE = join(REPO_ROOT, 'vocab', 'vd.ttl');
+export const OVERRIDES_FILE = join(EXPLORATION_ROOT, 'resources', 'match-overrides.json');
 
 export const dataPath = (...parts: string[]): string => join(DATA_DIR, ...parts);
 export const dumpPath = (...parts: string[]): string => join(DUMPS_DIR, ...parts);

@@ -104,7 +104,7 @@
   {
     "kind": 1,
     "language": "markdown",
-    "value": "## Searching for drowned villages\n\nObjects whose title mentions drowning. Script `03-zeeuws-erfgoedplatform` does the same for all village names.",
+    "value": "## Searching for drowned villages\n\nObjects whose title mentions drowning. The `zeeuws-erfgoedplatform` step does the same for all village names.",
     "metadata": {}
   },
   {

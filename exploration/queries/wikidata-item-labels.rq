@@ -1,7 +1,7 @@
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-# Labels and aliases of Wikidata items, from the local output of 02-wikidata-villages
+# Labels and aliases of Wikidata items, from the local output of the wikidata step
 # (data/wikidata/villages.ttl). Used as extra spellings of the matched villages.
 # The ITEMS placeholder is replaced by the script with the item IRIs.
 SELECT ?item ?label WHERE {

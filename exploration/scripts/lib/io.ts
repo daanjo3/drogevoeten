@@ -1,7 +1,13 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import type { Quad } from '@rdfjs/types';
 import { Store, Writer } from 'n3';
+
+export const exists = (path: string): Promise<boolean> =>
+  stat(path).then(
+    () => true,
+    () => false,
+  );
 
 export async function writeJson(path: string, value: unknown): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
@@ -14,7 +20,7 @@ export async function readJson<T>(path: string): Promise<T> {
     return JSON.parse(await readFile(path, 'utf8')) as T;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      throw new Error(`Missing input ${path}; run the earlier scripts first.`);
+      throw new Error(`Missing input ${path}; run the step that writes it first (see scripts/main.ts).`);
     }
     throw error;
   }

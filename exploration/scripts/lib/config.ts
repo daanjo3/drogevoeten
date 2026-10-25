@@ -5,7 +5,7 @@ import { EXPLORATION_ROOT } from './paths.ts';
 // Configuration from environment variables, optionally set in exploration/.env (see .env.example).
 // Environment variables take precedence over the .env file.
 interface Env {
-  /** Where 01-fetch-backbone reads the villages from: the live WFS or the local backup file. */
+  /** Where the backbone step reads the villages from: the live WFS or the local backup file. */
   BACKBONE_SOURCE: 'wfs' | 'backup';
   /** Backup file with villages, relative to the exploration package unless absolute. */
   BACKBONE_BACKUP_FILE: string;

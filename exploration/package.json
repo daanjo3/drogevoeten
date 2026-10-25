@@ -8,10 +8,10 @@
     "node": ">=26"
   },
   "scripts": {
-    "fetch:backbone": "node scripts/01-fetch-backbone.ts",
-    "fetch:wikidata": "node scripts/02-wikidata-villages.ts",
-    "fetch:zeeuws-erfgoedplatform": "node scripts/03-zeeuws-erfgoedplatform.ts",
-    "fetch:all": "pnpm run fetch:backbone && pnpm run fetch:wikidata && pnpm run fetch:zeeuws-erfgoedplatform",
+    "fetch:all": "node scripts/main.ts",
+    "fetch:backbone": "node scripts/backbone.ts",
+    "fetch:wikidata": "node scripts/wikidata.ts",
+    "fetch:zeeuws-erfgoedplatform": "node scripts/zeeuws-erfgoedplatform.ts",
     "typecheck": "tsc"
   },
   "dependencies": {
