@@ -18,7 +18,11 @@ interface Step {
 
 // The order in which the steps run. Steps don't depend on each other's outputs, but a step that
 // uses another step's output gets better results when it runs after that step.
-const STEPS: Step[] = [{ name: 'wikidata' }, { name: 'zeeuws-erfgoedplatform', uses: ['wikidata'] }];
+const STEPS: Step[] = [
+  { name: 'wikidata' },
+  { name: 'zeeuws-erfgoedplatform', uses: ['wikidata'] },
+  { name: 'rijksmuseum', uses: ['wikidata'] },
+];
 
 const BACKBONE = 'backbone';
 
