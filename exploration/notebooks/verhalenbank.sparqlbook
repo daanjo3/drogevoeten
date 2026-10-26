@@ -1,0 +1,128 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Volksverhalenbank: stories about the drowned villages\n\nExplores the results of the `verhalenbank` step: folktales from the [Volksverhalenbank van de Lage Landen](https://www.verhalenbank.nl/) (Meertens Instituut), found through its Omeka REST API. There is no dump, and the licence is unknown, so check it before publishing story texts.\n\n**Before running:** run `pnpm --filter @verdronkendorpen/exploration run fetch:verhalenbank`. The cells use its output in `data/verhalenbank/`: `stories.ttl` (the found stories as `schema:CreativeWork`) and `matches.ttl` (the candidates), plus `data/backbone/villages.ttl` for the village names.\n\nA story's place fields are plain text: `schema:contentLocation` holds Place of Action and Named Entity Location, `schema:locationCreated` the place where the story was recorded (Coverage), `schema:dateCreated` when it was told or published, and `schema:about` the tale type.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Overview\n\nCandidates per status, reason and match key.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/matches.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?status ?reason ?key (COUNT(*) AS ?candidates) (COUNT(DISTINCT ?village) AS ?villages) WHERE {\n  ?c a vd:Candidate ;\n    vd:matchedBy ?keyIri .\n  OPTIONAL { ?c vd:status ?statusIri }\n  OPTIONAL { ?c vd:statusReason ?reasonIri }\n  OPTIONAL { ?c vd:village ?village }\n  BIND(STRAFTER(STR(?keyIri), \"#key-\") AS ?key)\n  BIND(COALESCE(STRAFTER(STR(?statusIri), \"#status-\"), \"none (generic)\") AS ?status)\n  BIND(COALESCE(STRAFTER(STR(?reasonIri), \"#reason-\"), \"\") AS ?reason)\n}\nGROUP BY ?status ?reason ?key\nORDER BY ?status DESC(?candidates)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Accepted stories\n\nThe villages with accepted stories, with their titles (or the start of the summary for stories without a title).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\n# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?village ?name (COUNT(DISTINCT ?story) AS ?stories) (GROUP_CONCAT(DISTINCT ?title; separator=\" · \") AS ?titles) WHERE {\n  ?c vd:village ?village ;\n    vd:record ?story ;\n    vd:status vd:status-accepted .\n  ?village rdfs:label ?name .\n  OPTIONAL { ?story schema:name ?t }\n  OPTIONAL { ?story schema:abstract ?a }\n  BIND(SUBSTR(COALESCE(?t, ?a, STR(?story)), 1, 60) AS ?title)\n}\nGROUP BY ?village ?name\nORDER BY DESC(?stories) ?name",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Per accepted story: the match key and names, genre, places, where and when it was recorded, and the summary.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\n# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\nSELECT ?name ?story ?key ?matchedNames ?genre ?places ?recorded ?dated ?abstract WHERE {\n  {\n    SELECT ?name ?story ?key (GROUP_CONCAT(DISTINCT ?matchedName; separator=\", \") AS ?matchedNames)\n      (GROUP_CONCAT(DISTINCT ?genre1; separator=\", \") AS ?genre) (GROUP_CONCAT(DISTINCT ?place; separator=\" | \") AS ?places)\n      (SAMPLE(COALESCE(?recorded1, \"\")) AS ?recorded) (SAMPLE(COALESCE(?dated1, \"\")) AS ?dated) (SAMPLE(COALESCE(?abstract1, \"\")) AS ?abstract) WHERE {\n      ?c vd:village ?village ;\n        vd:record ?story ;\n        vd:matchedBy ?keyIri ;\n        vd:matchedName ?matchedName ;\n        vd:status vd:status-accepted .\n      ?village rdfs:label ?name .\n      BIND(STRAFTER(STR(?keyIri), \"#key-\") AS ?key)\n      OPTIONAL { ?story schema:genre ?genre1 }\n      OPTIONAL { ?story schema:contentLocation ?place }\n      OPTIONAL { ?story schema:locationCreated ?recorded1 }\n      OPTIONAL { ?story schema:dateCreated ?dated1 }\n      OPTIONAL { ?story schema:abstract ?abstract1 }\n    }\n    GROUP BY ?name ?story ?key\n  }\n}\nORDER BY ?name ?story",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "One complete story: \"Het verdronken Westenschouwen\".",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# One story with all its properties: \"Het verdronken Westenschouwen\".\nSELECT ?property ?value WHERE {\n  <https://www.verhalenbank.nl/items/show/47567> ?property ?value .\n}\nORDER BY ?property",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## To review\n\nCandidates in review per reason and matched name. Homonyms are mostly Flemish places (Oostende, Viane, Moerkerke).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/matches.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# Candidates in review, per reason and matched name: homonyms are mostly Flemish places.\nSELECT ?reason ?matchedName (COUNT(DISTINCT ?story) AS ?stories) (COUNT(DISTINCT ?village) AS ?villages) WHERE {\n  ?c vd:status vd:status-review ;\n    vd:statusReason ?reasonIri ;\n    vd:record ?story ;\n    vd:village ?village ;\n    vd:matchedName ?matchedName .\n  BIND(STRAFTER(STR(?reasonIri), \"#reason-\") AS ?reason)\n}\nGROUP BY ?reason ?matchedName\nORDER BY ?reason DESC(?stories)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Homonym candidates whose story still mentions drowning or a downfall: the most likely to deserve an `accept` override in `exploration/resources/match-overrides.json`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\n# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# Homonym candidates whose story still mentions drowning: the ones most worth an override.\nSELECT ?name ?story ?title ?places ?abstract WHERE {\n  {\n    SELECT ?name ?story (SAMPLE(COALESCE(?t, \"\")) AS ?title) (GROUP_CONCAT(DISTINCT ?place; separator=\" | \") AS ?places) (SAMPLE(COALESCE(?a, \"\")) AS ?abstract) WHERE {\n      ?c vd:status vd:status-review ;\n        vd:statusReason vd:reason-homonym ;\n        vd:record ?story ;\n        vd:village ?village .\n      ?village rdfs:label ?name .\n      ?story schema:text|schema:abstract|schema:name ?text .\n      FILTER(REGEX(?text, \"verdronk|verzonk|verzwolg|overspoel|ondergang|vergaan\", \"i\"))\n      OPTIONAL { ?story schema:name ?t }\n      OPTIONAL { ?story schema:contentLocation ?place }\n      OPTIONAL { ?story schema:abstract ?a }\n    }\n    GROUP BY ?name ?story\n  }\n}\nORDER BY ?name ?story",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Generic stories\n\nStories about drowned land or sunken bells that name no village, with near-spelling suggestions.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/matches.ttl]\n# [endpoint=../../data/backbone/villages.ttl]\n# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# Stories about drowned land that name no village, with near-spelling suggestions.\nSELECT ?story ?title ?abstract (GROUP_CONCAT(DISTINCT ?suggestion; separator=\", \") AS ?suggestions) WHERE {\n  ?c vd:matchedBy vd:key-generic ;\n    vd:record ?story .\n  FILTER NOT EXISTS { ?c vd:village ?anyVillage }\n  OPTIONAL { ?story schema:name ?title }\n  OPTIONAL { ?story schema:abstract ?abstract }\n  OPTIONAL { ?c vd:suggestedVillage ?s . ?s rdfs:label ?suggestion }\n}\nGROUP BY ?story ?title ?abstract\nORDER BY ?story",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Genres and recording places",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# Genres of the found stories.\nSELECT ?genre (COUNT(DISTINCT ?story) AS ?stories) WHERE {\n  ?story a schema:CreativeWork .\n  OPTIONAL { ?story schema:genre ?g }\n  BIND(COALESCE(?g, \"(none)\") AS ?genre)\n}\nGROUP BY ?genre\nORDER BY DESC(?stories)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Where the found stories were recorded, for the stories recorded in Zeeland.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# Where the stories were recorded (Coverage), for the stories in Zeeland.\nSELECT ?recorded (COUNT(DISTINCT ?story) AS ?stories) WHERE {\n  ?story schema:locationCreated ?recorded .\n  FILTER(CONTAINS(?recorded, \"(Zeeland)\"))\n}\nGROUP BY ?recorded\nORDER BY DESC(?stories)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## Example search\n\nEvery found story that mentions a mermaid: the legend of Westenschouwen, Reimerswaal and others.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=../../data/verhalenbank/stories.ttl]\nPREFIX vd: <https://github.com/daanjo3/verdronkendorpen/vocab#>\nPREFIX schema: <http://schema.org/>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n\n# Example search: every found story that mentions a mermaid (\"meermin\", \"zeemeermin\", \"meerman\").\nSELECT ?story ?title ?places ?abstract WHERE {\n  {\n    SELECT ?story (SAMPLE(COALESCE(?t, \"\")) AS ?title) (GROUP_CONCAT(DISTINCT ?place; separator=\" | \") AS ?places) (SAMPLE(COALESCE(?a, \"\")) AS ?abstract) WHERE {\n      ?story a schema:CreativeWork ;\n        schema:name|schema:abstract|schema:text ?text .\n      FILTER(REGEX(?text, \"meerm[ae]n|meermin\", \"i\"))\n      OPTIONAL { ?story schema:name ?t }\n      OPTIONAL { ?story schema:contentLocation ?place }\n      OPTIONAL { ?story schema:abstract ?a }\n    }\n    GROUP BY ?story\n  }\n}\nORDER BY ?story",
+    "metadata": {}
+  }
+]

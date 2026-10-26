@@ -14,6 +14,7 @@
     "fetch:zeeuws-erfgoedplatform": "node scripts/zeeuws-erfgoedplatform.ts",
     "fetch:rijksmuseum": "node scripts/rijksmuseum.ts",
     "fetch:rce": "node --max-old-space-size=8192 scripts/rce.ts",
+    "fetch:verhalenbank": "node scripts/verhalenbank.ts",
     "typecheck": "tsc"
   },
   "dependencies": {
