@@ -32,7 +32,7 @@ export interface GemaalMatch {
    so a sluice or a second pump next to a gemaal doesn't take its record.
    Pass every IMWA gemaal in the area, not only the ones shown: otherwise a
    neighbour that isn't shown can't claim its own record. */
-export function linkLandschapsatlas(
+function linkLandschapsatlas(
   imwa: Feature<ImwaGemaal>[],
   candidates: Feature<Gemaal>[],
 ): Map<string, GemaalMatch> {

@@ -73,14 +73,6 @@ export interface LocatieserverResponse {
   };
 }
 
-export interface LocatieserverError {
-  error: {
-    code: number;
-    msg: string;
-    metadata?: string[];
-  };
-}
-
 /* What the search accepts: an exact address or a whole town or city.
    The Locatieserver ranks a town above addresses, so "Middelburg" gives the
    town and "Abdij 4, Middelburg" still gives the address. */
@@ -93,10 +85,6 @@ export function freeQueryOptions(params: FreeParams) {
     queryFn: ({ signal }) => request("free", params, signal),
     enabled: !!params.q,
   });
-}
-
-export function useFree(params: FreeParams) {
-  return useQuery(freeQueryOptions(params));
 }
 
 /* Suggest (type-ahead): matches for a partial query, with id and weergavenaam. */
@@ -155,7 +143,7 @@ async function request(
 
   const res = await fetch(url, { signal });
   if (!res.ok) {
-    // TODO: 400 may be JSON (LocatieserverError) or plain text
+    // TODO: 400 may be JSON ({ error: { code, msg } }) or plain text
     throw new Error(`Locatieserver ${path} failed: ${res.status} ${res.statusText}`);
   }
   return res.json() as Promise<LocatieserverResponse>;

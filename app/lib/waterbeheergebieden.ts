@@ -123,11 +123,6 @@ export function usePeilgebied(lat?: number, lon?: number) {
   return { ...q, peilgebied };
 }
 
-/* Stable link to one feature: "html" is the readable page, "json" the GeoJSON. */
-export function itemUrl(collection: CollectionId, id: string, format: "html" | "json" = "json"): string {
-  return `${BASE_URL}/collections/${collection}/items/${encodeURIComponent(id)}?f=${format}`;
-}
-
 /* Polygon rings as Leaflet positions ([lat, lon]), for <Polygon positions>. */
 export function toLatLngs(g: AreaGeometry): [number, number][][][] {
   const polygons = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
@@ -135,7 +130,7 @@ export function toLatLngs(g: AreaGeometry): [number, number][][][] {
 }
 
 /* Even-odd point in polygon; holes are rings too, so they count out. */
-export function containsPoint(g: AreaGeometry, lon: number, lat: number): boolean {
+function containsPoint(g: AreaGeometry, lon: number, lat: number): boolean {
   const polygons = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
   return polygons.some((rings) => rings.filter((ring) => inRing(ring, lon, lat)).length % 2 === 1);
 }
