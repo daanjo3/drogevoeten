@@ -11,7 +11,7 @@ import { InfoPanel } from "../components/InfoPanel";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
 import { NlMap } from "../components/NlMap";
-import { BoreelArt, ImageTile, RijksTile, type RijksWork } from "../components/ImageTile";
+import { RijksTile, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
@@ -232,13 +232,6 @@ export default function Home() {
         <RijksTile id="i-molen" work={WORKS.stadswallen} />
         <RijksTile id="i-elisabeth" work={WORKS.getijdenmolen} />
         <RijksTile id="i-prent" work={WORKS.beemster} />
-        <ImageTile
-          id="i-boreel"
-          badge="placeholder · foto"
-          title="Gemaal Boreel, 1929"
-          caption="RCE beeldbank · Gemalenstichting"
-          art={<BoreelArt />}
-        />
       </Canvas>
 
       <TooltipLayer scrollRef={canvas.worldRef} />

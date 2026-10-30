@@ -102,6 +102,8 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 
 /* ===== START ===== */
 #start{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);transition:opacity .4s,visibility .4s;overflow:hidden}
+/* the two circles: soft, see-through edges */
+#start:before,#start:after{filter:blur(18px);-webkit-mask-image:radial-gradient(circle,#000 45%,transparent 70%);mask-image:radial-gradient(circle,#000 45%,transparent 70%)}
 #start:before{content:"";position:absolute;left:-10vw;top:-20vh;width:60vw;height:60vw;border-radius:50%;background:var(--g-bluepink);pointer-events:none}
 #start:after{content:"";position:absolute;right:-10vw;bottom:-25vh;width:55vw;height:55vw;border-radius:50%;background:var(--g-amber);pointer-events:none}
 #start.hide{opacity:0;visibility:hidden}
@@ -152,11 +154,11 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .panel.seen{opacity:1;translate:none}
 @media (hover:hover){.panel:hover{scale:1.015}}
 @media (prefers-reduced-motion:reduce){.panel{transition:none;translate:none}}
-/* middelpunt canvas 120vw,120vh = midden van de huiskamer */
+/* middelpunt canvas 120vw,120vh = midden van de huiskamer; 4vw tussen kolommen, 6vh tussen rijen */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
-#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
-#p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:var(--blue); color:#fff}
-#p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
+#p-info {left:152vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
+#p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue); color:#fff}
+#p-tijd {left:52vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 
 /* beeldtegels */
@@ -167,14 +169,12 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .img .badge{position:absolute;z-index:1;left:10px;top:10px;background:rgba(255,255,255,.85);color:var(--ink);border-radius:999px;padding:3px 9px;font:500 10px var(--font);text-transform:uppercase;letter-spacing:.06em}
 .img .cap b{margin-bottom:2px}
 .img .cap a{color:inherit;text-decoration:underline;text-underline-offset:2px}
-#i-asselijn {left:126vw;top:10vh; width:22vw;height:68vh;background:#fff;border:1.5px solid var(--line)}
+#i-asselijn {left:126vw;top:11vh; width:22vw;height:68vh;background:#fff;border:1.5px solid var(--line)}
 #i-asselijn .ph{background:linear-gradient(170deg,#4a5a6b,#b9c3cc 70%,#e9e1d4)}
-#i-elisabeth{left:12vw; top:62vh; width:32vw;height:44vh;background:#fff;border:1.5px solid var(--line)}
+#i-elisabeth{left:16vw; top:62vh; width:32vw;height:44vh;background:#fff;border:1.5px solid var(--line)}
 #i-elisabeth .ph{background:linear-gradient(170deg,#6a7a4f,#c9b98d 60%,#7aa0b8)}
-#i-prent   {left:154vw;top:22vh; width:28vw;height:56vh;background:#fff;border:1.5px solid var(--line)}
+#i-prent   {left:152vw;top:23vh; width:28vw;height:56vh;background:#fff;border:1.5px solid var(--line)}
 #i-prent .ph{background:repeating-linear-gradient(135deg,#d8d1c8 0 2px,#efe9e2 2px 7px)}
-#i-boreel  {left:154vw;top:161vh;width:28vw;height:42vh;background:#fff;border:1.5px solid var(--line)}
-#i-boreel .ph{background:linear-gradient(170deg,#8aa283,#e8e2d6)}
 #i-molen   {left:184vw;top:85vh; width:34vw;height:46vh;background:#fff;border:1.5px solid var(--line)}
 #i-molen .ph{background:linear-gradient(170deg,var(--lav2),#fff3e6)}
 
@@ -197,6 +197,9 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #p-info[data-mode=risk]{background:var(--dark);color:#fff;border-color:var(--dark)}
 #p-info .meta{z-index:1}
 /* huiskamer: water en uitleg alleen als het misgaat */
+/* water and waterline only when it goes wrong; in info mode the room is dry */
+#p-huis .water{opacity:0;transition:opacity .4s,height .7s cubic-bezier(.3,.8,.3,1)}
+#p-huis.risk .water{opacity:.9}
 #p-huis .line{opacity:0;transition:opacity .3s,bottom .6s}
 #p-huis #out{opacity:0;transform:translateY(12px);transition:opacity .3s,transform .4s;pointer-events:none}
 #p-huis.risk .line{opacity:1}
