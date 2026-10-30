@@ -28,9 +28,11 @@ export default function Home() {
   const [params, setParams] = useSearchParams();
   const queryClient = useQueryClient();
   const id = params.get("id") ?? "";
+  
   /* the full Locatieserver record for the id in the url */
   const lookup = useLookup({ id });
   const locatie = lookup.data?.response.docs[0];
+  
   /* TODO: fetch the rest of the place from the data layer; only the address is real now */
   const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address) };
   /* ground level at the address (AHN); the panels read the same cached query */
