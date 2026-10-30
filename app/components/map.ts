@@ -1,7 +1,7 @@
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 
-export default () => {
+export function render() {
     const map = L.map('map').setView([51.505, -0.09], 13);
 
     const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {

@@ -1,3 +1,3 @@
-import map from "./components"
+import { renderMap } from './components'
 
-map()
+renderMap()

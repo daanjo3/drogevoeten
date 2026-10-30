@@ -1,2 +1,2 @@
-import map from './map'
-export { map }
+import { render as renderMap } from './map'
+export { renderMap }
