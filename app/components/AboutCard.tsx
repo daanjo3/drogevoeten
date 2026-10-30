@@ -1,8 +1,29 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Icon } from "./Icons";
 
-/* Card with the story behind the data: which sources we use, how they are
-   linked, and what is still a placeholder. Opens from the info button. */
+/* Card with the story behind the app and the list of sources. Opens from
+   the Over button. Links open in a new tab. */
+
+const SOURCES: { label: string; name: string; href: string }[] = [
+  { label: "Hoogte", name: "Actueel Hoogtebestand Nederland", href: "https://www.ahn.nl" },
+  { label: "Gemalen en peilgebieden", name: "waterschapsregister, via PDOK", href: "https://www.pdok.nl" },
+  { label: "Overstromingen", name: "LIWO, Rijkswaterstaat", href: "https://basisinformatie-overstromingen.nl" },
+  { label: "Dijken en polders", name: "Provincie Zeeland", href: "https://opengeodata.zeeland.nl" },
+  { label: "Regen", name: "KNMI", href: "https://www.knmi.nl" },
+  { label: "Molens", name: "Molendatabase", href: "https://www.molendatabase.nl" },
+  { label: "Monumenten", name: "Rijksdienst voor het Cultureel Erfgoed", href: "https://linkeddata.cultureelerfgoed.nl" },
+  { label: "Beelden", name: "Rijksmuseum", href: "https://www.rijksmuseum.nl" },
+  { label: "Koppelingen", name: "Wikidata", href: "https://www.wikidata.org" },
+];
+
+function Ext({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  );
+}
+
 export function AboutCard({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -20,34 +41,37 @@ export function AboutCard({ onClose }: { onClose: () => void }) {
         </button>
         <h2 id="aboutTitle">
           <Icon name="info" />
-          Alles hier heeft een bron
+          Droog wonen voelt normaal. Dat is het niet.
         </h2>
-        <p className="lead">Elk feit op deze pagina komt uit open data. Weten we iets niet, dan zeggen we dat.</p>
-
-        <h3>Zo werkt het</h3>
-        <p>
-          Je typt een adres. Wij zoeken op in welke polder dat ligt, hoe hoog je vloer ligt en welk gemaal het water wegpompt. Die
-          gegevens komen van verschillende organisaties. Wij hebben ze aan elkaar gekoppeld met linked data. Zo weet de computer
-          dat Gemaal Boreel in het ene bestand hetzelfde gemaal is als in het andere. Wat we zelf koppelden, zetten we weer open
-          online.
+        <p className="lead">
+          Een kwart van Nederland ligt lager dan de zee. Dijken, molens en gemalen houden ons droog, dag en nacht. Ze staan om de
+          hoek, maar bijna niemand kijkt er nog naar.
         </p>
+        <p>
+          Daarom koppelden we open data aan elkaar. Actuele cijfers over hoogte, regen en gemalen, en de collecties van
+          erfgoedinstellingen. Samen vertellen ze wie jouw plek droog houdt, en sinds wanneer.
+        </p>
+        <p>
+          We maakten het voor de klas. Op het digibord typt de juf of meester het adres van de school. De groep ziet wat er gebeurt
+          als het gemaal stilvalt.
+        </p>
+        <p>Wat we zelf aan elkaar knoopten, geven we open terug. Zo bouwt de volgende verder waar wij stopten.</p>
 
         <h3>Bronnen</h3>
-        <ul>
-          <li>Hoogte van de vloer: Actueel Hoogtebestand Nederland (AHN)</li>
-          <li>Gemalen, sluizen en peilgebieden: waterschapsregister (IMWA)</li>
-          <li>Overstromingen: LIWO, Rijkswaterstaat</li>
-          <li>Jaartallen van dijken en polders: Provincie Zeeland</li>
-          <li>Regen: KNMI, weerstation Vlissingen</li>
-          <li>Adressen: PDOK</li>
-          <li>Molens: Molendatabase</li>
-          <li>Beelden: Rijksmuseum en RCE beeldbank</li>
+        <ul className="sources">
+          {SOURCES.map((s) => (
+            <li key={s.label}>
+              <span className="label">{s.label}</span>
+              <Ext href={s.href}>{s.name}</Ext>
+            </li>
+          ))}
         </ul>
 
-        <h3>Nog niet af</h3>
-        <p>
-          De tijd om het water weg te pompen is een rekensom met echte getallen, geen voorspelling. De waterhoogte bij een
-          dijkbreuk en een paar teksten en beelden zijn nog voorbeelden. Gebouwd in 24 uur tijdens HackaLOD 2026.
+        <p className="colophon">
+          Bekijk de code en onze data op <Ext href="https://github.com/daanjo3/drogevoeten">GitHub</Ext>.
+          <br />
+          Gemaakt in 24 uur tijdens HackaLOD 2026 van het{" "}
+          <Ext href="https://netwerkdigitaalerfgoed.nl">Netwerk Digitaal Erfgoed</Ext>.
         </p>
       </div>
     </div>

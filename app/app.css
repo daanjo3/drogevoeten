@@ -319,5 +319,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #about .card .close{color:var(--ink)}
 #about .card h2{padding-right:48px}
 #about .card h3{margin-top:18px}
-#about .card ul{margin:6px 0 0;padding-left:20px}
-#about .card li{margin:4px 0}
+#about .card p{margin:0 0 10px}
+#about .card .sources{list-style:none;margin:8px 0 0;padding:0;border-top:1.5px solid var(--line)}
+#about .card .sources li{display:grid;grid-template-columns:minmax(120px,38%) 1fr;gap:12px;align-items:baseline;padding:8px 0;border-bottom:1.5px solid rgba(36,36,36,.15);margin:0}
+#about .card .sources .label{color:var(--mute)}
+#about .card a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+#about .card .colophon{margin:16px 0 0;color:var(--mute);font-size:var(--fs-label)}
+@media (max-width:600px){#about .card .sources li{grid-template-columns:1fr;gap:2px}}
