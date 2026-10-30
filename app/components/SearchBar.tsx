@@ -1,6 +1,6 @@
 import { useEffect, useId, useImperativeHandle, useRef, useState, type Ref } from "react";
 import { Icon } from "./Icons";
-import { useSuggest, type LocatieserverDoc } from "../lib/locatieserver";
+import { PLACE_FILTER, useSuggest, type LocatieserverDoc } from "../lib/locatieserver";
 
 export interface SearchBarHandle {
   /* empty the field and give it focus (the Begin button) */
@@ -13,7 +13,7 @@ const MIN_CHARS = 2;
 const MAX_SUGGESTIONS = 6;
 
 /* Search field with its own thick blinking cursor that follows the typed
-   text. The real caret is hidden in css. While typing, address suggestions
+   text. The real caret is hidden in css. While typing, address and town suggestions
    from the Locatieserver show below the field. */
 export function SearchBar({
   onSearch,
@@ -49,7 +49,7 @@ export function SearchBar({
   }, [value]);
 
   const q = debounced.length >= MIN_CHARS ? debounced : "";
-  const suggest = useSuggest({ q, fq: ["type:adres"], rows: MAX_SUGGESTIONS, fl: "id weergavenaam" }, open && !busy);
+  const suggest = useSuggest({ q, fq: PLACE_FILTER, rows: MAX_SUGGESTIONS, fl: "id weergavenaam" }, open && !busy);
   const docs = q ? (suggest.data?.response.docs ?? []) : [];
   const shown = open && !busy && docs.length > 0;
 
@@ -126,8 +126,8 @@ export function SearchBar({
               id="q"
               ref={input}
               type="text"
-              placeholder="Straat en plaats"
-              aria-label="Adres"
+              placeholder="Adres of plaats"
+              aria-label="Adres of plaats"
               autoComplete="off"
               role="combobox"
               aria-autocomplete="list"
@@ -149,7 +149,7 @@ export function SearchBar({
             <Icon name="zoek" className="zoek" /> {busy ? "Zoeken…" : "Zoek"}
           </button>
         </form>
-        <ul className="suggest" id={listId} role="listbox" aria-label="Adressen" hidden={!shown}>
+        <ul className="suggest" id={listId} role="listbox" aria-label="Adressen en plaatsen" hidden={!shown}>
           {docs.map((d, i) => (
             <li
               key={d.id}

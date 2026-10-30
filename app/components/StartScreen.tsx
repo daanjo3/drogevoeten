@@ -49,7 +49,7 @@ export function StartScreen({
         <h1>Wie houdt jouw voeten droog?</h1>
         <p className="lead">
           Een kwart van Nederland ligt lager dan de zee. Dat je hier droog zit, gaat niet vanzelf. Al eeuwen pompen molens en
-          gemalen het water weg, en houden dijken de zee tegen. Typ je adres. Dan zie je wie jouw plek droog houdt, en wat er
+          gemalen het water weg, en houden dijken de zee tegen. Typ je adres of woonplaats. Dan zie je wie jouw plek droog houdt, en wat er
           gebeurt als het misgaat.
         </p>
         <SearchBar onSearch={onSearch} onPick={onPick} handle={searchHandle} busy={busy} message={message} />

@@ -165,7 +165,7 @@ export function BuurtPanel({ place }: Props) {
           <LeafletMap center={here ?? FALLBACK} zoom={13} style={{}}>
             {here && (
               <CircleMarker center={here} radius={7} pathOptions={{ color: "#16324f", weight: 3, fillColor: "#fff", fillOpacity: 1 }}>
-                <Tooltip>dit adres</Tooltip>
+                <Tooltip>{place?.type === "woonplaats" ? "deze plaats" : "dit adres"}</Tooltip>
               </CircleMarker>
             )}
             {pois.map((p) => (

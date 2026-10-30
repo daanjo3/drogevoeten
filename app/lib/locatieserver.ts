@@ -81,6 +81,11 @@ export interface LocatieserverError {
   };
 }
 
+/* What the search accepts: an exact address or a whole town or city.
+   The Locatieserver ranks a town above addresses, so "Middelburg" gives the
+   town and "Abdij 4, Middelburg" still gives the address. */
+export const PLACE_FILTER = ["type:(adres OR woonplaats)"];
+
 /* Free search (classic geocoding): results directly from a query. */
 export function freeQueryOptions(params: FreeParams) {
   return queryOptions({

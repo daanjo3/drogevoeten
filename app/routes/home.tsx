@@ -18,7 +18,7 @@ import { AboutCard } from "../components/AboutCard";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
-import { freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
+import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
@@ -163,25 +163,24 @@ export default function Home() {
       setSearchMsg("De adreszoeker gaf geen antwoord. Probeer het later nog eens.");
       setPhase("idle");
     } else if (lookup.isSuccess && !locatie) {
-      setSearchMsg("Dit adres is niet (meer) te vinden. Typ het opnieuw.");
+      setSearchMsg("Deze plek is niet (meer) te vinden. Typ hem opnieuw.");
       setPhase("idle");
       setParams({}, { replace: true });
     }
   }, [id, lookup.isError, lookup.isSuccess, locatie, setParams]);
 
-  /* look up the typed address in the Locatieserver (addresses only, best
-     match) and put its id in the url, so the link can be shared */
+  /* look up the typed address or town in the Locatieserver (best match) and put its id in the url, so the link can be shared */
   async function begin(q: string) {
     if (searching) return;
     if (!q) {
-      setSearchMsg("Typ een adres, bijvoorbeeld Abdij 4, Middelburg.");
+      setSearchMsg("Typ een adres of plaats, bijvoorbeeld Abdij 4, Middelburg.");
       return;
     }
     setSearching(true);
     setSearchMsg(null);
     let found: string | undefined;
     try {
-      const res = await queryClient.fetchQuery(freeQueryOptions({ q, fq: ["type:adres"], rows: 1, fl: "id" }));
+      const res = await queryClient.fetchQuery(freeQueryOptions({ q, fq: PLACE_FILTER, rows: 1, fl: "id" }));
       found = res.response.docs[0]?.id;
     } catch {
       setSearchMsg("De adreszoeker gaf geen antwoord. Probeer het later nog eens.");
@@ -190,7 +189,7 @@ export default function Home() {
       setSearching(false);
     }
     if (!found) {
-      setSearchMsg(`Geen adres gevonden voor "${q}". Typ straat, huisnummer en plaats.`);
+      setSearchMsg(`Niets gevonden voor "${q}". Typ een plaats, of straat, huisnummer en plaats.`);
       return;
     }
     setParams({ id: found }, { replace: true });
