@@ -1,9 +1,18 @@
-import type { Route } from "./+types/item";
+import { useParams } from "react-router";
+import LeafletMap from "../components/leaflet-map";
 
-export default function Item({ params }: Route.ComponentProps) {
+const DUMMY_COORD: [number, number] = [51.4996239,3.6117399]
+const DUMMY_ZOOM = 17
+
+export default function Item() {
+  const { id } = useParams();
   return (
     <main>
-      <h1>Item {params.id}</h1>
+      <h1>Item {id}</h1>
+      <LeafletMap
+        center={DUMMY_COORD}
+        zoom={DUMMY_ZOOM}
+       />
     </main>
   );
 }
