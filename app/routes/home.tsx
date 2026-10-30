@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useSearchParams } from "react-router";
 import { MIDDELBURG, type Mode } from "../data/place";
 import type { Scenario } from "../lib/scenario";
 import { Canvas, useCanvas } from "../components/Canvas";
@@ -12,12 +13,23 @@ import { NlMap } from "../components/NlMap";
 import { BoreelArt, ImageTile, PrentArt } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
+import { StartScreen, type StartPhase } from "../components/StartScreen";
+import type { SearchBarHandle } from "../components/SearchBar";
 
-/* The canvas view for one address. State at app level: the address, the mode
-   (info or risk) and the scenario choices. The start screen comes later. */
+/* Start screen plus the canvas for one address. State at app level: the
+   address (in the url as ?q=), the mode (info or risk) and the scenario
+   choices. */
 export default function Home() {
-  /* TODO: read the address from ?q= and fetch the place from the data layer */
-  const place = MIDDELBURG;
+  const [params, setParams] = useSearchParams();
+  const address = params.get("q") ?? "";
+  /* TODO: fetch the place for this address from the data layer */
+  const place = address ? { ...MIDDELBURG, address } : MIDDELBURG;
+  /* with an address in the url we skip the start screen */
+  const [phase, setPhase] = useState<StartPhase>(address ? "hidden" : "idle");
+  const [away, setAway] = useState(false);
+  /* remount the start screen on Begin, so the landscape resets without animating */
+  const [startKey, setStartKey] = useState(0);
+  const search = useRef<SearchBarHandle>(null);
   const [mode, setMode] = useState<Mode>("info");
   const [scenario, setScenario] = useState<Scenario>({
     rain: place.rain.record,
@@ -31,15 +43,39 @@ export default function Home() {
     canvas.go(t.key);
   }
 
-  function onBack() {
-    /* TODO: show the start screen again */
+  /* the leaving transition: text slides up, the pin drops, we dive into
+     the landscape, then the start screen fades and the grid zooms in */
+  function begin(q: string) {
+    const next = q || "Adres placeholder";
+    setParams({ q: next }, { replace: true });
     setMode("info");
-    canvas.go("huis");
+    canvas.go("huis", false);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setPhase("hidden");
+      return;
+    }
+    setAway(true);
+    setPhase("going");
+    window.setTimeout(() => {
+      setPhase("hidden");
+      setAway(false);
+    }, 1150);
+  }
+
+  /* Begin: back to the start screen without animation, field empty and focused */
+  function onBack() {
+    setStartKey((k) => k + 1);
+    setPhase("idle");
+    setParams({}, { replace: true });
+    window.setTimeout(() => search.current?.reset(), 0);
   }
 
   return (
     <>
       <SvgSymbols />
+
+      <StartScreen key={startKey} phase={phase} onSearch={begin} searchHandle={search} />
 
       <div id="where">
         jullie plek <b id="whereTxt">{place.address}</b>
@@ -48,7 +84,7 @@ export default function Home() {
       <FloatingNav active={canvas.active} mode={mode} onGo={onGo} onBack={onBack} />
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} view={canvas.view} onPick={canvas.goPanel} />
 
-      <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef}>
+      <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
         <HuiskamerPanel place={place} mode={mode} scenario={scenario} />
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} />
         <NlMap address={place.address} />
