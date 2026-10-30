@@ -46,6 +46,8 @@ export function HuiskamerPanel({ place, mode, scenario }: { place: PlaceData; mo
   return (
     <section className={`panel${risk ? " risk" : ""}`} id="p-huis">
       <div className="room">
+        {/* placeholder for the team's 3D room */}
+        <img className="scene" src="/img/huiskamer-3d.png" alt="" />
         <div className="water" id="water" style={{ height: `${r.percent}%` }} />
         <div className="line" id="line" style={{ bottom: `${r.percent}%` }}>
           waterlijn <b id="lineTxt">{nl(r.level)} m</b>
@@ -63,7 +65,7 @@ export function HuiskamerPanel({ place, mode, scenario }: { place: PlaceData; mo
           </Tip>{" "}
           {place.waterArea}
         </span>
-        <div className="iframe">hier komt de 3D-huiskamer van het team</div>
+        <div className="iframe" style={{ color: "#fff" }}>placeholder · hier komt de 3D-huiskamer</div>
         <div id="out" aria-live="polite">
           {explanation}
           <small>

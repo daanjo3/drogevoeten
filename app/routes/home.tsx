@@ -13,6 +13,8 @@ import { NlMap } from "../components/NlMap";
 import { BoreelArt, ImageTile, PrentArt } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
+import { AboutCard } from "../components/AboutCard";
+import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
 import { abdijLocatieDoc } from "../data/abdij4";
@@ -32,6 +34,8 @@ export default function Home() {
   /* remount the start screen on Begin, so the landscape resets without animating */
   const [startKey, setStartKey] = useState(0);
   const search = useRef<SearchBarHandle>(null);
+  const [about, setAbout] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<Mode>("info");
   const [scenario, setScenario] = useState<Scenario>({
     rain: place.rain.record,
@@ -65,6 +69,22 @@ export default function Home() {
     }, 1150);
   }
 
+  /* share: copy the link with the address, or use the share sheet */
+  async function share() {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Droge Voeten", url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* the user cancelled, nothing to do */
+    }
+  }
+
   /* Begin: back to the start screen without animation, field empty and focused */
   function onBack() {
     setStartKey((k) => k + 1);
@@ -81,16 +101,22 @@ export default function Home() {
 
       <StartScreen key={startKey} phase={phase} onSearch={begin} searchHandle={search} />
 
+      <button type="button" className="corner" id="infoBtn" onClick={() => setAbout(true)}>
+        <Icon name="info" /> Over de data
+      </button>
       <div id="where">
         jullie plek <b id="whereTxt">{place.address}</b>
       </div>
+      <button type="button" className="corner" id="shareBtn" onClick={share}>
+        <Icon name="share" /> {copied ? "Link gekopieerd" : "Deel"}
+      </button>
 
       <FloatingNav active={canvas.active} mode={mode} onGo={onGo} onBack={onBack} />
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
         <HuiskamerPanel place={place} mode={mode} scenario={scenario} />
-        <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} />
+        <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
         <NlMap address={place.address} />
         <TijdreisPanel place={place} />
         <BuurtPanel place={placeLocatieDoc} />
@@ -133,6 +159,7 @@ export default function Home() {
       </Canvas>
 
       <TooltipLayer scrollRef={canvas.worldRef} />
+      {about && <AboutCard onClose={() => setAbout(false)} />}
     </>
   );
 }

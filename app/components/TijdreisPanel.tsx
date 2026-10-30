@@ -11,13 +11,13 @@ export function TijdreisPanel({ place }: { place: PlaceData }) {
         <Icon name="tijd" />
         Tijdreis
       </h2>
-      <p className="sub">Hoe werd dit land droog? Lees van boven naar beneden.</p>
+      <p className="lead">Hoe werd dit land droog? Lees van boven naar beneden.</p>
       <div className="tl">
         <div className="axis" />
         <ol>
           {place.timeline.map((step) => (
             <li key={step.year}>
-              <b>{step.year}</b>
+              <h3>{step.year}</h3>
               <p>
                 <RichText text={step.text} />
               </p>

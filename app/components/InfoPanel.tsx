@@ -12,11 +12,14 @@ export function InfoPanel({
   mode,
   scenario,
   onScenario,
+  onClose,
 }: {
   place: PlaceData;
   mode: Mode;
   scenario: Scenario;
   onScenario: (s: Scenario) => void;
+  /* the cross on the scenario panel: back to info mode */
+  onClose: () => void;
 }) {
   return (
     <section className="panel" id="p-info" data-mode={mode}>
@@ -48,11 +51,14 @@ export function InfoPanel({
         <p>Dit land werd rond het jaar 1200 droog gemaakt. Kijk bij Tijdreis hoe dat ging.</p>
       </div>
       <div className="mode m-risk" aria-hidden={mode !== "risk"}>
+        <button type="button" className="close" aria-label="Sluiten" onClick={onClose}>
+          <Icon name="close" />
+        </button>
         <h2>
-          <Icon name="pomp" />
+          <Icon name="drop" />
           Kies wat er gebeurt
         </h2>
-        <p className="sub">Kijk daarna naar de waterlijn.</p>
+        <p className="lead">Kijk daarna naar de waterlijn.</p>
         <ScenarioControls place={place} scenario={scenario} onChange={onScenario} />
       </div>
     </section>

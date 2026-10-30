@@ -93,7 +93,7 @@ export function BuurtPanel({ place }: Props) {
         <Icon name="buurt" />
         Gemalen in de buurt
       </h2>
-      <p className="sub">Klik op een stip of een naam. Dan zie je wat het doet en of het nog werkt.</p>
+      <p className="lead">Klik op een stip of een naam. Dan zie je wat het doet en of het nog werkt.</p>
       <div className="buurt">
         <div className="map" id="map">
           <LeafletMap center={here ?? FALLBACK} zoom={13} style={{}}>
@@ -131,7 +131,9 @@ export function BuurtPanel({ place }: Props) {
                   <span>
                     <b>{p.name}</b> · {formatDistance(p.distance)}
                   </span>
-                  <span className="pill">{p.status}</span>
+                  <span className="pill" data-status={p.status}>
+                    {p.status}
+                  </span>
                 </button>
               </li>
             ))}

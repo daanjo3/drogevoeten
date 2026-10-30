@@ -9,7 +9,10 @@ export type IconName =
   | "terug"
   | "pin"
   | "zoek"
-  | "img";
+  | "img"
+  | "info"
+  | "share"
+  | "close";
 
 export function SvgSymbols() {
   return (
@@ -47,6 +50,20 @@ export function SvgSymbols() {
       <symbol id="i-zoek" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="6" />
         <path d="m20 20-4.5-4.5" />
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 11v5" />
+        <path d="M12 8h.01" />
+      </symbol>
+      <symbol id="i-share" viewBox="0 0 24 24">
+        <path d="M12 15V4" />
+        <path d="m8 8 4-4 4 4" />
+        <path d="M5 13v6h14v-6" />
+      </symbol>
+      <symbol id="i-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12" />
+        <path d="m18 6-12 12" />
       </symbol>
       <symbol id="i-img" viewBox="0 0 24 24">
         <rect x="3" y="5" width="18" height="14" rx="2" />

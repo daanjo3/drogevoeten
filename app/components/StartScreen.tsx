@@ -41,7 +41,7 @@ export function StartScreen({
       </svg>
       <div className="startbox">
         <h1>Wie houdt jullie voeten droog?</h1>
-        <p>
+        <p className="lead">
           Een kwart van ons land ligt lager dan de zee. Iemand houdt dat land elke dag droog. Typ een adres, van de school of van
           je eigen huis. Dan laten we zien wie dat is.
         </p>
