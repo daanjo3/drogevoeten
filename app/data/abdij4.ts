@@ -1,6 +1,6 @@
 import type { LocatieserverDoc } from "../lib/locatieserver"
 
-export const locatiedoc: LocatieserverDoc = {
+export const abdijLocatieDoc: LocatieserverDoc = {
     "bron": "BAG",
     "woonplaatscode": "1007",
     "type": "adres",

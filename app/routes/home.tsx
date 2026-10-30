@@ -15,6 +15,7 @@ import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
+import { abdijLocatieDoc } from "../data/abdij4";
 
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?q=), the mode (info or risk) and the scenario
@@ -24,6 +25,7 @@ export default function Home() {
   const address = params.get("q") ?? "";
   /* TODO: fetch the place for this address from the data layer */
   const place = address ? { ...MIDDELBURG, address } : MIDDELBURG;
+  
   /* with an address in the url we skip the start screen */
   const [phase, setPhase] = useState<StartPhase>(address ? "hidden" : "idle");
   const [away, setAway] = useState(false);
@@ -71,6 +73,8 @@ export default function Home() {
     window.setTimeout(() => search.current?.reset(), 0);
   }
 
+  const placeLocatieDoc = abdijLocatieDoc
+
   return (
     <>
       <SvgSymbols />
@@ -89,7 +93,7 @@ export default function Home() {
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} />
         <NlMap address={place.address} />
         <TijdreisPanel place={place} />
-        <BuurtPanel place={place} />
+        <BuurtPanel place={placeLocatieDoc} />
 
         <ImageTile
           id="i-asselijn"

@@ -208,7 +208,9 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 
 /* buurt */
 .buurt{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100% - 70px)}
-.buurt .map{background:rgba(255,255,255,.25);border-radius:16px;position:relative}
+.buurt .map{background:rgba(255,255,255,.25);border-radius:16px;position:relative;overflow:hidden;min-height:320px}
+.buurt .map .leaflet-container{position:absolute;inset:0;height:100%;width:100%}
+.buurt .map > button,.buurt .map > .you{z-index:500}
 .buurt .map button{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid #fff;padding:0;transform:translate(-50%,-50%)}
 .buurt .map button[aria-pressed="true"]{background:var(--sun);border-color:var(--ink);box-shadow:0 0 0 5px rgba(255,255,255,.5)}
 .buurt .map .you{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ink);position:absolute;transform:translate(-50%,-50%)}
