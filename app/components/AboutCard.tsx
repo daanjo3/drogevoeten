@@ -40,7 +40,6 @@ export function AboutCard({ onClose }: { onClose: () => void }) {
           <Icon name="close" />
         </button>
         <h2 id="aboutTitle">
-          <Icon name="info" />
           Droog wonen voelt normaal. Dat is het niet.
         </h2>
         <p className="lead">

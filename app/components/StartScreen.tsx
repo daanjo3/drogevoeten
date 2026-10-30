@@ -43,8 +43,7 @@ export function StartScreen({
     >
       <Landscape phase={phase === "idle" ? "idle" : "going"} dx={dx} />
       <svg id="drop" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" fill="#FFA654" stroke="#242424" strokeWidth="2" />
-        <circle cx="12" cy="10" r="2.6" fill="#242424" />
+        <path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" fill="#FFA654" />
       </svg>
       <div className="startbox">
         <h1>Wie houdt jouw voeten droog?</h1>

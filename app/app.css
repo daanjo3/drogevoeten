@@ -103,7 +103,6 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .startbox h1{margin:0 0 10px}
 .startbox .lead{color:var(--mute);opacity:1;margin:0 0 24px}
 .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px}
-.search > svg{fill:var(--sun);stroke:var(--sun)}
 .search input{flex:1;background:none;border:0;color:var(--ink);font-size:20px;outline:0;min-width:0}
 .search button{border:0;border-radius:999px;background:var(--dark);color:#fff;padding:12px 20px;font-weight:700}
 .searchwrap{position:relative}
@@ -214,6 +213,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .seg button:hover{background:#444}
 .seg button[aria-pressed="true"]{background:var(--sun);color:var(--ink)}
 .seg button[aria-pressed="true"] span{opacity:.8}
+.row .pick{display:none;width:100%;background:#333;color:#fff;border:0;border-radius:12px;padding:12px 14px;font:700 15px var(--font);appearance:auto}
 
 /* tijdlijn */
 .tl{display:grid;grid-template-columns:28px 1fr;gap:14px;height:calc(100% - 70px)}
@@ -276,13 +276,23 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 @media (max-width:600px){
   #world{--fade:6vmin}
   #canvas{padding:16px 0 150px}
-  #nav{bottom:12px;left:12px;right:12px;border-radius:16px;padding:4px}
+  /* the bar runs edge to edge, like an app tab bar; Begin is an icon only */
+  #nav{bottom:0;left:0;right:0;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
   #nav button{padding:10px 4px}
   #nav button svg{display:none}
-  #nav .t{font-size:11px}
+  #nav #back{flex:0 0 auto;padding:10px 12px}
+  #nav #back svg{display:block}
+  #nav #back .t{display:none}
+  #nav .t{font-size:11px;white-space:normal;line-height:1.1;text-align:center}
   #nav .sep{margin:8px 1px}
   #mini{display:none}
-  #where{top:auto;bottom:76px;left:12px;right:12px;transform:none;width:auto}
+  #where{top:auto;bottom:72px;left:12px;right:12px;transform:none;width:auto}
+  /* the scenario choices as dropdowns */
+  .seg{display:none}
+  .row .pick{display:block}
+  /* room for the pills and the close button next to long headings */
+  #p-buurt h2{padding-right:96px}
+  #p-info h2{padding-right:56px}
 }
 
 /* search button icon (inline style in the prototype) */
@@ -295,9 +305,11 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .room .loadbar{position:absolute;left:24px;right:24px;bottom:24px;height:10px;border-radius:999px;background:rgba(255,255,255,.3);border:1.5px solid rgba(255,255,255,.6);overflow:visible}
 .room .loadbar i{display:block;height:100%;border-radius:999px;background:var(--sun);transition:width .3s}
 .room .loadbar .label{position:absolute;left:0;bottom:16px;color:#fff;opacity:.9}
-.room .fs{position:absolute;right:16px;top:70px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font:500 var(--fs-label)/1.4 var(--font);text-transform:uppercase;letter-spacing:.06em}
+.room .fs{position:absolute;right:16px;bottom:16px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.9);color:var(--ink);border:1.5px solid var(--line);border-radius:999px;padding:6px 12px;font:500 var(--fs-label)/1.4 var(--font);text-transform:uppercase;letter-spacing:.06em}
 .room .fs svg{width:16px;height:16px}
 .room .fs:hover{background:var(--dark);color:#fff}
+/* in risk mode the explanation card sits at the bottom, so the button moves up */
+#p-huis.risk .fs{bottom:auto;top:70px}
 #p-huis .room .icon{color:#fff}
 #p-huis .meta,#p-huis .tag{color:#fff}
 #p-huis .room > .meta .tip.term{color:#fff}

@@ -41,6 +41,8 @@ export function TooltipLayer({ scrollRef }: { scrollRef: RefObject<HTMLElement |
   const [text, setText] = useState("");
   const [show, setShow] = useState(false);
   const cur = useRef<HTMLElement | null>(null);
+  /* opened by a click or tap: hover-out does not close it */
+  const pinned = useRef(false);
 
   useEffect(() => {
     const el = tt.current;
@@ -67,24 +69,37 @@ export function TooltipLayer({ scrollRef }: { scrollRef: RefObject<HTMLElement |
     function close() {
       cur.current?.removeAttribute("aria-describedby");
       cur.current = null;
+      pinned.current = false;
       setShow(false);
     }
     const tipOf = (e: Event) => (e.target as HTMLElement | null)?.closest?.(".tip") as HTMLElement | null;
 
     const onOver = (e: Event) => {
       const t = tipOf(e);
-      if (t) open(t);
+      if (t && !pinned.current) open(t);
     };
     const onOut = (e: Event) => {
-      if (tipOf(e)) close();
+      if (tipOf(e) && !pinned.current) close();
     };
     const onFocus = (e: Event) => {
       const t = tipOf(e);
-      t ? open(t) : close();
+      if (t) open(t);
+      else if (!pinned.current) close();
     };
+    /* click or tap: open and pin; a second click on the same one closes it,
+       a click anywhere else closes it too */
     const onClick = (e: Event) => {
       const t = tipOf(e);
-      if (t) cur.current === t ? close() : open(t);
+      if (!t) {
+        close();
+        return;
+      }
+      if (cur.current === t && pinned.current) {
+        close();
+        return;
+      }
+      open(t);
+      pinned.current = true;
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();

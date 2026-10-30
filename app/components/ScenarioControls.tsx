@@ -29,6 +29,15 @@ function Segment({
           </button>
         ))}
       </div>
+      {/* on phones the css shows this dropdown instead of the buttons */}
+      <select className="pick" aria-label={label} value={value} onChange={(e) => onPick(Number(e.target.value))}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+            {o.sub ? ` · ${o.sub}` : ""}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

@@ -74,14 +74,14 @@ export function Landscape({ phase, dx }: { phase: LandscapePhase; dx: number }) 
           <polygon points="-36,0 36,0 24,-124 -24,-124" fill="#FFA654"/>
           <path d="M-28 -122 Q0 -162 28 -122Z" fill="#FFA654"/>
           <g transform="translate(0 -132)"><g className="spin">
-            <g fill="#FFA654" stroke="#242424" strokeWidth="4">
+            <g fill="#FFA654">
               <rect x="6" y="-106" width="24" height="84" rx="4"/><rect x="-30" y="22" width="24" height="84" rx="4"/>
               <rect x="-106" y="-30" width="84" height="24" rx="4"/><rect x="22" y="6" width="84" height="24" rx="4"/>
             </g>
-            <rect x="-6" y="-112" width="12" height="224" rx="6" fill="#242424"/>
-            <rect x="-112" y="-6" width="224" height="12" rx="6" fill="#242424"/>
+            <rect x="-6" y="-112" width="12" height="224" rx="6" fill="#FFA654"/>
+            <rect x="-112" y="-6" width="224" height="12" rx="6" fill="#FFA654"/>
           </g>
-          <circle r="10" fill="#FFA654" stroke="#242424" strokeWidth="5"/></g>
+          <circle r="10" fill="#FFA654"/></g>
         </g>
         {/* gemaal met rook */}
         <g transform="translate(1120 314) scale(.9)">
