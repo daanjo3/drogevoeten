@@ -7,3 +7,6 @@ node_modules/
 .env
 .DS_Store
 .claude
+
+# Unity WebGL-build van de huiskamer, te groot voor git (bron staat in unity/)
+app/public/woonkamer/

@@ -12,7 +12,8 @@ export type IconName =
   | "img"
   | "info"
   | "share"
-  | "close";
+  | "close"
+  | "fullscreen";
 
 export function SvgSymbols() {
   return (
@@ -64,6 +65,12 @@ export function SvgSymbols() {
       <symbol id="i-close" viewBox="0 0 24 24">
         <path d="m6 6 12 12" />
         <path d="m18 6-12 12" />
+      </symbol>
+      <symbol id="i-fullscreen" viewBox="0 0 24 24">
+        <path d="M4 9V4h5" />
+        <path d="M20 9V4h-5" />
+        <path d="M4 15v5h5" />
+        <path d="M20 15v5h-5" />
       </symbol>
       <symbol id="i-img" viewBox="0 0 24 24">
         <rect x="3" y="5" width="18" height="14" rx="2" />

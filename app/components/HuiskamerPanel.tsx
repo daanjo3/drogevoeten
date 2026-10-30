@@ -4,11 +4,23 @@ import type { Scenario } from "../lib/scenario";
 import { calcScenario, nl, nlRaw } from "../lib/scenario";
 import { Icon } from "./Icons";
 import { Tip } from "./Tip";
+import { UnityRoom } from "./UnityRoom";
 import { TERMS } from "../data/place";
 
 /* The living room. The team's 3D room will be embedded here as an iframe.
    In risk mode the water rises and the explanation card appears. */
-export function HuiskamerPanel({ place, mode, scenario }: { place: PlaceData; mode: Mode; scenario: Scenario }) {
+export function HuiskamerPanel({
+  place,
+  mode,
+  scenario,
+  loadRoom,
+}: {
+  place: PlaceData;
+  mode: Mode;
+  scenario: Scenario;
+  /* start loading the 3D room (only after an address was chosen) */
+  loadRoom: boolean;
+}) {
   const risk = mode === "risk";
   const r = calcScenario(scenario, place.areaKm2, risk);
 
@@ -46,8 +58,7 @@ export function HuiskamerPanel({ place, mode, scenario }: { place: PlaceData; mo
   return (
     <section className={`panel${risk ? " risk" : ""}`} id="p-huis">
       <div className="room">
-        {/* placeholder for the team's 3D room */}
-        <img className="scene" src="/img/huiskamer-3d.png" alt="" />
+        <UnityRoom active={loadRoom} />
         <div className="water" id="water" style={{ height: `${r.percent}%` }} />
         <div className="line" id="line" style={{ bottom: `${r.percent}%` }}>
           waterlijn <b id="lineTxt">{nl(r.level)} m</b>
@@ -65,7 +76,6 @@ export function HuiskamerPanel({ place, mode, scenario }: { place: PlaceData; mo
           </Tip>{" "}
           {place.waterArea}
         </span>
-        <div className="iframe" style={{ color: "#fff" }}>placeholder · hier komt de 3D-huiskamer</div>
         <div id="out" aria-live="polite">
           {explanation}
           <small>

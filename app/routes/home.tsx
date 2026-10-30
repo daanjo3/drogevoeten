@@ -115,7 +115,7 @@ export default function Home() {
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
-        <HuiskamerPanel place={place} mode={mode} scenario={scenario} />
+        <HuiskamerPanel place={place} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
         <NlMap address={place.address} />
         <TijdreisPanel place={place} />
