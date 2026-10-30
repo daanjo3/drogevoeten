@@ -182,7 +182,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* beeldtegels */
 /* print tiles size to their content: the print keeps its ratio, the caption sits under it */
-.img{display:flex;flex-direction:column;padding:18px;height:auto!important}
+.img{display:flex;flex-direction:column;padding:18px;height:auto!important;margin:0}
 .img .ph{flex:none;border-radius:14px;margin-bottom:12px;position:relative;overflow:hidden;background:none!important}
 .img .ph img{display:block;width:100%;height:auto}
 .img .ph svg.art{position:absolute;inset:0;width:100%;height:100%;stroke:none}
@@ -201,8 +201,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #i-stadswallen,#i-beemster{left:16vw;top:45vh;width:32vw}
 /* featured works for every address, spread over the grid: two in the top
    row next to the map, one to the right of Gemalen, one under the Tijdreis */
-#i-cruquius     {left:126vw;top:11vh; width:22vw}
-#i-dongepolders {left:152vw;top:11vh; width:28vw}
+/* the two top tiles hang from the bottom of the top row (79vh, like the map), so the
+   gap to the living-room row stays 6vh whatever their height; canvas is 264vh */
+#i-cruquius     {left:126vw;bottom:185vh;width:22vw}
+#i-dongepolders {left:152vw;bottom:185vh;width:28vw}
 #i-keere        {left:184vw;top:161vh;width:30vw}
 #i-kinderdijk   {left:52vw; top:201vh;width:36vw}
 
