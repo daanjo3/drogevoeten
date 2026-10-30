@@ -185,9 +185,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #i-nieuwerkerk  {left:184vw;top:85vh; width:30vw;height:70vh}
 /* stadswallen and the Beemster medal share a spot: they never show together */
 #i-stadswallen,#i-beemster{left:16vw;top:45vh;width:32vw;height:40vh}
-/* general works: steam and electricity down the Tijdreis column, mills by Gemalen */
-#i-cruquius     {left:16vw; top:91vh; width:32vw;height:44vh}
-#i-dongepolders {left:16vw; top:141vh;width:32vw;height:44vh}
+/* featured works for every address, spread over the grid: two in the top
+   row next to the map, two to the right of Gemalen */
+#i-cruquius     {left:126vw;top:11vh; width:22vw;height:68vh}
+#i-dongepolders {left:152vw;top:23vh; width:28vw;height:56vh}
 #i-keere        {left:184vw;top:161vh;width:30vw;height:34vh}
 #i-kinderdijk   {left:184vw;top:201vh;width:30vw;height:30vh}
 

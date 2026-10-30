@@ -67,7 +67,7 @@ const WORKS: (RijksWork & { id: string })[] = [
     iiif: "https://iiif.micr.io/WSNzD",
     context: "Zo zag Nieuwerkerk eruit in 1735. In 1953 liep het dorp onder water.",
   },
-  /* general: mills by Gemalen */
+  /* general: four featured works, spread over the grid, shown for every address */
   {
     id: "i-keere",
     place: "",
@@ -76,7 +76,7 @@ const WORKS: (RijksWork & { id: string })[] = [
     year: "1608-1610",
     objectNumber: "RP-P-OB-6719",
     iiif: "https://iiif.micr.io/qRmsD",
-    context: "Al rond 1600 pompten molens het water uit de polder, vlak achter de dijk.",
+    context: "Een poldermolen achter de zeedijk bij Petten. Molens zoals deze pompten het water uit de polder.",
   },
   {
     id: "i-kinderdijk",
@@ -86,9 +86,8 @@ const WORKS: (RijksWork & { id: string })[] = [
     year: "",
     objectNumber: "RP-T-1963-39",
     iiif: "https://iiif.micr.io/rDJMg",
-    context: "Bij Kinderdijk staan de molens nog op een rij. Samen pompten ze het water uit de Alblasserwaard.",
+    context: "De molens bij Kinderdijk. Ze staan er nog steeds, op een rij langs het water.",
   },
-  /* general: steam and electricity in the Tijdreis */
   {
     id: "i-cruquius",
     place: "",
@@ -97,7 +96,7 @@ const WORKS: (RijksWork & { id: string })[] = [
     year: "",
     objectNumber: "RP-P-OB-28.402",
     iiif: "https://iiif.micr.io/iZtis",
-    context: "Daarna kwam stoom. Gemaal De Cruquius hielp de Haarlemmermeer droog te pompen.",
+    context: "Stoomgemaal De Cruquius. Het hielp de Haarlemmermeer droog te pompen, met stoom in plaats van wind.",
   },
   {
     id: "i-dongepolders",
@@ -107,7 +106,7 @@ const WORKS: (RijksWork & { id: string })[] = [
     year: "1901",
     objectNumber: "NG-1976-34-H-1",
     iiif: "https://iiif.micr.io/HHrDg",
-    context: "Rond 1900 kwamen er gemalen die op elektriciteit draaiden.",
+    context: "Een elektrische centrale om water weg te pompen uit de Dongepolders, in 1901.",
   },
 ];
 
