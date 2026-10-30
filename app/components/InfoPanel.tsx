@@ -46,14 +46,7 @@ export function InfoPanel({
   return (
     <section className="panel" id="p-info" data-mode={mode}>
       <div className="mode m-info" aria-hidden={mode !== "info"}>
-        <span className="meta">
-          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.`}>
-            bronnen
-          </Tip>
-        </span>
-        <h2 id="huisAdres" style={{ paddingRight: 120 }}>
-          {place.address}
-        </h2>
+        <h2 id="huisAdres">{place.address}</h2>
         <p>{heightText}</p>
         <p>
           Elke dag pompt{" "}
@@ -71,6 +64,11 @@ export function InfoPanel({
           {place.waterBoard}.
         </p>
         <p>Dit land werd rond {place.drainedYear} droog gemaakt. In de tijdreis zie je hoe.</p>
+        <p className="src">
+          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.`}>
+            bron
+          </Tip>
+        </p>
       </div>
       <div className="mode m-risk" aria-hidden={mode !== "risk"}>
         <button type="button" className="close" aria-label="Sluiten" onClick={onClose}>

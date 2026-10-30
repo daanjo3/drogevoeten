@@ -61,7 +61,9 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
       </div>
       <p className="kaartcap">
         Een kwart van Nederland ligt lager dan de zee. Het diepste stukje ligt bij Nieuwerkerk aan den IJssel, bijna 7 meter
-        onder de zee. Meer dan de helft van het land kan overstromen, door de zee of door de rivieren.{" "}
+        onder de zee. Meer dan de helft van het land kan overstromen, door de zee of door de rivieren.
+      </p>
+      <p className="src">
         <Tip kind="bron" tip="Planbureau voor de Leefomgeving (2010): 26 procent van Nederland ligt onder zeeniveau, 59 procent kan overstromen. Laagste punt: Rijkswaterstaat, 6,76 meter onder NAP.">
           bron
         </Tip>

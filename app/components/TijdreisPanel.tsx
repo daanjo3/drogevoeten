@@ -24,9 +24,11 @@ export function TijdreisPanel({ place }: { place: PlaceData }) {
               <p>
                 <RichText text={step.text} />
               </p>
-              <Tip kind="bron" tip={step.source}>
-                bron
-              </Tip>
+              <p className="src">
+                <Tip kind="bron" tip={step.source}>
+                  bron
+                </Tip>
+              </p>
             </li>
           ))}
         </ol>

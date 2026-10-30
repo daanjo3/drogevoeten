@@ -50,7 +50,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 
 /* tooltips */
 .term{border-bottom:1.5px dotted currentColor;cursor:help}
-.bron{display:inline-block;border:1px solid currentColor;border-radius:999px;padding:1px 8px;font:500 10px/1.6 var(--font);text-transform:uppercase;letter-spacing:.06em;opacity:.65;cursor:help}
+/* source pill: always the same pill, always on its own line under the text it belongs to */
+.bron{display:inline-block;border:1px solid currentColor;border-radius:999px;padding:1px 9px;font:500 var(--fs-label)/1.6 var(--font);text-transform:uppercase;letter-spacing:.06em;opacity:.65;cursor:help;vertical-align:middle}
+.src{margin:8px 0 0!important;line-height:1;opacity:1}
+.src .bron{opacity:.75}
 .bron:before{content:"i ";font-weight:700}
 .bron:hover,.bron:focus{opacity:1}
 .tip:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
@@ -213,6 +216,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #p-map .nl{flex:1;min-width:0;height:100%;stroke:none}
 #p-map .nl path{fill:#fff;stroke:none}
 #p-map .kaartcap{margin:0}
+#p-map .src .bron{color:#fff}
 #mapPin{transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
 .ping{animation:ping 2s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes ping{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
@@ -239,6 +243,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 @keyframes slidein{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.tl li{opacity:1}#p-tijd.seen .tl li{animation:none}}
 .tl li p{margin:4px 0}
+.tl li .src{margin-top:6px!important}
 
 /* buurt */
 /* the map and list fill whatever the heading and lead leave over */
