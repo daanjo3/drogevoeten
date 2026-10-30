@@ -16,13 +16,21 @@ interface UnityPlayer {
   quit: () => Promise<void>;
 }
 interface UnityEmbed {
-  mount: (canvas: HTMLCanvasElement, options?: { onProgress?: (p: number) => void }) => Promise<UnityPlayer>;
+  mount: (
+    canvas: HTMLCanvasElement,
+    options?: { onProgress?: (p: number) => void; fullscreenElement?: HTMLElement },
+  ) => Promise<UnityPlayer>;
 }
 
 type State = "idle" | "loading" | "ready" | "failed";
 
 export function UnityRoom({ active }: { active: boolean }) {
   const canvas = useRef<HTMLCanvasElement>(null);
+  /* wrapper that goes fullscreen, so our own exit button can sit on top of the room */
+  const wrap = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(false);
+  /* when the browser refuses real fullscreen (embedded views), the room fills the window instead */
+  const [faux, setFaux] = useState(false);
   const player = useRef<UnityPlayer | null>(null);
   const [state, setState] = useState<State>("idle");
   const [progress, setProgress] = useState(0);
@@ -41,7 +49,7 @@ export function UnityRoom({ active }: { active: boolean }) {
            it: a full url with origin makes the browser import it as is */
         const url = new URL(EMBED_URL, window.location.origin).href;
         const embed = (await import(/* @vite-ignore */ url)) as UnityEmbed;
-        const unity = await embed.mount(canvas.current!, { onProgress: setProgress });
+        const unity = await embed.mount(canvas.current!, { onProgress: setProgress, fullscreenElement: wrap.current ?? undefined });
         player.current = unity;
         setState("ready");
       } catch (err) {
@@ -50,6 +58,36 @@ export function UnityRoom({ active }: { active: boolean }) {
       }
     })();
   }, [active]);
+
+  useEffect(() => {
+    const onChange = () => setFull(document.fullscreenElement === wrap.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  /* the browser's own fullscreen api on the wrapper; Unity's SetFullscreen as fallback */
+  function enterFullscreen() {
+    const el = wrap.current;
+    if (el?.requestFullscreen) {
+      el.requestFullscreen().catch(() => setFaux(true));
+    } else {
+      setFaux(true);
+    }
+  }
+  function exitFullscreen() {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    setFaux(false);
+  }
+
+  /* Escape also leaves the window-filling fallback */
+  useEffect(() => {
+    if (!faux) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFaux(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [faux]);
 
   /* stop the player when the panel goes away */
   useEffect(
@@ -64,7 +102,14 @@ export function UnityRoom({ active }: { active: boolean }) {
   return (
     <>
       {/* pointer events stay off so the grid keeps scrolling over the room */}
-      <canvas id="unity-canvas" className="scene-canvas" ref={canvas} aria-label="3D-huiskamer" style={{ opacity: ready ? 1 : 0 }} />
+      <div className={`scene-wrap${faux ? " faux" : ""}`} ref={wrap}>
+        <canvas id="unity-canvas" className="scene-canvas" ref={canvas} aria-label="3D-huiskamer" style={{ opacity: ready ? 1 : 0 }} />
+        {(full || faux) && (
+          <button type="button" className="fs exit" onClick={exitFullscreen}>
+            <Icon name="close" /> sluit volledig scherm
+          </button>
+        )}
+      </div>
       {!ready && <img className="scene" src={PLACEHOLDER} alt="" />}
       {state === "loading" && (
         <div className="loadbar" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
@@ -73,7 +118,7 @@ export function UnityRoom({ active }: { active: boolean }) {
         </div>
       )}
       {ready && (
-        <button type="button" className="fs" onClick={() => player.current?.setFullscreen(true)}>
+        <button type="button" className="fs" onClick={enterFullscreen}>
           <Icon name="fullscreen" /> volledig scherm
         </button>
       )}

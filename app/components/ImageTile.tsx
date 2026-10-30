@@ -35,7 +35,12 @@ export function RijksTile({ id, work }: { id: string; work: RijksWork }) {
   return (
     <figure className="panel img" id={id}>
       <div className="ph">
-        <img src={rijksSrc(work)} alt={[work.title, work.maker, work.year].filter(Boolean).join(", ")} loading="lazy" />
+        <img
+          src={rijksSrc(work)}
+          alt={[work.title, work.maker, work.year].filter(Boolean).join(", ")}
+          loading="lazy"
+          onLoad={() => window.dispatchEvent(new Event("resize"))}
+        />
       </div>
       <figcaption className="cap">
         <p className="context">{work.context}</p>
