@@ -6,6 +6,7 @@ const DUMMY_ZOOM = 17
 
 export default function Item() {
   const { id } = useParams();
+
   return (
     <main>
       <h1>Item {id}</h1>
