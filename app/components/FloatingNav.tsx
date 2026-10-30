@@ -42,7 +42,7 @@ export function FloatingNav({
         </span>
       </button>
       <span className="sep" />
-      <Btn t={{ key: "huis", mode: "info" }} icon="huis" title="Huiskamer" label="hoe diep woon je?" />
+      <Btn t={{ key: "huis", mode: "info" }} icon="huis" title="Huiskamer" label="hoe droog woon je?" />
       <Btn t={{ key: "tijd" }} icon="tijd" title="Tijdreis" label="hoe werd het droog?" />
       <Btn t={{ key: "buurt" }} icon="buurt" title="Gemalen" label="zij houden je droog" />
       <span className="sep" />
