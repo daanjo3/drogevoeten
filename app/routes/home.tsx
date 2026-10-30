@@ -86,7 +86,8 @@ const WORKS: (RijksWork & { id: string })[] = [
     year: "",
     objectNumber: "RP-T-1963-39",
     iiif: "https://iiif.micr.io/rDJMg",
-    context: "De molens bij Kinderdijk. Ze staan er nog steeds, op een rij langs het water.",
+    context:
+      "De molens van Kinderdijk kent bijna iedereen, tot ver buiten Nederland. Samen pompten deze 19 molens het water uit de polder naar de rivier. Sinds 1997 zijn ze werelderfgoed.",
   },
   {
     id: "i-cruquius",
