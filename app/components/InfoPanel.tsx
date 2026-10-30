@@ -31,13 +31,13 @@ export function InfoPanel({
 
   let heightText: string;
   if (ground) {
-    heightText = `Je voordeur ligt ${nl(Math.abs(ground.value))} meter ${ground.value >= 0 ? "boven" : "onder"} de zee.`;
+    heightText = `Je huiskamer ligt ${nl(Math.abs(ground.value))} meter ${ground.value >= 0 ? "boven" : "onder"} de zee.`;
   } else if (height.isError) {
     heightText = "Het hoogtebestand gaf geen antwoord. Probeer het later nog eens.";
   } else if (height.isSuccess) {
-    heightText = "Hoe hoog je voordeur ligt, konden we hier niet vinden.";
+    heightText = "Hoe hoog je huiskamer ligt, konden we hier niet vinden.";
   } else {
-    heightText = "We zoeken op hoe hoog je voordeur ligt…";
+    heightText = "We zoeken op hoe hoog je huiskamer ligt…";
   }
   const heightSource = ground
     ? `Hoogte: Actueel Hoogtebestand Nederland (AHN), ${nlSigned(ground.value)} m NAP. Gemeten op de grond ${nl(ground.distance)} meter van je adres, want onder een huis meet het AHN de grond niet. Je drempel ligt vaak iets hoger.`

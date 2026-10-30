@@ -1,7 +1,9 @@
 /* Global styles for Droge Voeten. Ported from design/index.html, the design reference. Design tokens live in :root. */
 :root{
-  --bg:#F4EFEB; --ink:#242424; --mute:#77736E; --line:#242424;
+  --bg:#F4EFEB; --ink:#242424; --mute:#6B6762; --line:#242424;
   --blue:#0087D8; --blue2:#5fb4ec;
+  /* a touch darker than Curious, so white text on it reaches AA (4.99) */
+  --blue-deep:#0074BA;
   --lav:#D28AE1; --lav2:#E2BBE6;
   --green:#75724A; --green2:#467841;
   --sun:#FFA654; --sun2:#FDDDAA;
@@ -57,6 +59,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .bron:before{content:"i ";font-weight:700}
 .bron:hover,.bron:focus{opacity:1}
 .tip:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
 #tooltip{position:fixed;z-index:100;max-width:270px;background:var(--dark);color:#fff;font:14px/1.45 var(--font);padding:10px 13px;border-radius:12px;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;text-transform:none;letter-spacing:0}
 #tooltip.show{opacity:1;transform:none}
 
@@ -145,8 +148,9 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #nav .sep{width:1px;background:#444;margin:10px 3px}
 
 #mini{position:fixed;z-index:40;right:16px;bottom:16px;width:140px;height:140px;background:var(--dark);border:1.5px solid var(--dark);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
-#mini i{position:absolute;border-radius:3px;opacity:.75;cursor:pointer;border:1px solid var(--dark);box-sizing:border-box}
-#mini i:hover{opacity:1}
+#mini button{position:absolute;border-radius:3px;opacity:.75;cursor:pointer;border:1px solid var(--dark);box-sizing:border-box;padding:0}
+#mini button:hover,#mini button:focus-visible{opacity:1}
+#mini button:focus-visible{outline:2px solid #fff;outline-offset:1px}
 #mini .view{position:absolute;border:2px solid #fff;border-radius:3px;pointer-events:none}
 
 /* ===== CANVAS, bento vanuit het midden ===== */
@@ -160,7 +164,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 /* middelpunt canvas 120vw,120vh = midden van de huiskamer; 4vw tussen kolommen, 6vh tussen rijen */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
 #p-info {left:152vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
-#p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue); color:#fff}
+#p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue-deep); color:#fff}
 #p-tijd {left:52vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 

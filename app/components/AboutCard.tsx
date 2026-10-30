@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "./Icons";
 
 /* Card with the story behind the app and the list of sources. Opens from
@@ -35,17 +35,41 @@ function Ext({ href, children }: { href: string; children: ReactNode }) {
 }
 
 export function AboutCard({ onClose }: { onClose: () => void }) {
+  const card = useRef<HTMLDivElement>(null);
+
+  /* focus moves into the card, stays inside while it is open (Tab wraps
+     around), and goes back to the Over button when it closes */
   useEffect(() => {
+    const opener = document.activeElement as HTMLElement | null;
+    const el = card.current;
+    el?.querySelector<HTMLElement>("button")?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !el) return;
+      const items = [...el.querySelectorAll<HTMLElement>("button, a[href]")];
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
   }, [onClose]);
 
   return (
     <div id="about" onClick={onClose}>
-      <div className="card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" onClick={(e) => e.stopPropagation()}>
+      <div className="card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle" ref={card} onClick={(e) => e.stopPropagation()}>
         <button type="button" className="close" aria-label="Sluiten" onClick={onClose}>
           <Icon name="close" />
         </button>

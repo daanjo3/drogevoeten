@@ -1,10 +1,19 @@
 import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { useView, type Rect } from "./Canvas";
 
+/* names for the blocks, read out by screen readers */
+const NAMES: Record<string, string> = {
+  "p-huis": "Huiskamer",
+  "p-info": "Uitleg en scenario",
+  "p-map": "Kaart",
+  "p-tijd": "Tijdreis",
+  "p-buurt": "Gemalen",
+};
+
 const COLORS: Record<string, string> = {
   "p-huis": "#9fcdee",
   "p-info": "#F8BD83",
-  "p-map": "#0087D8",
+  "p-map": "#0074BA",
   "p-tijd": "#D28AE1",
   "p-buurt": "#657546",
 };
@@ -26,7 +35,7 @@ export function MiniMap({
   onPick: (id: string) => void;
 }) {
   const view = useView(worldRef);
-  const box = useRef<HTMLDivElement>(null);
+  const box = useRef<HTMLElement>(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
 
   /* the inner size of the minimap, also when css changes it per breakpoint */
@@ -40,7 +49,7 @@ export function MiniMap({
     return () => ro.disconnect();
   }, []);
 
-  if (!canvas.width || !canvas.height) return <div id="mini" ref={box} aria-label="Overzicht" />;
+  if (!canvas.width || !canvas.height) return <nav id="mini" ref={box} aria-label="Overzicht van de blokken" />;
 
   const pad = 6;
   const s = Math.min((size.w - 2 * pad) / canvas.width, (size.h - 2 * pad) / canvas.height);
@@ -49,17 +58,17 @@ export function MiniMap({
   const fit = (r: Rect) => ({ left: ox + r.l * s, top: oy + r.t * s, width: (r.r - r.l) * s, height: (r.b - r.t) * s });
 
   return (
-    <div id="mini" ref={box} aria-label="Overzicht">
+    <nav id="mini" ref={box} aria-label="Overzicht van de blokken">
       {panels.map((p) => (
-        <i
+        <button
           key={p.id}
+          type="button"
           style={{ ...fit(p.rect), background: COLORS[p.id] ?? "#e6e0da" }}
           onClick={() => onPick(p.id)}
-          role="button"
-          aria-label={p.id}
+          aria-label={`Ga naar ${NAMES[p.id] ?? "beeld"}`}
         />
       ))}
       <div className="view" style={fit(view)} />
-    </div>
+    </nav>
   );
 }
