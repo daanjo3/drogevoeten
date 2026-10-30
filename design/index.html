@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Droge Voeten, prototype grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,700,100,1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4EFEB; --ink:#242424; --mute:#7a7572; --line:#242424;
+    --blue:#0087D8; --blue2:#5fb4ec;
+    --lav:#D28AE1; --lav2:#efd3f5;
+    --green:#617E5A; --green2:#8aa283;
+    --sun:#FFA654; --sun2:#ffd2a6;
+    --dark:#242424; --water:#0087D8;
+    --font:"Instrument Sans",system-ui,sans-serif;
+    --mono:var(--font);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:16px/1.45 var(--font)}
+  button,input{font-family:var(--font)}
+  button{font:inherit;cursor:pointer}
+  :root{--head:"Fraunces";--headw:700;--headvar:"SOFT" 100,"WONK" 1}
+  h1,h2,h3,.tl li b{font-family:var(--head),var(--font);font-weight:var(--headw);font-variation-settings:var(--headvar);letter-spacing:-.005em}
+  .tl li b{font-size:20px!important}
+  h2{margin:0 0 6px;font-size:26px;display:flex;align-items:center;gap:10px}
+  /* labels in caps */
+  .src,.meta,.tag,.pill,.iframe,.line,.row small,.seg button span,#nav .l,#where,
+  #out small,#detail small,.img .cap{ text-transform:uppercase; letter-spacing:.06em; font-weight:500 }
+  .img .cap b,#where b,.line b{ text-transform:none; letter-spacing:0 }
+  h2 svg{width:28px;height:28px;flex:none}
+  .sub{font-size:14px;opacity:.65;margin:0 0 14px}
+  .src,.meta{font:12px/1.4 var(--mono);opacity:.6}
+  .meta{position:absolute;right:20px;top:20px;text-align:right}
+  svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* vignet: het hele canvas vaagt aan de randen weg in de achtergrond */
+  #world{
+    --fade:14vmin;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%),linear-gradient(to bottom,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to right,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%),linear-gradient(to bottom,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%);
+    mask-composite:intersect;
+  }
+
+  /* tooltips */
+  .term{border-bottom:1.5px dotted currentColor;cursor:help}
+  .bron{display:inline-block;border:1px solid currentColor;border-radius:999px;padding:1px 8px;font:500 10px/1.6 var(--font);text-transform:uppercase;letter-spacing:.06em;opacity:.65;cursor:help}
+  .bron:before{content:"i ";font-weight:700}
+  .bron:hover,.bron:focus{opacity:1}
+  .tip:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
+  #tooltip{position:fixed;z-index:100;max-width:270px;background:var(--dark);color:#fff;font:14px/1.45 var(--font);padding:10px 13px;border-radius:12px;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;text-transform:none;letter-spacing:0}
+  #tooltip.show{opacity:1;transform:none}
+
+  /* landschapje op het startscherm */
+  .land{position:absolute;z-index:1;left:-3vw;right:-3vw;bottom:0;height:48vh;pointer-events:none}
+  .land .lyr{position:absolute;inset:0;width:100%;height:100%;stroke:none;stroke-linejoin:round;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+  .startbox{margin-bottom:30vh}
+  @media (max-height:760px){.land{height:44vh}.startbox{margin-bottom:26vh}}
+  /* subtiele animaties */
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spin{transform-box:fill-box;transform-origin:center;animation:spin 18s linear infinite}
+  .spin.slow{animation-duration:32s}
+  @keyframes drift{from{transform:translateX(-30px)}to{transform:translateX(30px)}}
+  .drift{animation:drift 24s ease-in-out infinite alternate}
+  .drift.b{animation-duration:32s;animation-delay:-10s}
+  @keyframes bob{50%{transform:translateY(-5px)}}
+  .bob{animation:bob 3.4s ease-in-out infinite}
+  .bob.b{animation-delay:-1.7s}
+  @keyframes flow{to{stroke-dashoffset:-148}}
+  .shimmer{stroke-dasharray:60 14;animation:flow 7s linear infinite}
+  @keyframes smoke{0%{transform:translate(0,0) scale(.5);opacity:0}20%{opacity:.85}100%{transform:translate(18px,-70px) scale(1.7);opacity:0}}
+  .smoke{transform-box:fill-box;transform-origin:center;animation:smoke 6s ease-out infinite;opacity:0}
+  .smoke.s2{animation-delay:-2s}.smoke.s3{animation-delay:-4s}
+  @keyframes sway{50%{transform:rotate(5deg)}}
+  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.5s ease-in-out infinite}
+  .sway.b{animation-delay:-2.2s}
+  @media (prefers-reduced-motion:reduce){.land *{animation:none!important}}
+
+  /* cursor */
+  .field{position:relative;flex:1;display:flex;min-width:0}
+  .field input{caret-color:transparent;width:100%}
+  .caret{position:absolute;left:0;top:50%;width:3px;height:26px;margin-top:-13px;background:var(--ink);border-radius:2px;animation:blink 1.05s steps(1) infinite;pointer-events:none}
+  .mirror{position:absolute;visibility:hidden;white-space:pre;font:20px var(--font)}
+  @keyframes blink{50%{opacity:0}}
+
+  /* vertrek-transitie */
+  .startbox{transition:opacity .35s,transform .45s cubic-bezier(.5,0,.75,0)}
+  #start.going .startbox{opacity:0;transform:translateY(-40px)}
+  #drop{position:absolute;z-index:3;left:56%;top:-12vh;width:64px;height:64px;margin-left:-32px;stroke:none;opacity:0;filter:drop-shadow(0 6px 0 rgba(36,36,36,.15))}
+  #start.going #drop{animation:drop .7s .2s cubic-bezier(.3,1.5,.55,1) forwards}
+  @keyframes drop{0%{top:-12vh;opacity:1}100%{top:calc(86vh - 64px);opacity:1}}
+  #world{transition:opacity .6s ease, transform .8s cubic-bezier(.2,.7,.2,1)}
+  #world.away{opacity:0;transform:scale(.92)}
+  #start.going.hide{transition:opacity .5s ease,visibility 0s linear .5s}
+  @media (prefers-reduced-motion:reduce){.caret{animation:none}#start.going #drop{animation:none}}
+
+  /* ===== START ===== */
+  #start{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);transition:opacity .4s,visibility .4s;overflow:hidden}
+  #start:before{content:"";position:absolute;left:-10vw;top:-20vh;width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--lav2),transparent 70%);pointer-events:none}
+  #start:after{content:"";position:absolute;right:-10vw;bottom:-25vh;width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle at 60% 60%,var(--sun2),transparent 70%);pointer-events:none}
+  #start.hide{opacity:0;visibility:hidden}
+  .startbox{position:relative;z-index:2;width:min(640px,90vw);text-align:center}
+  .startbox h1{font-size:clamp(30px,5vw,54px);margin:0 0 10px;letter-spacing:-.02em}
+  .startbox p{color:var(--mute);margin:0 0 24px}
+  .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px}
+  .search input{flex:1;background:none;border:0;color:var(--ink);font-size:20px;outline:0;min-width:0}
+  .search button{border:0;border-radius:999px;background:var(--dark);color:#fff;padding:12px 20px;font-weight:700}
+  .defaults{margin-top:16px;display:flex;gap:8px;justify-content:center}
+  .defaults button{background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;flex:1;font-weight:700}
+  .defaults button:hover{background:var(--dark);color:#fff}
+
+  /* ===== FIXED ===== */
+  #where{position:fixed;z-index:40;left:50%;top:16px;transform:translateX(-50%);text-align:center;background:#fff;border:1.5px solid var(--line);padding:8px 18px;border-radius:999px;font:12px var(--mono);color:var(--mute)}
+  #where b{color:var(--ink);display:block;font:600 16px var(--font)}
+
+  #nav{position:fixed;z-index:40;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:4px;background:var(--dark);border-radius:20px;padding:6px}
+  #nav button{display:flex;align-items:center;gap:10px;background:transparent;color:#fff;border:0;border-radius:14px;padding:10px 14px;text-align:left}
+  #nav button svg{width:22px;height:22px;flex:none}
+  #nav .t{display:block;font-weight:700;font-size:15px;line-height:1.2;white-space:nowrap}
+  #nav .l{display:block;font:11px/1.3 var(--mono);opacity:.6;white-space:nowrap}
+  #nav button:hover{background:#333}
+  #nav button[aria-current="true"]{background:#fff;color:var(--ink)}
+  #nav button.risk{color:var(--sun)}
+  #nav button.risk[aria-current="true"]{background:var(--sun);color:var(--ink)}
+  #nav .sep{width:1px;background:#444;margin:10px 3px}
+
+  #mini{position:fixed;z-index:40;right:16px;bottom:16px;width:140px;height:140px;background:#fff;border:1.5px solid var(--line);border-radius:14px}
+  #mini i{position:absolute;border-radius:3px;opacity:.75;cursor:pointer}
+  #mini i:hover{opacity:1}
+  #mini .view{position:absolute;border:2px solid var(--ink);border-radius:3px;pointer-events:none}
+
+  /* ===== CANVAS, bento vanuit het midden ===== */
+  #world{position:relative;width:100vw;height:100vh;overflow:auto}
+  #canvas{position:relative;width:240vw;height:240vh}
+  .panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden}
+  /* middelpunt canvas 120vw,120vh = midden van de huiskamer */
+  #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
+  #p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:#fff; border:1.5px solid var(--line); display:grid; transition:background .4s,color .4s}
+  #p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); }
+  #p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:linear-gradient(180deg,var(--lav) 0%,var(--lav2) 100%)}
+  #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%); color:#fff}
+
+  /* beeldtegels */
+  .img{display:flex;flex-direction:column;justify-content:space-between;padding:18px}
+  .img .ph{flex:1;border-radius:14px;margin-bottom:12px;position:relative;overflow:hidden;background:none!important}
+  .img .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .img .ph svg.art{position:absolute;inset:0;width:100%;height:100%;stroke:none}
+  .img .badge{position:absolute;z-index:1;left:10px;top:10px;background:rgba(255,255,255,.85);color:var(--ink);border-radius:999px;padding:3px 9px;font:500 10px var(--font);text-transform:uppercase;letter-spacing:.06em}
+  .img .cap{font:12px/1.45 var(--mono)}
+  .img .cap b{display:block;font:600 14px/1.3 var(--font);margin-bottom:2px}
+  #i-asselijn {left:126vw;top:10vh; width:22vw;height:68vh;background:#fff;border:1.5px solid var(--line)}
+  #i-asselijn .ph{background:linear-gradient(170deg,#4a5a6b,#b9c3cc 70%,#e9e1d4)}
+  #i-elisabeth{left:12vw; top:62vh; width:32vw;height:44vh;background:#fff;border:1.5px solid var(--line)}
+  #i-elisabeth .ph{background:linear-gradient(170deg,#6a7a4f,#c9b98d 60%,#7aa0b8)}
+  #i-prent   {left:154vw;top:22vh; width:28vw;height:56vh;background:#fff;border:1.5px solid var(--line)}
+  #i-prent .ph{background:repeating-linear-gradient(135deg,#d8d1c8 0 2px,#efe9e2 2px 7px)}
+  #i-boreel  {left:154vw;top:161vh;width:28vw;height:42vh;background:#fff;border:1.5px solid var(--line)}
+  #i-boreel .ph{background:linear-gradient(170deg,#8aa283,#e8e2d6)}
+  #i-molen   {left:184vw;top:85vh; width:34vw;height:46vh;background:#fff;border:1.5px solid var(--line)}
+  #i-molen .ph{background:linear-gradient(170deg,var(--lav2),#fff3e6)}
+
+  /* kamers */
+  .room{position:absolute;inset:0}
+  .room .water{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#5fb4ec,var(--water));opacity:.9;transition:height .7s cubic-bezier(.3,.8,.3,1)}
+  .room .line{position:absolute;left:0;right:0;border-top:2px dashed currentColor;font:12px var(--mono);padding:4px 12px;transition:bottom .6s}
+  .room .tag{position:absolute;left:24px;top:24px;font:12px var(--mono);opacity:.8}
+  .room .iframe{position:absolute;right:16px;bottom:16px;font:12px var(--mono);opacity:.7}
+  .room .icon{position:absolute;left:24px;top:48px;width:40px;height:40px}
+  #p-info p{margin:0 0 10px}
+  #out{position:absolute;left:20px;right:20px;bottom:20px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;font-size:16px;color:var(--ink)}
+  #out small{display:block;color:var(--mute);font:11px var(--mono);margin-top:6px}
+
+  /* scenario-keuzes, compact */
+  .m-risk h2{font-size:22px}
+  /* info-blok wisselt van inhoud */
+  #p-info .mode{grid-area:1/1;transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1),visibility 0s linear .45s}
+  #p-info[data-mode=info] .m-risk,#p-info[data-mode=risk] .m-info{opacity:0;transform:translateY(16px);visibility:hidden;pointer-events:none}
+  #p-info[data-mode=info] .m-info,#p-info[data-mode=risk] .m-risk{transition-delay:.12s,.12s,0s}
+  #p-info[data-mode=risk]{background:var(--dark);color:#fff;border-color:var(--dark)}
+  #p-info .meta{z-index:1}
+  /* huiskamer: water en uitleg alleen als het misgaat */
+  #p-huis .line{opacity:0;transition:opacity .3s,bottom .6s}
+  #p-huis #out{opacity:0;transform:translateY(12px);transition:opacity .3s,transform .4s;pointer-events:none}
+  #p-huis.risk .line{opacity:1}
+  #p-huis.risk #out{opacity:1;transform:none;pointer-events:auto}
+  #p-huis.risk{border-color:var(--sun);box-shadow:0 0 0 4px rgba(255,166,84,.35)}
+  #p-huis.risk .iframe{opacity:0}
+  /* kaart */
+  #p-map{display:flex;flex-direction:column}
+  #p-map .nl{flex:1;min-height:0;width:100%;stroke:none;margin:6px 0}
+  #p-map .zee{font:600 10px var(--font);letter-spacing:.14em;fill:#fff}
+  #p-map .kaartcap{margin:0;font-size:14px}
+  #mapPin{transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+  .ping{animation:ping 2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes ping{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
+  .row{margin:0 0 16px}
+  .row small{display:block;font:11px var(--mono);opacity:.6;margin-bottom:6px}
+  .seg{display:flex;background:#333;border-radius:12px;padding:3px;gap:3px}
+  .seg button{flex:1;background:transparent;color:#fff;border:0;border-radius:9px;padding:9px 6px;font-weight:700;font-size:14px;line-height:1.2}
+  .seg button span{display:block;font:10px var(--mono);font-weight:400;opacity:.65;margin-top:2px}
+  .seg button:hover{background:#444}
+  .seg button[aria-pressed="true"]{background:var(--sun);color:var(--ink)}
+  .seg button[aria-pressed="true"] span{opacity:.8}
+
+  /* tijdlijn */
+  .tl{display:grid;grid-template-columns:28px 1fr;gap:14px;height:calc(100% - 70px)}
+  .tl .axis{position:relative}
+  .tl .axis:before{content:"";position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--ink)}
+  .tl ol{list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:1fr;gap:10px;height:100%}
+  .tl li{position:relative;background:rgba(255,255,255,.55);border-radius:14px;padding:12px 14px}
+  .tl li:before{content:"";position:absolute;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
+  .tl li b{display:block;font-size:17px}
+  .tl li p{margin:4px 0}
+
+  /* buurt */
+  .buurt{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100% - 70px)}
+  .buurt .map{background:rgba(255,255,255,.25);border-radius:16px;position:relative}
+  .buurt .map button{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid #fff;padding:0;transform:translate(-50%,-50%)}
+  .buurt .map button[aria-pressed="true"]{background:var(--sun);border-color:var(--ink);box-shadow:0 0 0 5px rgba(255,255,255,.5)}
+  .buurt .map .you{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ink);position:absolute;transform:translate(-50%,-50%)}
+  .buurt ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;align-content:start}
+  .buurt li button{width:100%;text-align:left;background:rgba(255,255,255,.25);border:1.5px solid transparent;border-radius:14px;padding:12px;color:#fff;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .buurt li button[aria-pressed="true"]{background:#fff;color:var(--ink);border-color:var(--ink)}
+  .pill{font:11px var(--mono);border:1px solid currentColor;border-radius:999px;padding:2px 8px;white-space:nowrap}
+  #detail{background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:14px;min-height:90px;margin-top:12px}
+  #detail b{display:block;font-size:16px;margin-bottom:4px}
+  #detail small{color:var(--mute);display:block;margin-top:6px;font:12px var(--mono)}
+
+  @media (max-width:900px){
+    #canvas{width:100vw;height:auto;padding:70px 0 110px}
+    .panel{position:relative;left:0!important;top:0!important;width:calc(100vw - 24px)!important;height:auto!important;min-height:60vh;margin:12px}
+    .img{min-height:40vh!important}
+    .buurt{grid-template-columns:1fr}
+    #nav .l{display:none}
+    #nav .t{font-size:13px}
+    #nav button{padding:10px}
+    #mini{display:none}
+    #out{position:relative;left:0;right:0;bottom:0;margin-top:50vh}
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-huis" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/></symbol>
+  <symbol id="i-tijd" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-buurt" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></symbol>
+  <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/><path d="M9 14a3 3 0 0 0 3 3"/></symbol>
+  <symbol id="i-pomp" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V5h8v4"/><path d="M8 15h8"/><circle cx="12" cy="15" r="2"/></symbol>
+  <symbol id="i-terug" viewBox="0 0 24 24"><path d="M19 12H6"/><path d="m11 6-6 6 6 6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z"/></symbol>
+  <symbol id="i-zoek" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></symbol>
+  <symbol id="i-img" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></symbol>
+</svg>
+
+<section id="start">
+  <!-- landschapje, drie lagen, lomp en een beetje levend -->
+  <div class="land" aria-hidden="true">
+    <svg class="lyr" data-p="0.25" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
+      <g class="drift" fill="#fff" opacity=".85">
+        <rect x="170" y="104" width="230" height="40" rx="20"/><circle cx="235" cy="104" r="34"/><circle cx="300" cy="94" r="44"/><circle cx="360" cy="110" r="26"/>
+      </g>
+      <g class="drift b" fill="#fff" opacity=".75">
+        <rect x="1030" y="70" width="210" height="34" rx="17"/><circle cx="1090" cy="70" r="30"/><circle cx="1150" cy="62" r="38"/>
+      </g>
+      <path d="M0 268 Q360 244 720 256 T1440 250 V400 H0Z" fill="#c3d1bc"/>
+      <g fill="#a3b89b">
+        <rect x="652" y="236" width="6" height="16" rx="3"/><circle cx="655" cy="232" r="16"/>
+        <rect x="684" y="240" width="6" height="14" rx="3"/><circle cx="687" cy="236" r="12"/>
+        <rect x="1052" y="232" width="6" height="18" rx="3"/><circle cx="1055" cy="228" r="17"/>
+        <rect x="1352" y="234" width="6" height="16" rx="3"/><circle cx="1355" cy="230" r="14"/>
+      </g>
+      <g transform="translate(790 256)" fill="#a3b89b">
+        <polygon points="-12,0 12,0 8,-40 -8,-40"/>
+        <g transform="translate(0 -44)"><g class="spin slow">
+          <rect x="-3" y="-34" width="6" height="68" rx="3"/><rect x="-34" y="-3" width="68" height="6" rx="3"/>
+        </g></g>
+      </g>
+    </svg>
+
+    <svg class="lyr" data-p="0.6" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
+      <defs>
+        <linearGradient id="seaG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb4ec"/><stop offset="1" stop-color="#0087D8"/></linearGradient>
+        <linearGradient id="fieldG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#93ab8b"/><stop offset="1" stop-color="#617E5A"/></linearGradient>
+      </defs>
+      <!-- zee, hoger dan het land -->
+      <rect x="0" y="258" width="480" height="142" fill="url(#seaG)"/>
+      <g stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none" opacity=".75">
+        <path class="bob" d="M40 286 q22 -10 44 0"/><path class="bob b" d="M170 300 q22 -10 44 0"/>
+        <path class="bob" d="M300 282 q22 -10 44 0"/><path class="bob b" d="M90 340 q22 -10 44 0"/><path class="bob" d="M250 352 q22 -10 44 0"/>
+      </g>
+      <!-- dijk -->
+      <path d="M430 400 L476 244 Q510 228 548 244 L660 312 L660 400Z" fill="#7a8f5c"/>
+      <path d="M476 244 Q510 228 548 244" stroke="#617E5A" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <!-- polder, lager dan de zee -->
+      <path d="M640 312 L1440 302 V400 H640Z" fill="url(#fieldG)"/>
+      <g stroke="#0087D8" stroke-width="9" stroke-linecap="round" fill="none" opacity=".8">
+        <path class="shimmer" d="M700 340 L1440 330"/><path class="shimmer" d="M740 376 L1440 366" style="animation-delay:-3s"/>
+      </g>
+      <!-- molen -->
+      <g transform="translate(900 314) scale(.82)">
+        <polygon points="-36,0 36,0 24,-124 -24,-124" fill="#242424"/>
+        <path d="M-28 -122 Q0 -162 28 -122Z" fill="#242424"/>
+        <rect x="-10" y="-40" width="20" height="40" rx="10" fill="#F4EFEB"/>
+        <g transform="translate(0 -132)"><g class="spin">
+          <g fill="#F4EFEB" stroke="#242424" stroke-width="4">
+            <rect x="6" y="-106" width="24" height="84" rx="4"/><rect x="-30" y="22" width="24" height="84" rx="4"/>
+            <rect x="-106" y="-30" width="84" height="24" rx="4"/><rect x="22" y="6" width="84" height="24" rx="4"/>
+          </g>
+          <rect x="-6" y="-112" width="12" height="224" rx="6" fill="#242424"/>
+          <rect x="-112" y="-6" width="224" height="12" rx="6" fill="#242424"/>
+        </g>
+        <circle r="10" fill="#FFA654" stroke="#242424" stroke-width="5"/></g>
+      </g>
+      <!-- gemaal met rook -->
+      <g transform="translate(1120 314) scale(.9)">
+        <circle class="smoke" cx="128" cy="-152" r="12" fill="#fff"/>
+        <circle class="smoke s2" cx="128" cy="-152" r="12" fill="#fff"/>
+        <circle class="smoke s3" cx="128" cy="-152" r="12" fill="#fff"/>
+        <rect x="118" y="-150" width="20" height="60" rx="4" fill="#7a432c"/>
+        <rect x="0" y="-90" width="160" height="90" rx="8" fill="#9b5a3c"/>
+        <polygon points="-14,-84 174,-84 80,-136" fill="#242424" stroke="#242424" stroke-width="8" stroke-linejoin="round"/>
+        <g fill="#F4EFEB"><path d="M20 -6 v-46 a12 12 0 0 1 24 0 v46z"/><path d="M68 -6 v-46 a12 12 0 0 1 24 0 v46z"/><path d="M116 -6 v-46 a12 12 0 0 1 24 0 v46z"/></g>
+      </g>
+    </svg>
+
+    <svg class="lyr" data-p="1.1" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
+      <path d="M0 374 Q240 348 520 364 T1040 354 T1440 362 V400 H0Z" fill="#4f6a49"/>
+      <g stroke="#4f6a49" stroke-width="7" stroke-linecap="round" fill="none">
+        <g class="sway"><path d="M118 376 l-10 -48 M130 376 l2 -58 M142 376 l12 -44"/></g>
+        <g class="sway b"><path d="M560 368 l-8 -40 M570 368 l3 -50"/></g>
+        <g class="sway"><path d="M990 362 l-10 -44 M1002 362 l2 -54 M1014 362 l12 -40"/></g>
+        <g class="sway b"><path d="M1318 366 l-8 -46 M1330 366 l4 -56"/></g>
+      </g>
+    </svg>
+  </div>
+  <svg id="drop" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" fill="#FFA654" stroke="#242424" stroke-width="2"/><circle cx="12" cy="10" r="2.6" fill="#242424"/></svg>
+  <div class="startbox">
+    <h1>Wie houdt jullie voeten droog?</h1>
+    <p>Een kwart van ons land ligt lager dan de zee. Iemand houdt dat land elke dag droog. Typ een adres, van de school of van je eigen huis. Dan laten we zien wie dat is.</p>
+    <form class="search" id="form">
+      <svg width="22" height="22" aria-hidden="true"><use href="#i-pin"/></svg>
+      <span class="field"><input id="q" type="text" placeholder="Straat en plaats" aria-label="Adres" autocomplete="off" autofocus><span class="caret" aria-hidden="true"></span><span class="mirror" aria-hidden="true"></span></span>
+      <button type="submit"><svg width="20" height="20" style="stroke:#fff;vertical-align:-4px" aria-hidden="true"><use href="#i-zoek"/></svg> Zoek</button>
+    </form>
+    <div class="defaults">
+      <button type="button" data-q="Abdij 4, Middelburg">Middelburg</button>
+      <button type="button" data-q="Middenweg 1, Beemster">Beemster</button>
+      <button type="button" data-q="Ring 1, Nieuwerkerk">Nieuwerkerk</button>
+    </div>
+  </div>
+</section>
+
+<div id="where">jullie plek <b id="whereTxt">…</b></div>
+
+<nav id="nav" aria-label="Navigatie">
+  <button id="back"><svg aria-hidden="true"><use href="#i-terug"/></svg><span><span class="t">Begin</span><span class="l">ander adres</span></span></button>
+  <span class="sep"></span>
+  <button data-go="huis" data-mode="info" aria-current="true"><svg aria-hidden="true"><use href="#i-huis"/></svg><span><span class="t">Huiskamer</span><span class="l">hoe diep woon je?</span></span></button>
+  <button data-go="tijd"><svg aria-hidden="true"><use href="#i-tijd"/></svg><span><span class="t">Tijdreis</span><span class="l">hoe werd het droog?</span></span></button>
+  <button data-go="buurt"><svg aria-hidden="true"><use href="#i-buurt"/></svg><span><span class="t">Buurt</span><span class="l">wie pompt hier?</span></span></button>
+  <span class="sep"></span>
+  <button data-go="huis" data-mode="risk" class="risk"><svg aria-hidden="true"><use href="#i-drop"/></svg><span><span class="t">Als het misgaat</span><span class="l">speel met regen en dijk</span></span></button>
+</nav>
+<div id="mini" aria-label="Overzicht"></div>
+
+<div id="world"><div id="canvas">
+
+  <section class="panel" id="p-huis">
+    <div class="room">
+      <div class="water" id="water" style="height:4%"></div>
+      <div class="line" id="line" style="bottom:4%">waterlijn <b id="lineTxt">0,1 m</b></div>
+      <span class="tag" id="huisTag">HUISKAMER · vandaag</span>
+      <svg class="icon" aria-hidden="true"><use href="#i-huis"/></svg>
+      <span class="meta"><span class="tip term" tabindex="0" data-tip="Normaal Amsterdams Peil. Daarmee meten we in Nederland hoe hoog iets ligt. Het is ongeveer de hoogte van de zee.">NAP</span> +2,0 m<br><span class="tip term" tabindex="0" data-tip="Een stuk land waar het water in de sloten overal even hoog moet staan.">peilgebied</span> GPG437</span>
+      <div class="iframe">hier komt de 3D-huiskamer van het team</div>
+      <div id="out" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-info" data-mode="info">
+    <div class="mode m-info">
+    <span class="meta"><span class="tip bron" tabindex="0" data-tip="Hoogte: Actueel Hoogtebestand Nederland (AHN). Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.">bronnen</span></span>
+    <h2 id="huisAdres" style="padding-right:120px">adres</h2>
+    <p>Dit is de huiskamer op dit adres. De vloer ligt 2 meter boven de zee. Dat klinkt veilig. Maar het land eromheen ligt lager.</p>
+    <p>Elke dag pompt <span class="tip term" tabindex="0" data-tip="Een gebouw met grote pompen. Het pompt water uit de polder naar een kanaal, rivier of de zee.">gemaal</span> Boreel het water weg. Het gemaal is van <span class="tip term" tabindex="0" data-tip="De organisatie die zorgt voor de dijken, sloten en gemalen in een gebied.">waterschap</span> Scheldestromen. Zonder dat gemaal loopt de <span class="tip term" tabindex="0" data-tip="Een stuk land met een dijk eromheen. Het water wordt eruit gepompt, zodat het land droog blijft.">polder</span> langzaam vol.</p>
+    <p>Dit land werd rond het jaar 1200 droog gemaakt. Kijk bij Tijdreis hoe dat ging.</p>
+      </div>
+    <div class="mode m-risk" aria-hidden="true">
+    <h2><svg aria-hidden="true"><use href="#i-pomp"/></svg>Kies wat er gebeurt</h2>
+    <p class="sub">Kijk daarna naar de waterlijn.</p>
+    <div class="row">
+      <small>regen</small>
+      <div class="seg" role="group" aria-label="Regen">
+        <button data-g="regen" data-v="10" aria-pressed="false">Gewoon<span>10 mm</span></button>
+        <button data-g="regen" data-v="31.8" aria-pressed="false">Flinke bui<span>32 mm</span></button>
+        <button data-g="regen" data-v="80.9" aria-pressed="true">Record<span>81 mm</span></button>
+      </div>
+    </div>
+    <div class="row">
+      <small>gemaal Boreel</small>
+      <div class="seg" role="group" aria-label="Gemaal">
+        <button data-g="gemaal" data-v="844" aria-pressed="true">Aan</button>
+        <button data-g="gemaal" data-v="0" aria-pressed="false">Valt uit</button>
+      </div>
+    </div>
+    <div class="row">
+      <small>dijk</small>
+      <div class="seg" role="group" aria-label="Dijk">
+        <button data-g="dijk" data-v="0" aria-pressed="true">Houdt</button>
+        <button data-g="dijk" data-v="0.5" aria-pressed="false">Lekt</button>
+        <button data-g="dijk" data-v="2" aria-pressed="false">Breekt</button>
+      </div>
+    </div>
+      </div>
+  </section>
+
+  <section class="panel" id="p-map">
+    <span class="meta">nederland</span>
+    <h2>Waar ligt het?</h2>
+    <svg class="nl" viewBox="-6 -6 312 362" aria-label="Kaart van Nederland met jullie plek" role="img"><path d="M15.6 265.2 Q8.9 270.0 14.8 274.8 Q20.7 279.6 32.5 284.4 Q44.3 289.2 59.1 279.6 Q73.9 270.0 79.5 270.6 Q85.0 271.2 94.2 267.6 Q103.4 264.0 110.8 264.0 Q118.2 264.0 124.8 260.4 Q131.5 256.8 134.1 259.8 Q136.7 262.8 141.8 270.0 Q147.0 277.2 156.6 278.4 Q166.2 279.6 172.5 286.2 Q178.8 292.8 185.4 294.6 Q192.1 296.4 188.4 308.4 Q184.7 320.4 181.0 325.8 Q177.3 331.2 179.2 337.2 Q181.0 343.2 192.8 343.8 Q204.6 344.4 207.2 334.2 Q209.8 324.0 201.7 316.2 Q193.6 308.4 204.6 302.4 Q215.7 296.4 212.4 291.6 Q209.1 286.8 214.2 276.6 Q219.4 266.4 209.4 245.4 Q199.5 224.4 216.1 219.6 Q232.7 214.8 244.5 210.6 Q256.4 206.4 260.4 200.4 Q264.5 194.4 273.0 180.6 Q281.5 166.8 280.4 156.6 Q279.3 146.4 267.1 141.0 Q254.9 135.6 256.8 126.0 Q258.6 116.4 269.6 116.4 Q280.7 116.4 286.6 95.4 Q292.6 74.4 292.6 60.0 Q292.6 45.6 281.1 39.0 Q269.7 32.4 243.8 28.8 Q217.9 25.2 206.9 27.0 Q195.8 28.8 182.9 34.8 Q169.9 40.8 164.4 51.6 Q158.8 62.4 156.9 71.4 Q155.1 80.4 144.1 81.0 Q133.0 81.6 121.9 80.4 Q110.8 79.2 105.2 100.8 Q99.7 122.4 96.0 140.4 Q92.3 158.4 83.1 170.4 Q73.9 182.4 66.5 189.6 Q59.1 196.8 51.7 205.8 Q44.3 214.8 38.8 222.6 Q33.2 230.4 25.9 236.4 Q18.5 242.4 16.6 248.4 Q14.8 254.4 18.5 257.4 Q22.2 260.4 15.6 265.2 Z" fill="#fff" stroke="#242424" stroke-width="3" stroke-linejoin="round"/><path d="M133.0 93.6 Q133.0 82.8 145.9 83.4 Q158.8 84.0 166.2 88.2 Q173.6 92.4 171.8 101.4 Q169.9 110.4 160.7 115.2 Q151.5 120.0 144.1 118.2 Q136.7 116.4 134.8 110.4 Q133.0 104.4 133.0 93.6 Z" fill="#5fb4ec" stroke="#242424" stroke-width="1.5" stroke-linejoin="round"/><path d="M133.0 133.2 Q133.0 122.4 144.1 125.4 Q155.1 128.4 153.3 138.6 Q151.5 148.8 142.2 146.4 Q133.0 144.0 133.0 133.2 Z" fill="#5fb4ec" stroke="#242424" stroke-width="1.5" stroke-linejoin="round"/><path d="M20.7 260.4 Q18.5 262.8 29.6 265.8 Q40.6 268.8 55.4 269.4 Q70.2 270.0 71.0 266.4 Q71.7 262.8 56.2 261.0 Q40.6 259.2 31.8 258.6 Q22.9 258.0 20.7 260.4 Z" fill="#5fb4ec" stroke="#242424" stroke-width="1.5" stroke-linejoin="round"/><path d="M34.8 237.0 Q31.8 240.0 43.6 244.2 Q55.4 248.4 62.8 251.4 Q70.2 254.4 67.2 248.4 Q64.3 242.4 51.0 238.2 Q37.7 234.0 34.8 237.0 Z" fill="#5fb4ec" stroke="#242424" stroke-width="1.5" stroke-linejoin="round"/><ellipse cx="114.5" cy="64.8" rx="10" ry="4" transform="rotate(-55 114.5 64.8)" fill="#fff" stroke="#242424" stroke-width="2"/><ellipse cx="133.0" cy="40.8" rx="9" ry="2.4" transform="rotate(-30 133.0 40.8)" fill="#fff" stroke="#242424" stroke-width="2"/><ellipse cx="151.5" cy="26.4" rx="11" ry="2.6" transform="rotate(-15 151.5 26.4)" fill="#fff" stroke="#242424" stroke-width="2"/><ellipse cx="184.7" cy="20.4" rx="9" ry="2.4" transform="rotate(-5 184.7 20.4)" fill="#fff" stroke="#242424" stroke-width="2"/><ellipse cx="217.9" cy="15.6" rx="6" ry="2" transform="rotate(0 217.9 15.6)" fill="#fff" stroke="#242424" stroke-width="2"/><text x="24" y="120" class="zee">NOORDZEE</text><g id="mapPin"><circle class="ping" r="9" fill="none" stroke="#FFA654" stroke-width="3"/><circle r="7" fill="#FFA654" stroke="#242424" stroke-width="2.5"/></g></svg>
+    <p class="kaartcap">Een kwart van Nederland ligt lager dan de zee. <span class="tip bron" tabindex="0" data-tip="Planbureau voor de Leefomgeving, 2010: 26 procent van Nederland ligt onder zeeniveau, 59 procent kan overstromen.">bron</span></p>
+  </section>
+
+  <section class="panel" id="p-tijd">
+    <span class="meta">1200 → nu</span>
+    <h2><svg aria-hidden="true"><use href="#i-tijd"/></svg>Tijdreis</h2>
+    <p class="sub">Hoe werd dit land droog? Lees van boven naar beneden.</p>
+    <div class="tl">
+      <div class="axis"></div>
+      <ol>
+        <li><b>Rond 1200</b><p>Mensen bouwen een <span class="tip term" tabindex="0" data-tip="Een lange wal van aarde en klei die het water tegenhoudt.">dijk</span> om het land. De zee kan er niet meer bij. Dit stuk heet <span class="tip term" tabindex="0" data-tip="Een stuk land met een dijk eromheen. Het water wordt eruit gepompt, zodat het land droog blijft.">Polder</span> Walcheren.</p><span class="tip bron" tabindex="0" data-tip="Bron: kaart Provincie Zeeland">bron</span></li>
+        <li><b>1600</b><p>Regen blijft in de polder staan. Molens draaien op de wind en pompen het water over de dijk.</p><span class="tip bron" tabindex="0" data-tip="Bron: Molendatabase (placeholder)">bron</span></li>
+        <li><b>1929</b><p>Er komt een <span class="tip term" tabindex="0" data-tip="Een gebouw met grote pompen. Het pompt water uit de polder naar een kanaal, rivier of de zee.">gemaal</span>, een pomp met een motor. Gemaal Boreel. Het doet het werk van veel molens tegelijk.</p><span class="tip bron" tabindex="0" data-tip="Bron: Gemalenstichting">bron</span></li>
+        <li><b>1953</b><p>Een zware storm. Bij veel dorpen in Zeeland breekt de dijk. Hier in Middelburg blijft het droog.</p><span class="tip bron" tabindex="0" data-tip="Bron: Rijkswaterstaat, Vlissingen">bron</span></li>
+        <li><b>Nu</b><p>Gemaal Boreel draait nog steeds. Waterschap Scheldestromen let erop, dag en nacht.</p><span class="tip bron" tabindex="0" data-tip="Bron: waterschapsregister">bron</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="panel" id="p-buurt">
+    <span class="meta">binnen 10 km</span>
+    <h2><svg aria-hidden="true"><use href="#i-buurt"/></svg>Gemalen in de buurt</h2>
+    <p class="sub">Klik op een stip of een naam. Dan zie je wat het doet en of het nog werkt.</p>
+    <div class="buurt">
+      <div class="map" id="map"><span class="you" style="left:48%;top:50%" title="dit adres"></span></div>
+      <div><ul id="list"></ul><div id="detail">Kies een gemaal of molen.</div></div>
+    </div>
+  </section>
+
+  <!-- beeldtegels: getekende placeholders. In de echte app het echte beeld via IIIF bij de bron. -->
+  <figure class="panel img" id="i-asselijn">
+    <div class="ph"><span class="badge">placeholder</span><img src="img/dijkherstel.jpg" alt="Mannen met schoppen herstellen een doorgebroken dijk, met ondergelopen land en kale bomen op de achtergrond" loading="lazy"></div>
+    <figcaption class="cap"><b>Dijkherstel na een doorbraak</b>foto · jaar en bron nog invullen</figcaption>
+  </figure>
+
+  <figure class="panel img" id="i-molen">
+    <div class="ph"><span class="badge">placeholder</span><img src="img/molen-tekening.jpg" alt="Pentekening van een stellingmolen met wolken erachter" loading="lazy"></div>
+    <figcaption class="cap"><b>Molen</b>pentekening · bron nog invullen</figcaption>
+  </figure>
+
+  <figure class="panel img" id="i-elisabeth">
+    <div class="ph"><span class="badge">placeholder</span><img src="img/stadsgezicht-molen.jpg" alt="Geschilderd stadsgezicht aan het water met huizen, een rokende schoorsteen en een grote molen" loading="lazy"></div>
+    <figcaption class="cap"><b>Stadsgezicht met molen</b>schilderij · maker en bron nog invullen</figcaption>
+  </figure>
+
+  <figure class="panel img" id="i-prent">
+    <div class="ph"><span class="badge">placeholder · beeld via IIIF</span>
+      <svg class="art" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <pattern id="hp1" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><line x1="0" y1="0" x2="0" y2="6" stroke="#242424" stroke-width=".8"/></pattern>
+          <pattern id="hp2" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="4" y2="2" stroke="#242424" stroke-width="1"/></pattern>
+        </defs>
+        <rect width="400" height="260" fill="#f2ece2"/>
+        <rect width="400" height="120" fill="url(#hp1)" opacity=".35"/>
+        <path d="M0 160 L120 150 L140 168 L170 168 L190 146 L400 138 L400 150 L196 158 L176 178 L134 178 L116 160 L0 172Z" fill="#242424"/>
+        <rect y="172" width="400" height="88" fill="url(#hp2)" opacity=".8"/>
+        <g fill="#f2ece2" stroke="#242424" stroke-width="2">
+          <path d="M40 182 v-24 l18 -16 l18 16 v24"/><path d="M230 186 v-18 l14 -12 l14 12 v18"/><path d="M300 180 v-26 l20 -18 l20 18 v26"/>
+        </g>
+        <path d="M150 200 q10 -10 20 0 q10 -10 20 0" stroke="#242424" stroke-width="1.5" fill="none"/>
+        <rect x="6" y="6" width="388" height="248" fill="none" stroke="#242424" stroke-width="2"/>
+      </svg></div>
+    <figcaption class="cap"><b>Watersnood na dijkdoorbraken bij de grote rivieren</b>prent, 1740-1741 · Rijksmuseum</figcaption>
+  </figure>
+
+  <figure class="panel img" id="i-boreel">
+    <div class="ph"><span class="badge">placeholder · foto</span>
+      <svg class="art" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><linearGradient id="gb1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8aa283"/><stop offset="1" stop-color="#e8e2d6"/></linearGradient></defs>
+        <rect width="400" height="260" fill="url(#gb1)"/>
+        <rect y="200" width="400" height="60" fill="#0087D8" opacity=".85"/>
+        <rect x="120" y="96" width="170" height="104" fill="#9b5a3c"/>
+        <polygon points="110,98 300,98 205,52" fill="#242424"/>
+        <rect x="262" y="40" width="14" height="50" fill="#7a432c"/>
+        <g fill="#f4efeb"><path d="M146 186 v-46 a12 12 0 0 1 24 0 v46z"/><path d="M193 186 v-46 a12 12 0 0 1 24 0 v46z"/><path d="M240 186 v-46 a12 12 0 0 1 24 0 v46z"/></g>
+        <rect x="170" y="72" width="70" height="14" fill="#f4efeb"/>
+        <path d="M290 192 h40 v8 h-40z" fill="#242424"/>
+        <path d="M330 200 q14 8 28 0 q14 8 28 0 M300 214 q14 8 28 0 q14 8 28 0" stroke="#fff" stroke-width="2.5" fill="none" opacity=".8"/>
+      </svg></div>
+    <figcaption class="cap"><b>Gemaal Boreel, 1929</b>RCE beeldbank · Gemalenstichting</figcaption>
+  </figure>
+
+</div></div>
+
+<script>
+(function(){
+  const world=document.getElementById('world'), canvas=document.getElementById('canvas');
+  const navBtns=document.querySelectorAll('#nav button[data-go]');
+  const panels=[...document.querySelectorAll('#canvas > .panel')];
+
+  const PLACES={'middelburg':[26.6,254.4],'beemster':[123.4,128.4],'nieuwerkerk':[55.4,236.4],'lemmer':[181.7,93.6]};
+  const huis=document.getElementById('p-huis'), info=document.getElementById('p-info');
+  function rectOf(key){
+    const els=key==='huis'?[huis,info]:[document.getElementById('p-'+key)];
+    const l=Math.min(...els.map(e=>e.offsetLeft)), t=Math.min(...els.map(e=>e.offsetTop));
+    const r=Math.max(...els.map(e=>e.offsetLeft+e.offsetWidth)), b=Math.max(...els.map(e=>e.offsetTop+e.offsetHeight));
+    return {l,t,r,b};
+  }
+  function go(key,smooth=true){
+    const R=rectOf(key), vw=world.clientWidth, vh=world.clientHeight;
+    const left=(R.l+R.r)/2-vw/2;
+    const top= key==='tijd' ? R.t-90 : (R.t+R.b)/2-vh/2;   // tijdreis begint bovenin, de rest in het midden
+    world.scrollTo({left,top,behavior:smooth?'smooth':'auto'});
+  }
+  function goPanel(el){ world.scrollTo({left:el.offsetLeft+el.offsetWidth/2-world.clientWidth/2,top:el.offsetTop+el.offsetHeight/2-world.clientHeight/2,behavior:'smooth'}); }
+
+  let mode='info';
+  function setMode(m){
+    mode=m; info.dataset.mode=m;
+    info.querySelector('.m-info').setAttribute('aria-hidden',m!=='info');
+    info.querySelector('.m-risk').setAttribute('aria-hidden',m!=='risk');
+    huis.classList.toggle('risk',m==='risk');
+    document.getElementById('huisTag').textContent=m==='risk'?'HUISKAMER · als het misgaat':'HUISKAMER · vandaag';
+    calc(); active();
+  }
+  navBtns.forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.mode) setMode(b.dataset.mode); go(b.dataset.go); }));
+
+  function active(){
+    const cx=world.scrollLeft+world.clientWidth/2, cy=world.scrollTop+world.clientHeight/2;
+    let best=null,bd=1e12;
+    ['huis','tijd','buurt'].forEach(k=>{ const R=rectOf(k); const dx=Math.max(R.l-cx,0,cx-R.r), dy=Math.max(R.t-cy,0,cy-R.b); const d=Math.hypot(dx,dy); if(d<bd){bd=d;best=k;} });
+    navBtns.forEach(b=>b.setAttribute('aria-current', b.dataset.go===best && (!b.dataset.mode || b.dataset.mode===mode)));
+  }
+
+  const mini=document.getElementById('mini');
+  const colors={'p-huis':'#9fcdee','p-info':'#d9d4cf','p-map':'#5fb4ec','p-tijd':'#D28AE1','p-buurt':'#617E5A'};
+  const sx=140/canvas.offsetWidth, sy=140/canvas.offsetHeight;
+  panels.forEach(p=>{ const i=document.createElement('i'); i.style.cssText=`left:${p.offsetLeft*sx}px;top:${p.offsetTop*sy}px;width:${p.offsetWidth*sx}px;height:${p.offsetHeight*sy}px;background:${colors[p.id]||'#e6e0da'}`; i.addEventListener('click',()=>goPanel(p)); mini.appendChild(i); });
+  const view=document.createElement('div'); view.className='view'; mini.appendChild(view);
+  function drawView(){ view.style.cssText=`left:${world.scrollLeft*sx}px;top:${world.scrollTop*sy}px;width:${world.clientWidth*sx}px;height:${world.clientHeight*sy}px`; }
+  world.addEventListener('scroll',()=>{drawView();active();}); drawView();
+
+  const start=document.getElementById('start'), q=document.getElementById('q');
+  const layers=[...document.querySelectorAll('.land .lyr')];
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function begin(adres){
+    adres=adres||'Adres placeholder';
+    document.getElementById('whereTxt').textContent=adres;
+    document.getElementById('huisAdres').textContent=adres;
+    const key=Object.keys(PLACES).find(k=>adres.toLowerCase().includes(k))||'middelburg';
+    document.getElementById('mapPin').setAttribute('transform',`translate(${PLACES[key].join(' ')})`);
+    setMode('info'); go('huis',false);
+    if(reduce){ start.classList.add('hide'); active(); return; }
+    world.classList.add('away');
+    start.classList.add('going');
+    // duik het landschap in, de voorste laag het snelst
+    layers.forEach((l,i)=>{
+      l.style.transformOrigin='56% 80%';
+      l.style.transition='transform 1.2s cubic-bezier(.55,0,.35,1) .25s';
+      l.style.transform=`scale(${[1.3,2,3][i]}) translateY(${[4,10,18][i]}%)`;
+    });
+    setTimeout(()=>{ start.classList.add('hide'); world.classList.remove('away'); active(); },1150);
+  }
+  // cursor volgt de tekst
+  const caret=document.querySelector('.caret'), mirror=document.querySelector('.mirror');
+  function moveCaret(){ mirror.textContent=q.value; caret.style.left=Math.min(mirror.offsetWidth+1,q.clientWidth-4)+'px'; caret.style.animation='none'; caret.offsetWidth; caret.style.animation=''; }
+  q.addEventListener('input',moveCaret); moveCaret();
+
+  // parallax op het landschapje
+  start.addEventListener('pointermove',e=>{
+    if(start.classList.contains('going')) return;
+    const dx=e.clientX/innerWidth-.5;
+    document.querySelectorAll('.land .lyr').forEach(l=>l.style.transform=`translateX(${dx*-24*l.dataset.p}px)`);
+  });
+  document.getElementById('form').addEventListener('submit',e=>{e.preventDefault();begin(q.value.trim());});
+  document.querySelectorAll('.defaults button').forEach(b=>b.addEventListener('click',()=>begin(b.dataset.q)));
+  document.getElementById('back').addEventListener('click',()=>{
+    layers.forEach(l=>{ l.style.transition='none'; l.style.transform=''; });
+    start.classList.remove('going'); start.classList.remove('hide');
+    q.value=''; moveCaret(); q.focus();
+  });
+  document.getElementById('mapPin').setAttribute('transform',`translate(${PLACES.middelburg.join(' ')})`);
+  go('huis',false);
+
+  const state={regen:80.9,gemaal:844,dijk:0}, area=3.09;
+  document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+    b.parentElement.querySelectorAll('button').forEach(o=>o.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true'); state[b.dataset.g]=+b.dataset.v; calc();
+  }));
+  const nl=n=>n.toFixed(1).replace('.',',');
+  function calc(){
+    const mm=state.regen, cap=state.gemaal, m3=mm/1000*area*1e6, uren=cap?m3/(cap*60):0;
+    const peil=Math.min(2.4, state.dijk+(cap?Math.max(0,(mm-393)/1000):mm/1000)), pct=mode==='risk'?Math.max(6,peil/2.4*100):4;
+    document.getElementById('water').style.height=pct+'%';
+    document.getElementById('line').style.bottom=pct+'%';
+    document.getElementById('lineTxt').textContent=nl(peil)+' m';
+    let txt;
+    if(state.dijk>=2) txt=`De dijk breekt. Het water komt tot <b>${nl(peil)} meter</b> in de huiskamer. Dat is tot aan de bank of hoger. Een gemaal helpt dan niet meer.`;
+    else if(!cap) txt=`Het gemaal valt uit. Er valt ${String(mm).replace(".",",")} mm regen en niets pompt het weg. Het water in de polder stijgt. In de huiskamer staat het op <b>${nl(peil)} meter</b>.`;
+    else txt=`Er valt ${String(mm).replace(".",",")} <span class="tip term" tabindex="0" data-tip="1 millimeter regen betekent 1 liter water op elke vierkante meter grond.">mm</span> regen. Gemaal Boreel pompt ${cap} <span class="tip term" tabindex="0" data-tip="Een kubieke meter. Een bak van 1 bij 1 bij 1 meter. Daar past 1000 liter water in.">kuub</span> per minuut. Na ongeveer <b>${nl(uren)} uur</b> is alles weg. Jullie voeten blijven droog.`;
+    document.getElementById('out').innerHTML=txt+`<small><span class="tip bron" tabindex="0" data-tip="Dit is een rekensom, geen voorspelling. Regen: KNMI, weerstation Vlissingen. Pompkracht: waterschapsregister. De hoogte bij een dijkbreuk is nog een placeholder.">hoe rekenen we dit?</span></small>`;
+  }
+  calc();
+
+  const gem=[
+    {n:'Gemaal Boreel',d:'1,1 km',s:'werkt nu mee',x:65,y:25,t:'Dit gemaal pompt elke dag water uit jullie polder. Het is gebouwd in 1929 en draait nog steeds.',b:'waterschapsregister · Gemalenstichting'},
+    {n:'Spuisluis bij de Stadsschuur',d:'0,6 km',s:'werkt nu mee',x:30,y:30,t:'Een <span class="tip term" tabindex="0" data-tip="Een soort deur in het water. Gaat hij open, dan kan water of een boot erdoor.">sluis</span> die water doorlaat als het nodig is. Staat in het register van het waterschap.',b:'waterschapsregister'},
+    {n:'Molen placeholder',d:'3,2 km',s:'werkte vroeger',x:20,y:72,t:'Deze molen pompte vroeger water weg. Nu is het een museum. Hij draait soms nog, maar niet voor de polder.',b:'Molendatabase'},
+    {n:'Sluis Veere',d:'5,8 km',s:'onbekend',x:70,y:70,t:'We weten niet zeker of deze sluis nog meedoet. Daar is geen bron voor gevonden.',b:'geen bron'}
+  ];
+  const list=document.getElementById('list'), map=document.getElementById('map'), detail=document.getElementById('detail');
+  gem.forEach((g,i)=>{
+    const li=document.createElement('li'); li.innerHTML=`<button data-i="${i}" aria-pressed="false"><span><b>${g.n}</b> · ${g.d}</span><span class="pill">${g.s}</span></button>`; list.appendChild(li);
+    const dot=document.createElement('button'); dot.dataset.i=i; dot.setAttribute('aria-label',g.n); dot.setAttribute('aria-pressed','false'); dot.style.cssText=`left:${g.x}%;top:${g.y}%`; map.appendChild(dot);
+  });
+  function pick(i){
+    document.querySelectorAll('#p-buurt button[data-i]').forEach(b=>b.setAttribute('aria-pressed', b.dataset.i==i));
+    const g=gem[i]; detail.innerHTML=`<b>${g.n}</b>${g.t}<small>status · ${g.s} &nbsp; <span class="tip bron" tabindex="0" data-tip="Bron: ${g.b}">bron</span></small>`;
+  }
+  document.querySelectorAll('#p-buurt button[data-i]').forEach(b=>b.addEventListener('click',()=>pick(b.dataset.i)));
+  // tooltips: hover, focus en tik
+  const tt=document.createElement('div'); tt.id='tooltip'; tt.setAttribute('role','tooltip'); document.body.appendChild(tt);
+  let cur=null;
+  function show(el){
+    cur=el; tt.textContent=el.dataset.tip; tt.classList.add('show'); el.setAttribute('aria-describedby','tooltip');
+    const r=el.getBoundingClientRect(), w=tt.offsetWidth, h=tt.offsetHeight;
+    let x=Math.min(Math.max(8,r.left+r.width/2-w/2),innerWidth-w-8), y=r.top-h-10;
+    if(y<8) y=r.bottom+10;
+    tt.style.left=x+'px'; tt.style.top=y+'px';
+  }
+  function hide(){ if(cur) cur.removeAttribute('aria-describedby'); cur=null; tt.classList.remove('show'); }
+  document.addEventListener('mouseover',e=>{const t=e.target.closest('.tip'); if(t) show(t);});
+  document.addEventListener('mouseout',e=>{ if(e.target.closest('.tip')) hide(); });
+  document.addEventListener('focusin',e=>{const t=e.target.closest('.tip'); t?show(t):hide();});
+  document.addEventListener('click',e=>{const t=e.target.closest('.tip'); if(t){ cur===t?hide():show(t); }});
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') hide(); });
+  world.addEventListener('scroll',hide);
+})();
+</script>
+</body>
+</html>
