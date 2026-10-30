@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { CircleMarker, Tooltip } from "react-leaflet";
 import { Icon } from "./Icons";
 import { Tip } from "./Tip";
 import LeafletMap from "./leaflet-map";
 import type { LocatieserverDoc } from "../lib/locatieserver";
-import { featureUrl, useNear, type Gemaal, type NearFeature } from "../lib/landschapsatlas";
+import { featureUrl, useNear as useNearLandschapsatlas } from "../lib/landschapsatlas";
+import { itemUrl, useNear } from "../lib/imwa";
+import { combineGemalen, webUrl, MATCH_MAX_M, type CombinedGemaal } from "../lib/linkset";
 
 interface Props {
   /* undefined until the address lookup is done */
@@ -12,7 +14,8 @@ interface Props {
 }
 
 const RADIUS_M = 5000;
-const PER_LAYER = 5;
+// number of gemalen in the list and on the map
+const MAX_SHOWN = 5;
 // used until the address has a coordinate
 const FALLBACK: [number, number] = [51.4987105, 3.6138756];
 // Only photos from the RCE image bank. foto_thumb also points to gemalen.nl
@@ -36,32 +39,71 @@ interface Poi {
   distance: number;
   status: string;
   text: string;
-  /* the gemalen.nl page, if any */
-  source?: string;
-  /* the raw WFS feature as GeoJSON */
-  metadata: string;
+  /* a web page about the object, if any */
+  source?: { href: string; tip: string };
+  /* one page with all fields per source the gemaal comes from */
+  metadata: { label: string; href: string; tip: string }[];
+  /* from the Landschapsatlas */
   photo?: { src: string; tip: string };
 }
 
-function fromGemaal(f: NearFeature<Gemaal>): Poi {
-  const p = f.properties;
-  // the WFS uses " " for empty fields
-  const year = p.stichtingsjaar?.trim();
-  const outlet = p.lozend_op?.trim();
-  const since = year ? `, gesticht in ${year}` : "";
+/* A gemaal from IMWA, the Landschapsatlas or both. IMWA gives the current
+   register (position, function, capacity, water board), the Landschapsatlas
+   the history (founding year, drive, status, gemalen.nl page, photo). */
+function fromCombined(c: CombinedGemaal): Poi {
+  const im = c.imwa?.properties;
+  const la = c.atlas?.properties;
+  // the position from the register when we have it
+  const [lon, lat] = (c.imwa ?? c.atlas)!.geometry.coordinates;
+  const name = im?.naam?.trim() || la?.naam_gemaal?.trim() || "Gemaal zonder naam";
+  // the Landschapsatlas uses " " for empty fields
+  const year = la?.stichtingsjaar?.trim();
+  const driveThen = la?.aandrijving_oorspronkelijk?.trim().toLowerCase();
+  const driveNow = la?.aandrijving_huidig?.trim().toLowerCase();
+  const drive = driveThen && driveNow && driveThen !== driveNow ? `eerst ${driveThen}, nu ${driveNow}` : driveNow || driveThen;
+  const fn = im?.functiegemaal && im.functiegemaal !== "Onbekend" ? im.functiegemaal : la?.functie?.trim();
+  const outlet = la?.lozend_op?.trim();
+  const parts = [
+    year ? `Gesticht in ${year}.` : "",
+    fn ? `Functie: ${fn.toLowerCase()}.` : "",
+    im?.maximalecapaciteit != null ? `Pompt maximaal ${im.maximalecapaciteit.toLocaleString("nl-NL")} m³ per minuut.` : "",
+    outlet ? `Loost op ${outlet}.` : "",
+    drive ? `Aandrijving: ${drive}.` : "",
+    im?.waterbeheerder ? `Beheerd door ${im.waterbeheerder}.` : "",
+  ];
+
+  const gemalenNl = webUrl(la?.infolink);
+  const registerUrl = webUrl(im?.url);
+  const linked = c.linkDistance !== undefined ? ` Gekoppeld aan het register van de waterschappen op naam en afstand (${Math.round(c.linkDistance)} m).` : "";
+  const source = gemalenNl
+    ? { href: gemalenNl, tip: `Bron: Nederlandse Gemalenstichting (gemalen.nl), via de RCE Landschapsatlas.${linked}` }
+    : registerUrl
+      ? { href: registerUrl, tip: "Bron: de website bij dit gemaal in het register van de waterschappen" }
+      : undefined;
+
+  const metadata: Poi["metadata"] = [];
+  if (c.imwa) {
+    metadata.push({ label: "imwa", href: itemUrl("gemaal", c.imwa.id, "html"), tip: "Alle gegevens van dit gemaal uit IMWA, het register van de waterschappen (PDOK)" });
+  }
+  if (c.atlas) {
+    metadata.push({ label: "rce", href: featureUrl("landschapsatlas:gemalen", c.atlas.id), tip: "Alle gegevens van dit gemaal uit de RCE Landschapsatlas (WFS, GeoJSON)" });
+  }
+
   return {
-    id: f.id,
-    name: p.naam_gemaal,
-    lat: f.geometry.coordinates[1],
-    lon: f.geometry.coordinates[0],
-    distance: f.distance,
-    status: p.status || "onbekend",
-    text: `${p.functie}${since}. Loost op ${outlet || "onbekend"}.`,
-    source: p.infolink || undefined,
-    metadata: featureUrl("landschapsatlas:gemalen", f.id),
-    photo: isAllowedPhoto(p.foto_thumb)
-      ? { src: p.foto_thumb, tip: p.fotograaf ? `${p.naam_gemaal} · foto: ${p.fotograaf}` : p.naam_gemaal }
-      : undefined,
+    id: c.id,
+    name,
+    lat,
+    lon,
+    distance: c.distance,
+    // the Landschapsatlas says whether it still works ("In bedrijf", "Gesloopt"); IMWA only "gerealiseerd"
+    status: la?.status?.trim() || im?.statusobject || "onbekend",
+    text: parts.filter(Boolean).join(" ") || "Geen verdere gegevens.",
+    source,
+    metadata,
+    photo:
+      la && isAllowedPhoto(la.foto_thumb)
+        ? { src: la.foto_thumb, tip: la.fotograaf ? `${la.naam_gemaal} · foto: ${la.fotograaf}` : la.naam_gemaal }
+        : undefined,
   };
 }
 
@@ -81,13 +123,25 @@ export function BuurtPanel({ place }: Props) {
   const here = parsePoint(place?.centroide_ll);
   const [lat, lon] = here ?? [undefined, undefined];
 
-  const gemalen = useNear({ typeName: "landschapsatlas:gemalen", lat, lon, radius: RADIUS_M, limit: PER_LAYER });
+  // Both sources in parallel, everything in the circle: combining needs them
+  // all, we show the nearest MAX_SHOWN of the union.
+  const imwa = useNear({ collection: "gemaal", lat, lon, radius: RADIUS_M, limit: 1000 });
+  // a bit wider, so IMWA gemalen near the edge can still be linked
+  const atlas = useNearLandschapsatlas({
+    typeName: "landschapsatlas:gemalen",
+    lat,
+    lon,
+    radius: RADIUS_M + MATCH_MAX_M,
+    limit: 1000,
+  });
 
-  const pois = [...(gemalen.data ?? []).map(fromGemaal)].sort(
-    (a, b) => a.distance - b.distance,
-  );
-  const loading = gemalen.isLoading;
-  const failed = gemalen.isError;
+  // wait for both, so the list doesn't reshuffle; a failed source counts as empty
+  const loading = imwa.isLoading || atlas.isLoading;
+  const failed = imwa.isError && atlas.isError;
+  const partial = imwa.isError !== atlas.isError;
+  const pois = loading
+    ? []
+    : combineGemalen(imwa.data ?? [], atlas.data ?? [], RADIUS_M).slice(0, MAX_SHOWN).map(fromCombined);
 
   const [picked, setPicked] = useState<string | null>(null);
   const g = pois.find((p) => p.id === picked) ?? null;
@@ -135,7 +189,8 @@ export function BuurtPanel({ place }: Props) {
         <div className="side">
           <ul id="list">
             {loading && <li>Gemalen en molens zoeken…</li>}
-            {failed && <li>De Landschapsatlas gaf geen antwoord. Probeer het later nog eens.</li>}
+            {failed && <li>De bronnen gaven geen antwoord. Probeer het later nog eens.</li>}
+            {partial && <li>Een van de bronnen gaf geen antwoord, dus de lijst is misschien niet compleet.</li>}
             {!loading && !failed && here && pois.length === 0 && <li>Geen gemalen of molens binnen {RADIUS_M / 1000} km.</li>}
             {pois.map((p) => (
               <li key={p.id}>
@@ -169,13 +224,18 @@ export function BuurtPanel({ place }: Props) {
                   <small>
                     status · {g.status} &nbsp;{" "}
                     {g.source && (
-                      <Tip kind="bron" tip="Bron: Nederlandse Gemalenstichting, via de RCE Landschapsatlas">
-                        <a href={g.source} target="_blank" rel="noreferrer">bron</a>
+                      <Tip kind="bron" tip={g.source.tip}>
+                        <a href={g.source.href} target="_blank" rel="noreferrer">bron</a>
                       </Tip>
                     )}{" "}
-                    <Tip kind="bron" tip="Alle gegevens van dit gemaal zoals de RCE Landschapsatlas ze levert (WFS, GeoJSON)">
-                      <a href={g.metadata} target="_blank" rel="noreferrer">metadata</a>
-                    </Tip>
+                    {g.metadata.map((m) => (
+                      <Fragment key={m.label}>
+                        {" "}
+                        <Tip kind="bron" tip={m.tip}>
+                          <a href={m.href} target="_blank" rel="noreferrer">metadata · {m.label}</a>
+                        </Tip>
+                      </Fragment>
+                    ))}
                   </small>
                 </div>
               </>
