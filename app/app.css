@@ -135,7 +135,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #nav .sep{width:1px;background:#444;margin:10px 3px}
 
 #mini{position:fixed;z-index:40;right:16px;bottom:16px;width:140px;height:140px;background:var(--dark);border:1.5px solid var(--dark);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
-#mini i{position:absolute;border-radius:3px;opacity:.75;cursor:pointer}
+#mini i{position:absolute;border-radius:3px;opacity:.75;cursor:pointer;border:1px solid var(--dark);box-sizing:border-box}
 #mini i:hover{opacity:1}
 #mini .view{position:absolute;border:2px solid #fff;border-radius:3px;pointer-events:none}
 
