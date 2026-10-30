@@ -52,7 +52,7 @@ export function HuiskamerPanel({ place, mode, scenario }: { place: PlaceData; mo
         <div className="line" id="line" style={{ bottom: `${r.percent}%` }}>
           waterlijn <b id="lineTxt">{nl(r.level)} m</b>
         </div>
-        <span className="tag" id="huisTag">{risk ? "HUISKAMER · als het misgaat" : "HUISKAMER · vandaag"}</span>
+        <span className="tag" id="huisTag">{risk ? "WELKOM THUIS · als het misgaat" : "WELKOM THUIS"}</span>
         <Icon name="huis" className="icon" />
         <span className="meta">
           <Tip kind="term" tip={TERMS.NAP}>

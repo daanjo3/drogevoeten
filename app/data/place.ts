@@ -29,6 +29,10 @@ export interface PlaceData {
   /* pump capacity in m3/min (IMWA) */
   pumpCapacity: number;
   pumpName: string;
+  /* the water board that owns the pump */
+  waterBoard: string;
+  /* the year the land was drained, roughly */
+  drainedYear: number;
   /* area of the water level area in km2 (IMWA) */
   areaKm2: number;
   /* rain options in mm (KNMI, Vlissingen) */
@@ -43,6 +47,8 @@ export const MIDDELBURG: PlaceData = {
   waterArea: "GPG437",
   pumpCapacity: 844,
   pumpName: "Boreel",
+  waterBoard: "Scheldestromen",
+  drainedYear: 1200,
   areaKm2: 3.09,
   rain: { normal: 10, heavy: 31.8, record: 80.9 },
   timeline: [

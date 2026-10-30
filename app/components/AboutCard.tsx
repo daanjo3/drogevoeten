@@ -20,31 +20,34 @@ export function AboutCard({ onClose }: { onClose: () => void }) {
         </button>
         <h2 id="aboutTitle">
           <Icon name="info" />
-          Waar komt dit vandaan?
+          Alles hier heeft een bron
         </h2>
-        <p className="lead">Alles wat je hier ziet komt uit open data. Elk feit heeft een bron. Weten we iets niet, dan zeggen we dat.</p>
+        <p className="lead">Elk feit op deze pagina komt uit open data. Weten we iets niet, dan zeggen we dat.</p>
 
-        <h3>Hoe het werkt</h3>
+        <h3>Zo werkt het</h3>
         <p>
-          Je typt een adres. Wij zoeken op welk stuk land dat ligt, hoe hoog het ligt en welk gemaal het droog houdt. Die gegevens
-          staan bij verschillende organisaties. Ze zijn aan elkaar gekoppeld als linked data, zodat de computer ze bij elkaar kan
-          zoeken.
+          Je typt een adres. Wij zoeken op in welke polder dat ligt, hoe hoog je vloer ligt en welk gemaal het water wegpompt. Die
+          gegevens komen van verschillende organisaties. Wij hebben ze aan elkaar gekoppeld met linked data. Zo weet de computer
+          dat Gemaal Boreel in het ene bestand hetzelfde gemaal is als in het andere. Wat we zelf koppelden, zetten we weer open
+          online.
         </p>
 
         <h3>Bronnen</h3>
         <ul>
-          <li>Hoogte van de vloer: Actueel Hoogtebestand Nederland (AHN).</li>
-          <li>Gemalen, sluizen en peilgebieden: waterschapsregister (IMWA).</li>
-          <li>Regen: KNMI, weerstation Vlissingen.</li>
-          <li>Kaart en adressen: PDOK.</li>
-          <li>Beelden: Rijksmuseum en RCE beeldbank, via IIIF.</li>
-          <li>Molens: Molendatabase.</li>
+          <li>Hoogte van de vloer: Actueel Hoogtebestand Nederland (AHN)</li>
+          <li>Gemalen, sluizen en peilgebieden: waterschapsregister (IMWA)</li>
+          <li>Overstromingen: LIWO, Rijkswaterstaat</li>
+          <li>Jaartallen van dijken en polders: Provincie Zeeland</li>
+          <li>Regen: KNMI, weerstation Vlissingen</li>
+          <li>Adressen: PDOK</li>
+          <li>Molens: Molendatabase</li>
+          <li>Beelden: Rijksmuseum en RCE beeldbank</li>
         </ul>
 
-        <h3>Nog niet echt</h3>
+        <h3>Nog niet af</h3>
         <p>
-          De waterhoogte bij een dijkbreuk is een rekensom, geen voorspelling. De tekst per adres en een paar beelden zijn nog
-          placeholders. Dit is gebouwd tijdens HackaLOD 2026.
+          De tijd om het water weg te pompen is een rekensom met echte getallen, geen voorspelling. De waterhoogte bij een
+          dijkbreuk en een paar teksten en beelden zijn nog voorbeelden. Gebouwd in 24 uur tijdens HackaLOD 2026.
         </p>
       </div>
     </div>

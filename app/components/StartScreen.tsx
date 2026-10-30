@@ -40,10 +40,11 @@ export function StartScreen({
         <circle cx="12" cy="10" r="2.6" fill="#242424" />
       </svg>
       <div className="startbox">
-        <h1>Wie houdt jullie voeten droog?</h1>
+        <h1>Wie houdt jouw voeten droog?</h1>
         <p className="lead">
-          Een kwart van ons land ligt lager dan de zee. Iemand houdt dat land elke dag droog. Typ een adres, van de school of van
-          je eigen huis. Dan laten we zien wie dat is.
+          Een kwart van Nederland ligt lager dan de zee. Dat je hier droog zit, gaat niet vanzelf. Al eeuwen pompen molens en
+          gemalen het water weg, en houden dijken de zee tegen. Typ je adres. Dan zie je wie jouw plek droog houdt, en wat er
+          gebeurt als het misgaat.
         </p>
         <SearchBar onSearch={onSearch} handle={searchHandle} />
         <div className="defaults">

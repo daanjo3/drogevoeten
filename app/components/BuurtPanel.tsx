@@ -91,9 +91,12 @@ export function BuurtPanel({ place }: Props) {
       <span className="meta">binnen {RADIUS_M / 1000} km</span>
       <h2>
         <Icon name="buurt" />
-        Gemalen in de buurt
+        Zij houden je voeten droog
       </h2>
-      <p className="lead">Klik op een stip of een naam. Dan zie je wat het doet en of het nog werkt.</p>
+      <p className="lead">
+        Een gemaal is een gebouw met grote pompen. Het pompt water uit de polder naar de rivier of de zee. Vroeger deden molens dat,
+        op de wind. Klik op een stip en zie wie hier nog meedoet.
+      </p>
       <div className="buurt">
         <div className="map" id="map">
           <LeafletMap center={here ?? FALLBACK} zoom={13} style={{}}>

@@ -1,6 +1,6 @@
 import type { Mode, PlaceData } from "../data/place";
 import { TERMS } from "../data/place";
-import type { Scenario } from "../lib/scenario";
+import { nl, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
 import { ScenarioControls } from "./ScenarioControls";
 import { Tip } from "./Tip";
@@ -32,23 +32,25 @@ export function InfoPanel({
         <h2 id="huisAdres" style={{ paddingRight: 120 }}>
           {place.address}
         </h2>
-        <p>Dit is de huiskamer op dit adres. De vloer ligt 2 meter boven de zee. Dat klinkt veilig. Maar het land eromheen ligt lager.</p>
+        <p>
+          Je voordeur ligt {nl(Math.abs(place.nap))} meter {place.nap >= 0 ? "boven" : "onder"} de zee.
+        </p>
         <p>
           Elke dag pompt{" "}
           <Tip kind="term" tip={TERMS.gemaal}>
             gemaal
           </Tip>{" "}
-          {place.pumpName} het water weg. Het gemaal is van{" "}
+          {place.pumpName} het water uit jouw{" "}
+          <Tip kind="term" tip={TERMS.polder}>
+            polder
+          </Tip>
+          . Dat gemaal is van{" "}
           <Tip kind="term" tip={TERMS.waterschap}>
             waterschap
           </Tip>{" "}
-          Scheldestromen. Zonder dat gemaal loopt de{" "}
-          <Tip kind="term" tip={TERMS.polder}>
-            polder
-          </Tip>{" "}
-          langzaam vol.
+          {place.waterBoard}.
         </p>
-        <p>Dit land werd rond het jaar 1200 droog gemaakt. Kijk bij Tijdreis hoe dat ging.</p>
+        <p>Dit land werd rond {place.drainedYear} droog gemaakt. In de tijdreis zie je hoe.</p>
       </div>
       <div className="mode m-risk" aria-hidden={mode !== "risk"}>
         <button type="button" className="close" aria-label="Sluiten" onClick={onClose}>

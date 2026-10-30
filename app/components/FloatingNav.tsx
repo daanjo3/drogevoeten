@@ -44,7 +44,7 @@ export function FloatingNav({
       <span className="sep" />
       <Btn t={{ key: "huis", mode: "info" }} icon="huis" title="Huiskamer" label="hoe diep woon je?" />
       <Btn t={{ key: "tijd" }} icon="tijd" title="Tijdreis" label="hoe werd het droog?" />
-      <Btn t={{ key: "buurt" }} icon="buurt" title="Buurt" label="wie pompt hier?" />
+      <Btn t={{ key: "buurt" }} icon="buurt" title="Gemalen" label="zij houden je droog" />
       <span className="sep" />
       <Btn t={{ key: "huis", mode: "risk" }} icon="drop" title="Als het misgaat" label="speel met regen en dijk" className="risk" />
     </nav>

@@ -51,9 +51,9 @@ export function ScenarioControls({
         value={scenario.rain}
         onPick={(rain) => onChange({ ...scenario, rain })}
         options={[
-          { label: "Gewoon", sub: mm(place.rain.normal), value: place.rain.normal },
+          { label: "Gewone dag", sub: mm(place.rain.normal), value: place.rain.normal },
           { label: "Flinke bui", sub: mm(place.rain.heavy), value: place.rain.heavy },
-          { label: "Record", sub: mm(place.rain.record), value: place.rain.record },
+          { label: "Wolkbreuk", sub: mm(place.rain.record), value: place.rain.record },
         ]}
       />
       <Segment

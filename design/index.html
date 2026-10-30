@@ -340,8 +340,8 @@
   </div>
   <svg id="drop" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" fill="#FFA654" stroke="#242424" stroke-width="2"/><circle cx="12" cy="10" r="2.6" fill="#242424"/></svg>
   <div class="startbox">
-    <h1>Wie houdt jullie voeten droog?</h1>
-    <p>Een kwart van ons land ligt lager dan de zee. Iemand houdt dat land elke dag droog. Typ een adres, van de school of van je eigen huis. Dan laten we zien wie dat is.</p>
+    <h1>Wie houdt jouw voeten droog?</h1>
+    <p>Een kwart van Nederland ligt lager dan de zee. Dat je hier droog zit, gaat niet vanzelf. Al eeuwen pompen molens en gemalen het water weg, en houden dijken de zee tegen. Typ je adres. Dan zie je wie jouw plek droog houdt, en wat er gebeurt als het misgaat.</p>
     <form class="search" id="form">
       <svg width="22" height="22" aria-hidden="true"><use href="#i-pin"/></svg>
       <span class="field"><input id="q" type="text" placeholder="Straat en plaats" aria-label="Adres" autocomplete="off" autofocus><span class="caret" aria-hidden="true"></span><span class="mirror" aria-hidden="true"></span></span>
@@ -362,7 +362,7 @@
   <span class="sep"></span>
   <button data-go="huis" data-mode="info" aria-current="true"><svg aria-hidden="true"><use href="#i-huis"/></svg><span><span class="t">Huiskamer</span><span class="l">hoe diep woon je?</span></span></button>
   <button data-go="tijd"><svg aria-hidden="true"><use href="#i-tijd"/></svg><span><span class="t">Tijdreis</span><span class="l">hoe werd het droog?</span></span></button>
-  <button data-go="buurt"><svg aria-hidden="true"><use href="#i-buurt"/></svg><span><span class="t">Buurt</span><span class="l">wie pompt hier?</span></span></button>
+  <button data-go="buurt"><svg aria-hidden="true"><use href="#i-buurt"/></svg><span><span class="t">Gemalen</span><span class="l">zij houden je droog</span></span></button>
   <span class="sep"></span>
   <button data-go="huis" data-mode="risk" class="risk"><svg aria-hidden="true"><use href="#i-drop"/></svg><span><span class="t">Als het misgaat</span><span class="l">speel met regen en dijk</span></span></button>
 </nav>
@@ -374,7 +374,7 @@
     <div class="room">
       <div class="water" id="water" style="height:4%"></div>
       <div class="line" id="line" style="bottom:4%">waterlijn <b id="lineTxt">0,1 m</b></div>
-      <span class="tag" id="huisTag">HUISKAMER · vandaag</span>
+      <span class="tag" id="huisTag">WELKOM THUIS</span>
       <svg class="icon" aria-hidden="true"><use href="#i-huis"/></svg>
       <span class="meta"><span class="tip term" tabindex="0" data-tip="Normaal Amsterdams Peil. Daarmee meten we in Nederland hoe hoog iets ligt. Het is ongeveer de hoogte van de zee.">NAP</span> +2,0 m<br><span class="tip term" tabindex="0" data-tip="Een stuk land waar het water in de sloten overal even hoog moet staan.">peilgebied</span> GPG437</span>
       <div class="iframe">hier komt de 3D-huiskamer van het team</div>
@@ -386,9 +386,9 @@
     <div class="mode m-info">
     <span class="meta"><span class="tip bron" tabindex="0" data-tip="Hoogte: Actueel Hoogtebestand Nederland (AHN). Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.">bronnen</span></span>
     <h2 id="huisAdres" style="padding-right:120px">adres</h2>
-    <p>Dit is de huiskamer op dit adres. De vloer ligt 2 meter boven de zee. Dat klinkt veilig. Maar het land eromheen ligt lager.</p>
-    <p>Elke dag pompt <span class="tip term" tabindex="0" data-tip="Een gebouw met grote pompen. Het pompt water uit de polder naar een kanaal, rivier of de zee.">gemaal</span> Boreel het water weg. Het gemaal is van <span class="tip term" tabindex="0" data-tip="De organisatie die zorgt voor de dijken, sloten en gemalen in een gebied.">waterschap</span> Scheldestromen. Zonder dat gemaal loopt de <span class="tip term" tabindex="0" data-tip="Een stuk land met een dijk eromheen. Het water wordt eruit gepompt, zodat het land droog blijft.">polder</span> langzaam vol.</p>
-    <p>Dit land werd rond het jaar 1200 droog gemaakt. Kijk bij Tijdreis hoe dat ging.</p>
+    <p>Je voordeur ligt 2,0 meter boven de zee.</p>
+    <p>Elke dag pompt <span class="tip term" tabindex="0" data-tip="Een gebouw met grote pompen. Het pompt water uit de polder naar een kanaal, rivier of de zee.">gemaal</span> Boreel het water uit jouw <span class="tip term" tabindex="0" data-tip="Een stuk land met een dijk eromheen. Het water wordt eruit gepompt, zodat het land droog blijft.">polder</span>. Dat gemaal is van <span class="tip term" tabindex="0" data-tip="De organisatie die zorgt voor de dijken, sloten en gemalen in een gebied.">waterschap</span> Scheldestromen.</p>
+    <p>Dit land werd rond 1200 droog gemaakt. In de tijdreis zie je hoe.</p>
       </div>
     <div class="mode m-risk" aria-hidden="true">
     <h2><svg aria-hidden="true"><use href="#i-pomp"/></svg>Kies wat er gebeurt</h2>
@@ -396,9 +396,9 @@
     <div class="row">
       <small>regen</small>
       <div class="seg" role="group" aria-label="Regen">
-        <button data-g="regen" data-v="10" aria-pressed="false">Gewoon<span>10 mm</span></button>
+        <button data-g="regen" data-v="10" aria-pressed="false">Gewone dag<span>10 mm</span></button>
         <button data-g="regen" data-v="31.8" aria-pressed="false">Flinke bui<span>32 mm</span></button>
-        <button data-g="regen" data-v="80.9" aria-pressed="true">Record<span>81 mm</span></button>
+        <button data-g="regen" data-v="80.9" aria-pressed="true">Wolkbreuk<span>81 mm</span></button>
       </div>
     </div>
     <div class="row">
@@ -444,8 +444,8 @@
 
   <section class="panel" id="p-buurt">
     <span class="meta">binnen 10 km</span>
-    <h2><svg aria-hidden="true"><use href="#i-buurt"/></svg>Gemalen in de buurt</h2>
-    <p class="sub">Klik op een stip of een naam. Dan zie je wat het doet en of het nog werkt.</p>
+    <h2><svg aria-hidden="true"><use href="#i-buurt"/></svg>Zij houden je voeten droog</h2>
+    <p class="sub">Een gemaal is een gebouw met grote pompen. Het pompt water uit de polder naar de rivier of de zee. Vroeger deden molens dat, op de wind. Klik op een stip en zie wie hier nog meedoet.</p>
     <div class="buurt">
       <div class="map" id="map"><span class="you" style="left:48%;top:50%" title="dit adres"></span></div>
       <div><ul id="list"></ul><div id="detail">Kies een gemaal of molen.</div></div>
@@ -535,7 +535,7 @@
     info.querySelector('.m-info').setAttribute('aria-hidden',m!=='info');
     info.querySelector('.m-risk').setAttribute('aria-hidden',m!=='risk');
     huis.classList.toggle('risk',m==='risk');
-    document.getElementById('huisTag').textContent=m==='risk'?'HUISKAMER · als het misgaat':'HUISKAMER · vandaag';
+    document.getElementById('huisTag').textContent=m==='risk'?'WELKOM THUIS · als het misgaat':'WELKOM THUIS';
     calc(); active();
   }
   navBtns.forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.mode) setMode(b.dataset.mode); go(b.dataset.go); }));
