@@ -32,11 +32,12 @@ export function InfoPanel({
 
   let heightText: ReactNode;
   if (ground) {
+    const m = Math.round(Math.abs(ground.value) * 10) / 10;
     heightText = (
       <>
-        Je huiskamer ligt {nl(Math.abs(ground.value))} meter {ground.value >= 0 ? "boven" : "onder"} de{" "}
+        {m === 0 ? "Je huiskamer ligt precies op " : `Je huiskamer ligt ${nl(m)} meter ${ground.value >= 0 ? "boven" : "onder"} `}
         <Tip kind="term" tip={TERMS.zeeniveau}>
-          zee
+          zeeniveau
         </Tip>
         .
       </>

@@ -47,7 +47,9 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
       <h2>
         {nap === undefined
           ? "Hoe hoog woon je?"
-          : `Je woont ${nl(Math.abs(nap))} meter ${nap >= 0 ? "boven" : "onder"} de zee`}
+          : Math.round(Math.abs(nap) * 10) === 0
+            ? "Je woont precies op zeeniveau"
+            : `Je woont ${nl(Math.abs(nap))} meter ${nap >= 0 ? "boven" : "onder"} zeeniveau`}
       </h2>
       <div className="kaartrij">
         <svg className="nl" viewBox="0 0 512 512" aria-label="Kaart van Nederland met jouw straat" role="img">
@@ -61,12 +63,12 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
         </svg>
       </div>
       <p className="kaartcap">
-        Een kwart van Nederland ligt lager dan de{" "}
+        Een kwart van Nederland ligt onder{" "}
         <Tip kind="term" tip={TERMS.zeeniveau}>
-          zee
+          zeeniveau
         </Tip>
         . Het diepste stukje ligt bij Nieuwerkerk aan den IJssel, bijna 7 meter
-        onder de zee. Meer dan de helft van het land kan overstromen, door de zee of door de rivieren.
+        onder zeeniveau. Meer dan de helft van het land kan overstromen, door de zee of door de rivieren.
       </p>
       <p className="src">
         <Tip kind="bron" tip="Planbureau voor de Leefomgeving (2010): 26 procent van Nederland ligt onder zeeniveau, 59 procent kan overstromen. Laagste punt: Rijkswaterstaat, 6,76 meter onder NAP.">

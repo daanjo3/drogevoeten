@@ -77,7 +77,7 @@ export function AboutCard({ onClose }: { onClose: () => void }) {
           Droog wonen voelt normaal. Dat is het niet.
         </h2>
         <p className="lead">
-          Een kwart van Nederland ligt lager dan de zee. Dijken, molens en gemalen houden ons droog, dag en nacht. Ze staan om de
+          Een kwart van Nederland ligt onder zeeniveau. Dijken, molens en gemalen houden ons droog, dag en nacht. Ze staan om de
           hoek, maar bijna niemand kijkt er nog naar.
         </p>
         <p>

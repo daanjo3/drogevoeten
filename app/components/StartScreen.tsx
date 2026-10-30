@@ -50,9 +50,9 @@ export function StartScreen({
       <div className="startbox">
         <h1>Wie houdt jouw voeten droog?</h1>
         <p className="lead">
-          Een kwart van Nederland ligt lager dan de{" "}
+          Een kwart van Nederland ligt onder{" "}
           <Tip kind="term" tip={TERMS.zeeniveau}>
-            zee
+            zeeniveau
           </Tip>
           . Dat je hier droog zit, gaat niet vanzelf. Al eeuwen pompen molens en
           gemalen het water weg, en houden dijken de zee tegen. Typ je adres of woonplaats. Dan zie je wie jouw plek droog houdt, en wat er
