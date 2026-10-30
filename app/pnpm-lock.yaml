@@ -8,12 +8,9 @@ importers:
 
   .:
     dependencies:
-<<<<<<< Updated upstream
-=======
       '@tanstack/react-query':
         specifier: ^5.105.0
         version: 5.105.0(@types/react@19.3.0)(react@19.3.1)
->>>>>>> Stashed changes
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
