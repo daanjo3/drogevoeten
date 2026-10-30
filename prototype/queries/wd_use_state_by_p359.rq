@@ -1,0 +1,15 @@
+# Wikidata: "is it still in use?" signals for the water monuments, by Rijksmonument ID (P359).
+# #VALUES# is replaced by the monument numbers from the koppelvlak (datalayer/fetch.py).
+#   P5817 state of use (staat van gebruik), P366 has use (gebruik),
+#   P2866 Hollandsche Molen ID, P2863 Nederlandse Molendatabase ID, P12772 Milldatabase ID, P31 instance of.
+SELECT ?rm ?item ?state ?stateLabel ?use ?useLabel ?hm ?nmdb ?milldb ?inst ?instLabel WHERE {
+  VALUES ?rm { #VALUES# }
+  ?item wdt:P359 ?rm .
+  OPTIONAL { ?item wdt:P5817 ?state }
+  OPTIONAL { ?item wdt:P366 ?use }
+  OPTIONAL { ?item wdt:P2866 ?hm }
+  OPTIONAL { ?item wdt:P2863 ?nmdb }
+  OPTIONAL { ?item wdt:P12772 ?milldb }
+  OPTIONAL { ?item wdt:P31 ?inst }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "nl,en". }
+}

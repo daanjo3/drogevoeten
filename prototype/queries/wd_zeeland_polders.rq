@@ -1,0 +1,10 @@
+# Wikidata Query Service, used by datalayer/fetch_v3.py (v3). Run at most 1 request/minute.
+SELECT ?item ?itemLabel ?inception ?coord ?alias WHERE {
+  SERVICE wikibase:box {
+    ?item wdt:P625 ?coord .
+    bd:serviceParam wikibase:cornerSouthWest "Point(3.35 51.19)"^^geo:wktLiteral .
+    bd:serviceParam wikibase:cornerNorthEast "Point(4.30 51.78)"^^geo:wktLiteral . }
+  ?item wdt:P31 wd:Q106259 .
+  OPTIONAL { ?item wdt:P571 ?inception }
+  OPTIONAL { ?item skos:altLabel ?alias FILTER(LANG(?alias) = "nl") }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "nl,en". } }

@@ -1,0 +1,17 @@
+# Not in git: everything the data layer downloads or generates. Get it back with
+#   make restore SNAPSHOT=<file or URL>   (exact data of the demo), or
+#   make harvest                          (fresh harvest from the sources, ~25 min), or
+#   make build                            (rebuild data/build/ from data/raw/, offline)
+# See "Data terughalen" in README.md.
+
+# raw harvest cache (untrusted input), ~80 MB
+/data/raw/
+# data layer output (koppelvlak, linksets, QuickStatements), ~22 MB
+/data/build/
+# data snapshots go to a release, not into git
+/snapshots/
+*.tar.zst
+
+__pycache__/
+*.pyc
+.DS_Store

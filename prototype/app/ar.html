@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Water in je kamer</title>
+<meta name="description" content="Zie hoe hoog het water op jouw adres kan komen: LIWO bij een dijkdoorbraak, 1953 waar een open bron bestaat, en zeeniveau (NAP). In AR of als 3D-kamer.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="style.css">
+<script>try{const t=localStorage.getItem('dv-theme');if(t)document.documentElement.dataset.theme=t;}catch{}</script>
+<style>
+  .stage { position: relative; height: min(62vh, 560px); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--soft); }
+  .stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+  .seg button { background: var(--card); color: var(--ink); border: 1px solid var(--line); padding: 8px 6px; font-size: .9rem; line-height: 1.2; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--card); border-color: var(--ink); }
+  .seg button[data-off="true"] { color: var(--muted); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin: 8px 0; font-size: .92rem; }
+  .readout { font-size: 1.2rem; margin: 10px 0 4px; }
+  .readout b { font-size: 1.5rem; }
+  .ar-ui { display: none; }
+  #xr-overlay { position: fixed; inset: auto 0 0 0; padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); color: #fff; font: 15px/1.4 system-ui, sans-serif; }
+  #xr-overlay .box { background: rgba(10, 25, 35, .78); border-radius: 12px; padding: 10px 12px; }
+  #xr-overlay .seg button { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.3); }
+  #xr-overlay .seg button[aria-pressed="true"] { background: #fff; color: #0c1a22; }
+  .keeper { margin-top: 12px; }
+  .keeper h2 { margin-bottom: 6px; }
+  .note3d { position: absolute; left: 10px; top: 10px; right: 10px; font-size: .8rem; color: var(--muted); pointer-events: none; }
+</style>
+<script type="importmap">{ "imports": { "three": "./vendor/three-0.170.0/three.module.min.js" } }</script>
+</head>
+<body>
+<header class="top"><div class="wrap top-in"><a class="brand" id="back" href="./">← Droge Voeten</a><span class="muted small">Water in je kamer</span></div></header>
+<main class="wrap" style="padding-top:14px">
+  <h1 style="font-size:1.5rem;margin:4px 0 2px">Hoe hoog komt het water hier?</h1>
+  <p id="addr" class="muted" style="margin:0 0 6px">Adres laden…</p>
+  <p id="status" class="status" role="status" aria-live="polite"></p>
+
+  <section class="card" id="controls" hidden>
+    <div class="seg" role="group" aria-label="Welke waterhoogte">
+      <button type="button" data-layer="liwo" aria-pressed="true">Dijkdoorbraak<br><span class="small">LIWO</span></button>
+      <button type="button" data-layer="1953" aria-pressed="false">1953<br><span class="small">watersnood</span></button>
+      <button type="button" data-layer="nap" aria-pressed="false">Zeeniveau<br><span class="small">NAP</span></button>
+    </div>
+    <div class="row">
+      <label id="kans-wrap" style="flex:1 1 100%">Kansklasse <select id="kans" style="width:100%"></select></label>
+      <label>Je bent op <select id="storey"><option value="0">de begane grond</option><option value="1">de 1e verdieping</option><option value="2">de 2e verdieping</option></select></label>
+    </div>
+    <p class="readout" id="readout"></p>
+    <p class="muted small" id="source"></p>
+    <button type="button" id="start-ar" class="wide button" hidden>Start AR: zet het water in je kamer</button>
+    <p class="hint" id="ar-hint"></p>
+  </section>
+
+  <div class="stage" id="stage"><p class="note3d" id="note3d">3D-kamer: sleep om rond te kijken. Deur 2,10 m, persoon 1,80 m, meetlat 3 m.</p></div>
+
+  <section class="card keeper" id="keeper" hidden></section>
+
+  <details class="acc"><summary><span>Hoe rekenen we dit uit?</span></summary><div class="acc-body small">
+    <ul>
+      <li><b>Dijkdoorbraak (LIWO):</b> de maximale waterdiepte boven maaiveld op dit punt, per kansklasse, uit de Landelijke Informatievoorziening Water en Overstromingen (Rijkswaterstaat/Deltares). Raster 5 tot 100 m; geen voorspelling.</li>
+      <li><b>Zeeniveau (NAP):</b> 0 m NAP min de maaiveldhoogte uit AHN. In een diepe polder hangt dat vlak boven je hoofd.</li>
+      <li><b>1953:</b> alleen waar een open inundatiekaart zegt dat deze plek onderliep (nu alleen Noord-Brabant, Provincie Noord-Brabant). De hoogte is dan de hoogst gemeten waterstand op zee bij het dichtstbijzijnde getijstation (Rijkswaterstaat): een <b>vereenvoudiging</b>, want binnen de polder kan het water anders hebben gestaan. Elders tonen we geen lijn.</li>
+      <li><b>Verdieping:</b> vereenvoudiging: 2,80 m per verdieping, en de vloer van de begane grond ligt op maaiveld.</li>
+      <li>In AR tik je één keer op de vloer; het vlak komt op vloer + waterhoogte. Het camerabeeld blijft op je toestel.</li>
+    </ul></div></details>
+</main>
+<div id="xr-overlay" class="ar-ui"><div class="box">
+  <p id="xr-msg" style="margin:0 0 6px">Richt je telefoon op de vloer en tik als de ring op de vloer ligt.</p>
+  <div class="seg" id="xr-seg"></div>
+  <div class="row" style="justify-content:space-between;margin:4px 0 0"><span id="xr-read"></span><button type="button" id="xr-stop" class="ghost" style="color:#fff;border-color:rgba(255,255,255,.4)">Stop AR</button></div>
+</div></div>
+<script type="module" src="ar.js"></script>
+</body>
+</html>

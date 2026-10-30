@@ -1,0 +1,7 @@
+# Wikidata Query Service, used by datalayer/fetch_v3.py (v3). Run at most 1 request/minute.
+SELECT ?item ?id ?itemLabel ?inception ?dissolved ?coord WHERE {
+  ?item wdt:P2903 ?id .
+  OPTIONAL { ?item wdt:P571 ?inception }
+  OPTIONAL { ?item wdt:P576 ?dissolved }
+  OPTIONAL { ?item wdt:P625 ?coord }
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "nl,en". } }

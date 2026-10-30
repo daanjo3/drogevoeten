@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Droge Voeten</title>
+<meta name="description" content="Typ je adres: hoe diep woon je, wie pompt hier, hoe werd deze plek droog en hoe hoog kan het water komen. Met bronnen bij elke uitspraak.">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="vendor/leaflet/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+<script>try{const t=localStorage.getItem('dv-theme');if(t)document.documentElement.dataset.theme=t;}catch{}</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="./">Droge Voeten</a>
+    <button type="button" id="theme" class="ghost" aria-label="Wissel licht/donker thema" title="Licht of donker">◐</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Wie houdt mijn voeten droog?</h1>
+    <form id="f" role="search" autocomplete="off">
+      <label for="q" class="sr">Adres</label>
+      <input id="q" type="search" list="sugg" placeholder="Straat en huisnummer, plaats" autocomplete="off">
+      <datalist id="sugg"></datalist>
+      <button>Zoek</button>
+    </form>
+    <p class="examples">Probeer:
+      <button type="button" class="link" data-q="Abdij 4, Middelburg">Middelburg</button>
+      <button type="button" class="link" data-q="Middenweg 68a, Middenbeemster">Beemster</button>
+      <button type="button" class="link" data-q="Nieuwburen 1, Lemmer">Lemmer</button>
+      <button type="button" class="link" data-q="Koningin Maudplein 1, Nieuwerkerk">Nieuwerkerk</button>
+      <button type="button" class="link" data-q="Elisabethweg 2, Heijningen">Heijningen</button>
+    </p>
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+  </section>
+
+  <section id="intro" class="intro">
+    <ol class="steps">
+      <li><b>Typ je adres.</b> Alleen het adres gaat naar de open adressendienst van PDOK.</li>
+      <li><b>Krijg vier antwoorden:</b> hoe diep je woont, wie hier pompt, hoe deze plek droog werd en hoe hoog het water kan komen.</li>
+      <li><b>Klik door</b> voor de tijdlijn, de kaart en de bron achter elke uitspraak.</li>
+    </ol>
+  </section>
+
+  <div id="result" class="layout" hidden>
+    <div class="col-main">
+      <section class="card answer" aria-labelledby="addr">
+        <h2 id="addr" class="addr"></h2>
+        <ul id="facts" class="facts"></ul>
+        <div id="callout"></div>
+        <a id="arlink" class="button wide" href="ar.html">Bekijk het water in je kamer</a>
+        <p class="hint">Met AR op een geschikte telefoon, anders als 3D-kamer in de browser.</p>
+      </section>
+
+      <section class="card" aria-labelledby="tl-h">
+        <h2 id="tl-h">Hoe werd dit droog?</h2>
+        <p class="sub">Elke stap met jaartal, bron en hoe zeker dat jaartal is.</p>
+        <ol id="timeline" class="timeline"></ol>
+        <div id="tl-more"></div>
+      </section>
+
+      <section class="more" aria-label="Meer weten">
+        <details class="acc" id="acc-heritage"><summary><span>Erfgoed in de buurt: werkt het nog?</span></summary><div class="acc-body" id="heritage"></div></details>
+        <details class="acc" id="acc-sim"><summary><span>Wat als het gemaal uitvalt? (rekenvoorbeeld)</span></summary><div class="acc-body" id="sim"></div></details>
+        <details class="acc" id="acc-flood"><summary><span>Overstroming in detail</span></summary><div class="acc-body" id="flood"></div></details>
+        <details class="acc" id="acc-board"><summary><span>Wie beslist over het water hier?</span></summary><div class="acc-body" id="board"></div></details>
+        <details class="acc" id="acc-ld"><summary><span>Onder de motorkap: bronnen en linked data</span></summary><div class="acc-body" id="ld"></div></details>
+      </section>
+    </div>
+
+    <aside class="col-map">
+      <details class="card mapcard" id="mapbox" open>
+        <summary><span>Kaart en tijdreis</span></summary>
+        <div class="themes" role="tablist" aria-label="Kaartthema">
+          <button type="button" role="tab" data-theme="nu" aria-selected="true">Nu</button>
+          <button type="button" role="tab" data-theme="tijd" aria-selected="false">Tijdreis</button>
+          <button type="button" role="tab" data-theme="risico" aria-selected="false">Risico</button>
+          <button type="button" role="tab" data-theme="zeeland" aria-selected="false">Zeeland</button>
+        </div>
+        <div id="map" role="region" aria-label="Kaart"></div>
+        <div id="themepanel" class="themepanel"></div>
+        <details class="sub-acc"><summary>Alle kaartlagen</summary><div id="layers" class="layers"></div></details>
+      </details>
+    </aside>
+  </div>
+</main>
+
+<footer class="wrap foot">
+  <p>Droge Voeten, ronde 3 · HackaLOD 2026 · Gebouwd op open data van RCE, Provincie Zeeland, Rijkswaterstaat, Het Waterschapshuis, Kadaster, KNMI en Wikidata.
+    <a href="../data/build/dataset-description.jsonld">Wat we teruggeven</a></p>
+</footer>
+
+<script src="vendor/leaflet/leaflet.min.js"></script>
+<script type="module" src="main.js"></script>
+</body>
+</html>

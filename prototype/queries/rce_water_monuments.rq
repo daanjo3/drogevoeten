@@ -1,0 +1,18 @@
+# RCE Rijksmonumenten (schema.org view): all monuments whose function type is water management.
+# Endpoint: https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/Rijksmonumenten-sdo/sparql
+PREFIX schema: <https://schema.org/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+SELECT ?mon ?nr ?type ?name ?addr ?place ?wkt ?desc WHERE {
+  VALUES ?type { "Gemaal" "Poldergemaal" "Boezemgemaal" "Industrie- en poldermolen" "Boezemmolen"
+                 "Waterkering en -doorlaat" "Schutsluis" "Sluis" "Spuisluis" "Inlaatsluis" "Keersluis"
+                 "Inundatiesluis" "Stuw" "Schuifstuw" "Duiker" "Dijk" "Dijkpaal" "Zeewering"
+                 "Stormvloedkering" "Polderhuis" "Waterschapshuis" "Sluiswachterswoning"
+                 "Sluismeesterswoning" "Sluiswachtershuisje" "Molen" "Watermolen" "Getijmolen" "Weidemolen" }
+  ?mon schema:additionalType ?type ;
+       schema:identifier ?nr ;
+       geo:asWKT ?wkt .
+  OPTIONAL { ?mon schema:name ?name }
+  OPTIONAL { ?mon schema:address ?addr }
+  OPTIONAL { ?mon schema:addressLocality ?place }
+  OPTIONAL { ?mon schema:description ?desc }
+}

@@ -1,0 +1,367 @@
+{
+ "@context": {
+  "@vocab": "https://schema.org/",
+  "dcat": "http://www.w3.org/ns/dcat#"
+ },
+ "@graph": [
+  {
+   "@type": [
+    "Dataset",
+    "dcat:Dataset"
+   ],
+   "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/linkset.ttl#dataset",
+   "name": "Droge Voeten-linkset (ronde 2): waterstaatsmonumenten ↔ waterschapsregister, waterschap en Molendatabase",
+   "description": "RCE-rijksmonumenten gekoppeld aan IMWA (skos:closeMatch), het huidige waterschap (schema:containedInPlace) en de Nederlandse Molendatabase (schema:subjectOf).",
+   "isBasedOn": [
+    "https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/id/dataset/51cf46fe-522b-390d-8620-ba777ccfc086",
+    "https://api.pdok.nl/hwh/waterschappen-kunstwerken-imwa/ogc/v2",
+    "https://www.wikidata.org/",
+    "https://www.molendatabase.nl/"
+   ],
+   "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "inLanguage": "nl",
+   "creator": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "dateModified": "2026-10-28",
+   "keywords": [
+    "waterstaat",
+    "polder",
+    "molen",
+    "gemaal",
+    "linkset",
+    "HackaLOD 2026"
+   ],
+   "distribution": [
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/turtle",
+     "dcat:mediaType": "text/turtle",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/linkset.ttl",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/linkset.ttl"
+     }
+    }
+   ]
+  },
+  {
+   "@type": [
+    "Dataset",
+    "dcat:Dataset"
+   ],
+   "@id": "urn:hackalod2026:dataset:staat-van-gebruik",
+   "name": "Staat van gebruik van waterstaatsmonumenten",
+   "description": "Per rijksmonument: werkt het nu mee aan de afwatering, werkte het vroeger, onbekend of geen werktuig, met prov:wasDerivedFrom per uitspraak.",
+   "isBasedOn": [
+    "https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/id/dataset/51cf46fe-522b-390d-8620-ba777ccfc086",
+    "https://www.molendatabase.nl/",
+    "https://www.wikidata.org/"
+   ],
+   "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "inLanguage": "nl",
+   "creator": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "dateModified": "2026-10-28",
+   "keywords": [
+    "waterstaat",
+    "polder",
+    "molen",
+    "gemaal",
+    "linkset",
+    "HackaLOD 2026"
+   ],
+   "distribution": [
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/turtle",
+     "dcat:mediaType": "text/turtle",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/status.ttl",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/status.ttl"
+     }
+    }
+   ]
+  },
+  {
+   "@type": [
+    "Dataset",
+    "dcat:Dataset"
+   ],
+   "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/linkset-v3.ttl#dataset",
+   "name": "Droge Voeten-linkset (ronde 3): molens, gemalen, polders en geschenkwoningen",
+   "description": "Rijksmonument ↔ molenrecord/Ten Bruggencate (1236), rijksmonument ↔ gemalen.nl (80), historisch gemaal ↔ IMWA (1519), verdwenen molen ↔ Wikidata (186), Zeeuwse polder ↔ Wikidata (207), geschenkwoning 1953 ↔ BAG (507).",
+   "isBasedOn": [
+    "https://services.rce.geovoorziening.nl/landschapsatlas/wfs",
+    "https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/id/dataset/51cf46fe-522b-390d-8620-ba777ccfc086",
+    "https://opengeodata.zeeland.nl/geoserver/wfs",
+    "https://www.wikidata.org/",
+    "https://api.pdok.nl/bzk/locatieserver/search/v3_1/"
+   ],
+   "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "inLanguage": "nl",
+   "creator": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "dateModified": "2026-10-28",
+   "keywords": [
+    "waterstaat",
+    "polder",
+    "molen",
+    "gemaal",
+    "linkset",
+    "HackaLOD 2026"
+   ],
+   "distribution": [
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/turtle",
+     "dcat:mediaType": "text/turtle",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/linkset-v3.ttl",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/linkset-v3.ttl"
+     }
+    }
+   ]
+  },
+  {
+   "@type": [
+    "Dataset",
+    "dcat:Dataset"
+   ],
+   "@id": "urn:hackalod2026:dataset:hoe-werd-dit-droog",
+   "name": "Hoe werd dit droog? Gebeurtenissen in de waterstaatsgeschiedenis",
+   "description": "21374 gedateerde gebeurtenissen als schema:Event, elk met de oorspronkelijke jaartekst, de nauwkeurigheid en prov:wasDerivedFrom naar het bronobject.",
+   "isBasedOn": [
+    "https://services.rce.geovoorziening.nl/landschapsatlas/wfs",
+    "https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/id/dataset/51cf46fe-522b-390d-8620-ba777ccfc086",
+    "https://opengeodata.zeeland.nl/geoserver/wfs"
+   ],
+   "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "inLanguage": "nl",
+   "creator": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "dateModified": "2026-10-28",
+   "keywords": [
+    "waterstaat",
+    "polder",
+    "molen",
+    "gemaal",
+    "linkset",
+    "HackaLOD 2026"
+   ],
+   "distribution": [
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/turtle",
+     "dcat:mediaType": "text/turtle",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/events.ttl",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/events.ttl"
+     }
+    }
+   ]
+  },
+  {
+   "@type": [
+    "Dataset",
+    "dcat:Dataset"
+   ],
+   "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/droge-voeten.jsonld#dataset",
+   "name": "Droge Voeten-koppelvlak",
+   "description": "Het document dat de presentatielagen lezen (JSON-LD en JSON), plus voorbereide geometrie voor punt-in-vlak in de browser.",
+   "isBasedOn": [
+    "https://services.rce.geovoorziening.nl/landschapsatlas/wfs",
+    "https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/id/dataset/51cf46fe-522b-390d-8620-ba777ccfc086",
+    "https://opengeodata.zeeland.nl/geoserver/wfs",
+    "https://www.wikidata.org/"
+   ],
+   "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "inLanguage": "nl",
+   "creator": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "dateModified": "2026-10-28",
+   "keywords": [
+    "waterstaat",
+    "polder",
+    "molen",
+    "gemaal",
+    "linkset",
+    "HackaLOD 2026"
+   ],
+   "distribution": [
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "application/ld+json",
+     "dcat:mediaType": "application/ld+json",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/droge-voeten.jsonld",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/droge-voeten.jsonld"
+     }
+    },
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "application/json",
+     "dcat:mediaType": "application/json",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/history-areas.json",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/history-areas.json"
+     }
+    },
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "application/json",
+     "dcat:mediaType": "application/json",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/history-points.json",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/history-points.json"
+     }
+    },
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "application/json",
+     "dcat:mediaType": "application/json",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/zeeland.json",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/zeeland.json"
+     }
+    }
+   ]
+  },
+  {
+   "@type": [
+    "Dataset",
+    "dcat:Dataset"
+   ],
+   "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata-suggestions#dataset",
+   "name": "Wikidata-voorstellen (QuickStatements) voor review",
+   "description": "P5817, P137 (ronde 2); P571/P576 voor verdwenen molens via P2903 en P571 voor Zeeuwse polders (ronde 3). Niet geüpload; bedoeld voor menselijke review.",
+   "isBasedOn": [
+    "https://services.rce.geovoorziening.nl/landschapsatlas/wfs",
+    "https://linkeddata.cultureelerfgoed.nl/rce/datacatalog/id/dataset/51cf46fe-522b-390d-8620-ba777ccfc086",
+    "https://opengeodata.zeeland.nl/geoserver/wfs",
+    "https://www.wikidata.org/"
+   ],
+   "license": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "inLanguage": "nl",
+   "creator": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "publisher": {
+    "@type": "Organization",
+    "name": "Droge Voeten (HackaLOD 2026)"
+   },
+   "dateModified": "2026-10-28",
+   "keywords": [
+    "waterstaat",
+    "polder",
+    "molen",
+    "gemaal",
+    "linkset",
+    "HackaLOD 2026"
+   ],
+   "distribution": [
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/plain",
+     "dcat:mediaType": "text/plain",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P5817_suggestions.qs",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P5817_suggestions.qs"
+     }
+    },
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/plain",
+     "dcat:mediaType": "text/plain",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P137_suggestions.qs",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P137_suggestions.qs"
+     }
+    },
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/plain",
+     "dcat:mediaType": "text/plain",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P571_P576_molens.qs",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P571_P576_molens.qs"
+     }
+    },
+    {
+     "@type": [
+      "DataDownload",
+      "dcat:Distribution"
+     ],
+     "encodingFormat": "text/plain",
+     "dcat:mediaType": "text/plain",
+     "contentUrl": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P571_polders.qs",
+     "dcat:downloadURL": {
+      "@id": "https://vps.maijenburg.dev/v3/droge-voeten/data/build/wikidata_P571_polders.qs"
+     }
+    }
+   ]
+  }
+ ]
+}
