@@ -4,7 +4,7 @@ import { Icon } from "./Icons";
 import { Tip } from "./Tip";
 import LeafletMap from "./leaflet-map";
 import type { LocatieserverDoc } from "../lib/locatieserver";
-import { featureUrl, useNear, type Gemaal, type Molen, type NearFeature } from "../lib/landschapsatlas";
+import { featureUrl, useNear, type Gemaal, type NearFeature } from "../lib/landschapsatlas";
 
 interface Props {
   place: LocatieserverDoc
@@ -14,6 +14,17 @@ const RADIUS_M = 5000;
 const PER_LAYER = 5;
 // used until the address has a coordinate
 const FALLBACK: [number, number] = [51.4987105, 3.6138756];
+// Only photos from the RCE image bank. foto_thumb also points to gemalen.nl
+// (no open licence), watertorens.eu (licence unknown) and a "no photo" placeholder.
+const PHOTO_HOSTS = ["images.memorix.nl"];
+
+function isAllowedPhoto(url: string): boolean {
+  try {
+    return PHOTO_HOSTS.includes(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
 
 /* One row in the list and one dot on the map, from either layer. */
 interface Poi {
@@ -24,7 +35,11 @@ interface Poi {
   distance: number;
   status: string;
   text: string;
-  source: string;
+  /* the gemalen.nl page, if any */
+  source?: string;
+  /* the raw WFS feature as GeoJSON */
+  metadata: string;
+  photo?: { src: string; tip: string };
 }
 
 function fromGemaal(f: NearFeature<Gemaal>): Poi {
@@ -38,22 +53,11 @@ function fromGemaal(f: NearFeature<Gemaal>): Poi {
     distance: f.distance,
     status: p.status || "onbekend",
     text: `${p.functie}${since}. Loost op ${p.lozend_op || "onbekend"}.`,
-    source: featureUrl("landschapsatlas:gemalen", f.id),
-  };
-}
-
-function fromMolen(f: NearFeature<Molen>): Poi {
-  const p = f.properties;
-  const built = p.BOUWJAAR ? `, gebouwd in ${p.BOUWJAAR}` : "";
-  return {
-    id: f.id,
-    name: p.NAAM || "Molen zonder naam",
-    lat: f.geometry.coordinates[1],
-    lon: f.geometry.coordinates[0],
-    distance: f.distance,
-    status: p.STAAT || "onbekend",
-    text: `${p.TYPE} (${p.FUNCTIE})${built}.`,
-    source: featureUrl("landschapsatlas:Molens", f.id),
+    source: p.infolink || undefined,
+    metadata: featureUrl("landschapsatlas:gemalen", f.id),
+    photo: isAllowedPhoto(p.foto_thumb)
+      ? { src: p.foto_thumb, tip: p.fotograaf ? `${p.naam_gemaal} · foto: ${p.fotograaf}` : p.naam_gemaal }
+      : undefined,
   };
 }
 
@@ -71,20 +75,21 @@ function formatDistance(m: number): string {
    are linked: pick one and both highlight, and the details show. */
 export function BuurtPanel({ place }: Props) {
   const here = parsePoint(place.centroide_ll);
-  console.log(here)
   const [lat, lon] = here ?? [undefined, undefined];
 
   const gemalen = useNear({ typeName: "landschapsatlas:gemalen", lat, lon, radius: RADIUS_M, limit: PER_LAYER });
-  const molens = useNear({ typeName: "landschapsatlas:Molens", lat, lon, radius: RADIUS_M, limit: PER_LAYER });
 
-  const pois = [...(gemalen.data ?? []).map(fromGemaal), ...(molens.data ?? []).map(fromMolen)].sort(
+  const pois = [...(gemalen.data ?? []).map(fromGemaal)].sort(
     (a, b) => a.distance - b.distance,
   );
-  const loading = gemalen.isLoading || molens.isLoading;
-  const failed = gemalen.isError || molens.isError;
+  const loading = gemalen.isLoading;
+  const failed = gemalen.isError;
 
   const [picked, setPicked] = useState<string | null>(null);
   const g = pois.find((p) => p.id === picked) ?? null;
+  // photo urls that failed to load, so we don't show an empty square
+  const [broken, setBroken] = useState<ReadonlySet<string>>(new Set());
+  const photo = g?.photo && !broken.has(g.photo.src) ? g.photo : undefined;
 
   return (
     <section className="panel" id="p-buurt">
@@ -123,7 +128,7 @@ export function BuurtPanel({ place }: Props) {
             ))}
           </LeafletMap>
         </div>
-        <div>
+        <div className="side">
           <ul id="list">
             {loading && <li>Gemalen en molens zoeken…</li>}
             {failed && <li>De Landschapsatlas gaf geen antwoord. Probeer het later nog eens.</li>}
@@ -141,17 +146,34 @@ export function BuurtPanel({ place }: Props) {
               </li>
             ))}
           </ul>
-          <div id="detail">
+          <div id="detail" className={photo ? "with-foto" : undefined}>
             {g ? (
               <>
-                <b>{g.name}</b>
-                {g.text}
-                <small>
-                  status · {g.status} &nbsp;{" "}
-                  <Tip kind="bron" tip="Bron: RCE Landschapsatlas">
-                    <a href={g.source} target="_blank" rel="noreferrer">bron</a>
+                {photo && (
+                  <Tip kind="foto" tip={photo.tip}>
+                    <img
+                      src={photo.src}
+                      alt={`Foto van ${g.name}`}
+                      loading="lazy"
+                      onError={() => setBroken((b) => new Set(b).add(photo.src))}
+                    />
                   </Tip>
-                </small>
+                )}
+                <div>
+                  <b>{g.name}</b>
+                  {g.text}
+                  <small>
+                    status · {g.status} &nbsp;{" "}
+                    {g.source && (
+                      <Tip kind="bron" tip="Bron: Nederlandse Gemalenstichting, via de RCE Landschapsatlas">
+                        <a href={g.source} target="_blank" rel="noreferrer">bron</a>
+                      </Tip>
+                    )}{" "}
+                    <Tip kind="bron" tip="Alle gegevens van dit gemaal zoals de RCE Landschapsatlas ze levert (WFS, GeoJSON)">
+                      <a href={g.metadata} target="_blank" rel="noreferrer">metadata</a>
+                    </Tip>
+                  </small>
+                </div>
               </>
             ) : (
               "Kies een gemaal of molen."

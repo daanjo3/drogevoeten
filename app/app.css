@@ -217,14 +217,19 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .buurt .map button{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid #fff;padding:0;transform:translate(-50%,-50%)}
 .buurt .map button[aria-pressed="true"]{background:var(--sun);border-color:var(--ink);box-shadow:0 0 0 5px rgba(255,255,255,.5)}
 .buurt .map .you{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ink);position:absolute;transform:translate(-50%,-50%)}
-.buurt ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;align-content:start}
+/* the list scrolls inside the panel, the detail stays in view below it */
+.buurt .side{display:flex;flex-direction:column;min-height:0}
+.buurt ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;align-content:start;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .buurt li button{width:100%;text-align:left;background:rgba(255,255,255,.25);border:1.5px solid transparent;border-radius:14px;padding:12px;color:#fff;display:flex;justify-content:space-between;gap:8px;align-items:center}
 .buurt li button[aria-pressed="true"]{background:#fff;color:var(--ink);border-color:var(--ink)}
 .pill{border:1.5px solid var(--ink);border-radius:999px;padding:2px 8px;white-space:nowrap;background:#fff;color:var(--ink)}
   /* a station or mill that works now is black; the Landschapsatlas says "in bedrijf" or "maalvaardig" */
   .pill[data-status="werkt nu mee" i],.pill[data-status="in bedrijf" i],.pill[data-status="maalvaardig" i]{background:var(--ink);color:#fff;border-color:#fff}
-#detail{background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:var(--fs-p);min-height:90px;margin-top:12px}
+#detail{flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:var(--fs-p);min-height:90px;margin-top:12px}
 #detail b{margin-bottom:4px}
+#detail.with-foto{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:start}
+#detail .foto{display:block;cursor:help}
+#detail .foto img{display:block;width:72px;height:72px;object-fit:cover;border-radius:10px;background:var(--line)}
 #detail small{color:var(--mute);display:block;margin-top:6px}
 
 @media (max-width:900px){

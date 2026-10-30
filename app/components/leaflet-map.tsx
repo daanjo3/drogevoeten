@@ -7,6 +7,10 @@ export type MapProps = {
     zoom?: number;
     className?: string;
     style?: CSSProperties;
+    // zoom with the mouse wheel; off by default, so the wheel keeps scrolling the canvas
+    scrollWheelZoom?: boolean;
+    // pan by dragging (mouse and touch)
+    dragging?: boolean;
     // react-leaflet children such as <Marker>, <GeoJSON>, <Popup>
     children?: ReactNode;
 };
@@ -23,9 +27,10 @@ function SyncView({ center, zoom }: { center: [number, number]; zoom: number }) 
     return null;
 }
 
-export default function LeafletMap({ center, zoom, className, style = { height: 400 }, children }: Required<Pick<MapProps, "center" | "zoom">> & MapProps) {
+// scrollWheelZoom and dragging are read on mount only, like center and zoom
+export default function LeafletMap({ center, zoom, className, style = { height: 400 }, scrollWheelZoom = false, dragging = true, children }: Required<Pick<MapProps, "center" | "zoom">> & MapProps) {
     return (
-        <MapContainer center={center} zoom={zoom} className={className} style={style}>
+        <MapContainer center={center} zoom={zoom} className={className} style={style} scrollWheelZoom={scrollWheelZoom} dragging={dragging}>
             <TileLayer
                 url={tilesetPdok}
                 maxZoom={19}

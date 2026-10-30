@@ -4,7 +4,7 @@ import { TERMS } from "../data/place";
 /* Inline element with a tooltip. kind "term" explains a difficult word,
    kind "bron" shows a source. The tooltip itself is rendered once by
    <TooltipLayer /> and opens on hover, focus and tap. */
-export function Tip({ kind, tip, children }: { kind: "term" | "bron"; tip: string; children: ReactNode }) {
+export function Tip({ kind, tip, children }: { kind: "term" | "bron" | "foto"; tip: string; children: ReactNode }) {
   return (
     <span className={`tip ${kind}`} tabIndex={0} data-tip={tip}>
       {children}
