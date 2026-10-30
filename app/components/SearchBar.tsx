@@ -8,7 +8,19 @@ export interface SearchBarHandle {
 
 /* Search field with its own thick blinking cursor that follows the typed
    text. The real caret is hidden in css. */
-export function SearchBar({ onSearch, handle }: { onSearch: (address: string) => void; handle?: Ref<SearchBarHandle> }) {
+export function SearchBar({
+  onSearch,
+  handle,
+  busy = false,
+  message,
+}: {
+  onSearch: (address: string) => void;
+  handle?: Ref<SearchBarHandle>;
+  /* a search is running: block a second submit */
+  busy?: boolean;
+  /* shown under the field, e.g. when no address was found */
+  message?: string | null;
+}) {
   const input = useRef<HTMLInputElement>(null);
   const mirror = useRef<HTMLSpanElement>(null);
   const caret = useRef<HTMLSpanElement>(null);
@@ -39,12 +51,14 @@ export function SearchBar({ onSearch, handle }: { onSearch: (address: string) =>
   }));
 
   return (
+    <>
     <form
       className="search"
       id="form"
+      aria-busy={busy}
       onSubmit={(e) => {
         e.preventDefault();
-        onSearch(value.trim());
+        if (!busy) onSearch(value.trim());
       }}
     >
       <svg width="22" height="22" aria-hidden="true">
@@ -64,9 +78,13 @@ export function SearchBar({ onSearch, handle }: { onSearch: (address: string) =>
         <span className="caret" aria-hidden="true" ref={caret} />
         <span className="mirror" aria-hidden="true" ref={mirror} />
       </span>
-      <button type="submit">
-        <Icon name="zoek" className="zoek" /> Zoek
+      <button type="submit" disabled={busy}>
+        <Icon name="zoek" className="zoek" /> {busy ? "Zoeken…" : "Zoek"}
       </button>
     </form>
+    <p className="searchmsg" role="status">
+      {message}
+    </p>
+    </>
   );
 }

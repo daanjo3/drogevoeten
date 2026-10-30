@@ -104,7 +104,9 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px}
 .search input{flex:1;background:none;border:0;color:var(--ink);font-size:20px;outline:0;min-width:0}
 .search button{border:0;border-radius:999px;background:var(--dark);color:#fff;padding:12px 20px;font-weight:700}
-.defaults{margin-top:16px;display:flex;gap:8px;justify-content:center}
+.searchmsg{min-height:1.4em;margin:10px 0 0;color:var(--ink);font-weight:700}
+.search button:disabled,.defaults button:disabled{opacity:.6;cursor:progress}
+.defaults{margin-top:6px;display:flex;gap:8px;justify-content:center}
 .defaults button{background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;flex:1;font-weight:700}
 .defaults button:hover{background:var(--dark);color:#fff}
 

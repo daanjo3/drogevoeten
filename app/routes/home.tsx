@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { MIDDELBURG, type Mode } from "../data/place";
 import type { Scenario } from "../lib/scenario";
@@ -17,19 +18,25 @@ import { AboutCard } from "../components/AboutCard";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
-import { abdijLocatieDoc } from "../data/abdij4";
+import { freeQueryOptions, useLookup } from "../lib/locatieserver";
 
 /* Start screen plus the canvas for one address. State at app level: the
-   address (in the url as ?q=), the mode (info or risk) and the scenario
-   choices. */
+   address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
+   and the scenario choices. */
 export default function Home() {
   const [params, setParams] = useSearchParams();
-  const address = params.get("q") ?? "";
-  /* TODO: fetch the place for this address from the data layer */
-  const place = address ? { ...MIDDELBURG, address } : MIDDELBURG;
-  
+  const queryClient = useQueryClient();
+  const id = params.get("id") ?? "";
+  /* the full Locatieserver record for the id in the url */
+  const lookup = useLookup({ id });
+  const locatie = lookup.data?.response.docs[0];
+  /* TODO: fetch the rest of the place from the data layer; only the address is real now */
+  const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address) };
+
   /* with an address in the url we skip the start screen */
-  const [phase, setPhase] = useState<StartPhase>(address ? "hidden" : "idle");
+  const [phase, setPhase] = useState<StartPhase>(id ? "hidden" : "idle");
+  const [searching, setSearching] = useState(false);
+  const [searchMsg, setSearchMsg] = useState<string | null>(null);
   const [away, setAway] = useState(false);
   /* remount the start screen on Begin, so the landscape resets without animating */
   const [startKey, setStartKey] = useState(0);
@@ -49,11 +56,51 @@ export default function Home() {
     canvas.go(t.key);
   }
 
+  /* a shared link with an id that no longer exists (or a failed lookup):
+     back to the start screen with a message */
+  useEffect(() => {
+    if (!id) return;
+    if (lookup.isError) {
+      setSearchMsg("De adreszoeker gaf geen antwoord. Probeer het later nog eens.");
+      setPhase("idle");
+    } else if (lookup.isSuccess && !locatie) {
+      setSearchMsg("Dit adres is niet (meer) te vinden. Typ het opnieuw.");
+      setPhase("idle");
+      setParams({}, { replace: true });
+    }
+  }, [id, lookup.isError, lookup.isSuccess, locatie, setParams]);
+
+  /* look up the typed address in the Locatieserver (addresses only, best
+     match) and put its id in the url, so the link can be shared */
+  async function begin(q: string) {
+    if (searching) return;
+    if (!q) {
+      setSearchMsg("Typ een adres, bijvoorbeeld Abdij 4, Middelburg.");
+      return;
+    }
+    setSearching(true);
+    setSearchMsg(null);
+    let found: string | undefined;
+    try {
+      const res = await queryClient.fetchQuery(freeQueryOptions({ q, fq: ["type:adres"], rows: 1, fl: "id" }));
+      found = res.response.docs[0]?.id;
+    } catch {
+      setSearchMsg("De adreszoeker gaf geen antwoord. Probeer het later nog eens.");
+      return;
+    } finally {
+      setSearching(false);
+    }
+    if (!found) {
+      setSearchMsg(`Geen adres gevonden voor "${q}". Typ straat, huisnummer en plaats.`);
+      return;
+    }
+    setParams({ id: found }, { replace: true });
+    dive();
+  }
+
   /* the leaving transition: text slides up, the pin drops, we dive into
      the landscape, then the start screen fades and the grid zooms in */
-  function begin(q: string) {
-    const next = q || "Adres placeholder";
-    setParams({ q: next }, { replace: true });
+  function dive() {
     setMode("info");
     canvas.go("huis", false);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -89,17 +136,23 @@ export default function Home() {
   function onBack() {
     setStartKey((k) => k + 1);
     setPhase("idle");
+    setSearchMsg(null);
     setParams({}, { replace: true });
     window.setTimeout(() => search.current?.reset(), 0);
   }
-
-  const placeLocatieDoc = abdijLocatieDoc
 
   return (
     <>
       <SvgSymbols />
 
-      <StartScreen key={startKey} phase={phase} onSearch={begin} searchHandle={search} />
+      <StartScreen
+        key={startKey}
+        phase={phase}
+        onSearch={begin}
+        searchHandle={search}
+        busy={searching}
+        message={searchMsg}
+      />
 
       <button type="button" className="corner" id="infoBtn" onClick={() => setAbout(true)}>
         <Icon name="info" /> Over de data
@@ -119,7 +172,7 @@ export default function Home() {
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
         <NlMap address={place.address} />
         <TijdreisPanel place={place} />
-        <BuurtPanel place={placeLocatieDoc} />
+        <BuurtPanel place={locatie} />
 
         <ImageTile
           id="i-asselijn"

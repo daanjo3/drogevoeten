@@ -17,10 +17,14 @@ export function StartScreen({
   phase,
   onSearch,
   searchHandle,
+  busy = false,
+  message,
 }: {
   phase: StartPhase;
   onSearch: (address: string) => void;
   searchHandle?: Ref<SearchBarHandle>;
+  busy?: boolean;
+  message?: string | null;
 }) {
   /* pointer position from -0.5 to 0.5, for the parallax */
   const [dx, setDx] = useState(0);
@@ -46,10 +50,10 @@ export function StartScreen({
           gemalen het water weg, en houden dijken de zee tegen. Typ je adres. Dan zie je wie jouw plek droog houdt, en wat er
           gebeurt als het misgaat.
         </p>
-        <SearchBar onSearch={onSearch} handle={searchHandle} />
+        <SearchBar onSearch={onSearch} handle={searchHandle} busy={busy} message={message} />
         <div className="defaults">
           {EXAMPLES.map((x) => (
-            <button key={x.label} type="button" onClick={() => onSearch(x.address)}>
+            <button key={x.label} type="button" disabled={busy} onClick={() => onSearch(x.address)}>
               {x.label}
             </button>
           ))}

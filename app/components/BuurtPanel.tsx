@@ -7,7 +7,8 @@ import type { LocatieserverDoc } from "../lib/locatieserver";
 import { featureUrl, useNear, type Gemaal, type NearFeature } from "../lib/landschapsatlas";
 
 interface Props {
-  place: LocatieserverDoc
+  /* undefined until the address lookup is done */
+  place?: LocatieserverDoc;
 }
 
 const RADIUS_M = 5000;
@@ -74,7 +75,7 @@ function formatDistance(m: number): string {
 /* Pumping stations and mills nearby. Dots on the map and rows in the list
    are linked: pick one and both highlight, and the details show. */
 export function BuurtPanel({ place }: Props) {
-  const here = parsePoint(place.centroide_ll);
+  const here = parsePoint(place?.centroide_ll);
   const [lat, lon] = here ?? [undefined, undefined];
 
   const gemalen = useNear({ typeName: "landschapsatlas:gemalen", lat, lon, radius: RADIUS_M, limit: PER_LAYER });
