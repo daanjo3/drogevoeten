@@ -178,9 +178,14 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
    Beemster medal by the Tijdreis, Nieuwerkerk by Als het misgaat */
 .img{background:#fff;border:1.5px solid var(--line)}
 #i-getijdenmolen{left:152vw;top:161vh;width:28vw;height:52vh}
-#i-stadswallen  {left:16vw; top:45vh; width:32vw;height:48vh}
-#i-beemster     {left:16vw; top:99vh; width:32vw;height:60vh}
 #i-nieuwerkerk  {left:184vw;top:85vh; width:30vw;height:70vh}
+/* stadswallen and the Beemster medal share a spot: they never show together */
+#i-stadswallen,#i-beemster{left:16vw;top:45vh;width:32vw;height:40vh}
+/* general works: steam and electricity down the Tijdreis column, mills by Gemalen */
+#i-cruquius     {left:16vw; top:91vh; width:32vw;height:44vh}
+#i-dongepolders {left:16vw; top:141vh;width:32vw;height:44vh}
+#i-keere        {left:184vw;top:161vh;width:30vw;height:34vh}
+#i-kinderdijk   {left:184vw;top:201vh;width:30vw;height:30vh}
 
 /* kamers */
 .room{position:absolute;inset:0}

@@ -14,10 +14,11 @@ export interface RijksWork {
   context: string;
 }
 
-/* Does this work belong to the address? "beemster" also matches Middenbeemster. */
+/* Does this work belong to the address? A work without a place belongs
+   everywhere; "beemster" also matches Middenbeemster. */
 export function worksFor<T extends RijksWork>(works: T[], woonplaats?: string): T[] {
   const w = (woonplaats ?? "").toLowerCase();
-  return works.filter((x) => w.includes(x.place.toLowerCase()));
+  return works.filter((x) => !x.place || w.includes(x.place.toLowerCase()));
 }
 
 export function rijksSrc(w: RijksWork): string {
@@ -34,12 +35,13 @@ export function RijksTile({ id, work }: { id: string; work: RijksWork }) {
   return (
     <figure className="panel img" id={id}>
       <div className="ph">
-        <img src={rijksSrc(work)} alt={`${work.title}, ${work.maker}, ${work.year}`} loading="lazy" />
+        <img src={rijksSrc(work)} alt={[work.title, work.maker, work.year].filter(Boolean).join(", ")} loading="lazy" />
       </div>
       <figcaption className="cap">
         <p className="context">{work.context}</p>
         <span className="museum">
-          {work.title} · {work.maker}, {work.year} · Rijksmuseum ·{" "}
+          {work.title} · {work.maker}
+          {work.year ? `, ${work.year}` : ""} · Rijksmuseum ·{" "}
           <a href={rijksUrl(work)} target="_blank" rel="noreferrer">
             {work.objectNumber}
           </a>

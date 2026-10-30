@@ -21,9 +21,10 @@ import type { SearchBarHandle } from "../components/SearchBar";
 import { freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 
-/* Works from the Rijksmuseum, each next to the block it belongs to and only
-   shown when the address lies in that place. The id picks the spot in the
-   grid (see app.css). */
+/* Works from the Rijksmuseum, each next to the block it belongs to. Works
+   with a place show only when the address lies there; works without a
+   place show for every address. The id picks the spot in the grid (see
+   app.css). */
 const WORKS: (RijksWork & { id: string })[] = [
   {
     id: "i-getijdenmolen",
@@ -65,6 +66,48 @@ const WORKS: (RijksWork & { id: string })[] = [
     objectNumber: "RP-T-1921-17",
     iiif: "https://iiif.micr.io/WSNzD",
     context: "Zo zag Nieuwerkerk eruit in 1735. In 1953 liep het dorp onder water.",
+  },
+  /* general: mills by Gemalen */
+  {
+    id: "i-keere",
+    place: "",
+    title: "Poldermolen en visserij in Holland. Onderhoud Hondsbosse zeewering bij Petten, ca. 1600",
+    maker: "Pieter van der Keere",
+    year: "1608-1610",
+    objectNumber: "RP-P-OB-6719",
+    iiif: "https://iiif.micr.io/qRmsD",
+    context: "Al rond 1600 pompten molens het water uit de polder, vlak achter de dijk.",
+  },
+  {
+    id: "i-kinderdijk",
+    place: "",
+    title: "Windmolens bij Kinderdijk",
+    maker: "Adolf le Comte",
+    year: "",
+    objectNumber: "RP-T-1963-39",
+    iiif: "https://iiif.micr.io/rDJMg",
+    context: "Bij Kinderdijk staan de molens nog op een rij. Samen pompten ze het water uit de Alblasserwaard.",
+  },
+  /* general: steam and electricity in the Tijdreis */
+  {
+    id: "i-cruquius",
+    place: "",
+    title: "Stoomgemaal De Cruquius in Haarlemmermeer",
+    maker: "Willem Hekking jr.",
+    year: "",
+    objectNumber: "RP-P-OB-28.402",
+    iiif: "https://iiif.micr.io/iZtis",
+    context: "Daarna kwam stoom. Gemaal De Cruquius hielp de Haarlemmermeer droog te pompen.",
+  },
+  {
+    id: "i-dongepolders",
+    place: "",
+    title: "Bemaling van de Dongepolders. Electrische Centrale",
+    maker: "Pistoor & Zoon",
+    year: "1901",
+    objectNumber: "NG-1976-34-H-1",
+    iiif: "https://iiif.micr.io/HHrDg",
+    context: "Rond 1900 kwamen er gemalen die op elektriciteit draaiden.",
   },
 ];
 
