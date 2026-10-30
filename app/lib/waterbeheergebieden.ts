@@ -27,7 +27,6 @@ export type AreaGeometry =
 
 export interface AreaFeature<P> {
   type: "Feature";
-  /* stable uuid, e.g. "8eb31cb9-4a8a-530c-b0ed-992d8094399b" */
   id: string;
   geometry: AreaGeometry;
   properties: P;
