@@ -166,6 +166,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .img .ph svg.art{position:absolute;inset:0;width:100%;height:100%;stroke:none}
 .img .badge{position:absolute;z-index:1;left:10px;top:10px;background:rgba(255,255,255,.85);color:var(--ink);border-radius:999px;padding:3px 9px;font:500 10px var(--font);text-transform:uppercase;letter-spacing:.06em}
 .img .cap b{margin-bottom:2px}
+.img .cap a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 #i-asselijn {left:126vw;top:10vh; width:22vw;height:68vh;background:#fff;border:1.5px solid var(--line)}
 #i-asselijn .ph{background:linear-gradient(170deg,#4a5a6b,#b9c3cc 70%,#e9e1d4)}
 #i-elisabeth{left:12vw; top:62vh; width:32vw;height:44vh;background:#fff;border:1.5px solid var(--line)}

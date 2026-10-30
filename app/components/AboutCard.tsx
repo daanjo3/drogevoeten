@@ -22,6 +22,7 @@ const SOURCES: { label: string; name: string; href: string }[] = [
     href: "https://basisinformatie-overstromingen.nl",
   },
   { label: "Regen", name: "KNMI daggegevens en Klimaateffectatlas", href: "https://www.daggegevens.knmi.nl" },
+  { label: "Beelden", name: "Rijksmuseum", href: "https://www.rijksmuseum.nl" },
   { label: "Koppelingen", name: "Wikidata", href: "https://www.wikidata.org" },
 ];
 

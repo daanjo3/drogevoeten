@@ -11,7 +11,7 @@ import { InfoPanel } from "../components/InfoPanel";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
 import { NlMap } from "../components/NlMap";
-import { BoreelArt, ImageTile, PrentArt } from "../components/ImageTile";
+import { BoreelArt, ImageTile, RijksTile, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
@@ -20,6 +20,39 @@ import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
 import { freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
+
+/* Works from the Rijksmuseum in the image tiles. TODO: pick them per
+   address from the data layer; these four fit the demo addresses. */
+const WORKS: Record<string, RijksWork> = {
+  getijdenmolen: {
+    title: "Gezicht op het Spin- en Rasphuis, Getijdenmolen en Stadsschuur te Middelburg",
+    maker: "anoniem",
+    year: "1696",
+    objectNumber: "RP-P-AO-15-141K-2",
+    iiif: "https://iiif.micr.io/ySnWZ",
+  },
+  beemster: {
+    title: "Tweede eeuwfeest van de droogmaking van de Beemster",
+    maker: "Willem de Wijs",
+    year: "1712",
+    objectNumber: "NG-VG-1-2060",
+    iiif: "https://iiif.micr.io/MjziZ",
+  },
+  nieuwerkerk: {
+    title: "Nieuwerkerk te Duiveland",
+    maker: "Cornelis Pronk",
+    year: "1735",
+    objectNumber: "RP-T-1921-17",
+    iiif: "https://iiif.micr.io/WSNzD",
+  },
+  stadswallen: {
+    title: "Stadswallen van Middelburg met de Koepoort, de Oostkerk en een molen",
+    maker: "anoniem",
+    year: "1700-1800",
+    objectNumber: "RP-T-1894-A-2959",
+    iiif: "https://iiif.micr.io/tOijd",
+  },
+};
 
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
@@ -195,34 +228,10 @@ export default function Home() {
         <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
 
-        <ImageTile
-          id="i-asselijn"
-          title="Dijkherstel na een doorbraak"
-          caption="foto · jaar en bron nog invullen"
-          src="/img/dijkherstel.jpg"
-          alt="Mannen met schoppen herstellen een doorgebroken dijk, met ondergelopen land en kale bomen op de achtergrond"
-        />
-        <ImageTile
-          id="i-molen"
-          title="Molen"
-          caption="pentekening · bron nog invullen"
-          src="/img/molen-tekening.jpg"
-          alt="Pentekening van een stellingmolen met wolken erachter"
-        />
-        <ImageTile
-          id="i-elisabeth"
-          title="Stadsgezicht met molen"
-          caption="schilderij · maker en bron nog invullen"
-          src="/img/stadsgezicht-molen.jpg"
-          alt="Geschilderd stadsgezicht aan het water met huizen, een rokende schoorsteen en een grote molen"
-        />
-        <ImageTile
-          id="i-prent"
-          badge="placeholder · beeld via IIIF"
-          title="Watersnood na dijkdoorbraken bij de grote rivieren"
-          caption="prent, 1740-1741 · Rijksmuseum"
-          art={<PrentArt />}
-        />
+        <RijksTile id="i-asselijn" work={WORKS.nieuwerkerk} />
+        <RijksTile id="i-molen" work={WORKS.stadswallen} />
+        <RijksTile id="i-elisabeth" work={WORKS.getijdenmolen} />
+        <RijksTile id="i-prent" work={WORKS.beemster} />
         <ImageTile
           id="i-boreel"
           badge="placeholder · foto"
