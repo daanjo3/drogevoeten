@@ -183,10 +183,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue-deep); color:#fff}
 #p-tijd {left:52vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
-#p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:linear-gradient(180deg,var(--green2) 0%,var(--blue-deep) 100%); color:#fff}
+#p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:var(--g-lavender)}
 #p-gemaal p{margin:0 0 10px}
 #p-gemaal h2{margin:6px 0 12px}
-#p-gemaal .src-link{display:inline-block;margin-top:6px;font:500 var(--fs-label)/1.4 var(--font);color:#fff;opacity:.8}
+#p-gemaal .src-link{display:inline-block;margin-top:6px;font:500 var(--fs-label)/1.4 var(--font);color:var(--ink);opacity:.7}
 
 /* beeldtegels */
 /* print tiles size to their content: the print keeps its ratio, the caption sits under it */
