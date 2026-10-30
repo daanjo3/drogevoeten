@@ -23,7 +23,7 @@ Teamafspraak: documentatie in het Nederlands, code en commentaar in het Engels.
 
 1. **Startscherm.** Kop, intro, zoekbalk met eigen knipperende cursor, drie voorbeeldplekken. Onderaan een landschap in drie svg-lagen (zee hoger dan polder, dijk, molen, gemaal) met parallax en subtiele animaties. Na zoeken volgt een vertrektransitie: tekst schuift weg, speld valt, je duikt het landschap in, het grid zoomt in.
 2. **Canvas** (`#world` > `#canvas`). Bento-grid van absoluut gepositioneerde blokken in vw/vh, vrij scrollbaar in twee richtingen. De randen vagen weg via een css-mask op `#world`.
-   - `#p-huis` is de huiskamer. Hier komt de 3D/AR-kamer van het team als iframe. Het water stijgt hier in de misgaat-modus.
+   - `#p-huis` is de huiskamer. In het prototype staat hier een render als placeholder; in de app draait de 3D-woonkamer uit Unity (zie hieronder). Het water stijgt hier in de misgaat-modus.
    - `#p-info` staat naast de huiskamer en heeft twee modi, `data-mode="info"` en `data-mode="risk"`. In risk toont het de scenarioknoppen.
    - `#p-tijd` is de tijdreis, een lange verticale kolom.
    - `#p-buurt` toont de gemalen in de buurt, klikbaar op kaart en lijst.
@@ -66,7 +66,7 @@ Placeholder:
 
 ## Open punten
 
-- [ ] De 3D-huiskamer in `#p-huis`, als WebGL-build van het Unity-project in `unity/`. De waterlijn moet daarnaartoe.
+- [x] De 3D-huiskamer in `#p-huis`, als WebGL-build van het Unity-project in `unity/`. Zit in de app (`app/components/UnityRoom.tsx`). De waterlijn ligt nog als html-laag over het canvas; die naar Unity brengen is een volgende stap.
 - [ ] Data per adres ophalen via het koppelvlak van de datalaag, in plaats van hardcoded.
 - [ ] Beelden via IIIF bij de bron (Rijksmuseum, RCE beeldbank). Bronnen van de drie beelden in `img/` invullen.
 - [ ] Kaart van Nederland uit open data (PDOK), speld op echte coördinaten van de PDOK Locatieserver.
@@ -80,6 +80,18 @@ In `design/docs/` staan referentiedocs die bewust niet in de repo staan (zie `.g
 - `docs/02-jurering-en-oplevering.md` bevat de juryeisen en wat we moeten opleveren.
 - `docs/04-integration-layer-api.md` is de NDE-spec voor het koppelvlak tussen datalaag en presentatielaag.
 - `docs/05-laws-of-ux.md` bevat de ontwerpprincipes om keuzes aan te toetsen.
+
+## Stand van zaken in `app/`
+
+Gebouwd en werkend: startscherm met landschap en vertrektransitie, het canvas met alle blokken, navigatie, minimap, risicomodus met scenarioknoppen, tooltips, infoknop met bronnenkaart, deelknop, en de 3D-woonkamer. Het buurtblok haalt gemalen en molens live op uit de Landschapsatlas (RCE). De overige teksten en cijfers staan nog in `app/data/place.ts` (Middelburg) en wachten op het koppelvlak.
+
+### 3D-woonkamer
+
+De Unity WebGL-build staat in `app/public/woonkamer/` en is bewust niet in git (te groot, zie `.gitignore`); de bron staat in `unity/`. `UnityRoom.tsx` laadt hem via `mount()` uit `woonkamer/unity-embed.js`, pas nadat een adres is gekozen. Tijdens het laden staat de render-png met een voortgangsbalk; mislukt het laden, dan blijft de png staan. Het canvas heeft `pointer-events: none`, zodat het grid eroverheen blijft scrollen; interactie met de kamer kan via de knop "volledig scherm".
+
+### Copy
+
+De teksten zijn aangepast (startscherm, "Welkom thuis", infokaart, gemalenblok, navigatie, regenknoppen, bronnenkaart). In de infokaart variëren hoogte, boven/onder, gemaal, waterschap en jaartal per adres; die velden staan in `PlaceData`.
 
 ## Plan: bouwen in React (`app/`)
 
