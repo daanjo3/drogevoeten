@@ -2,6 +2,8 @@ import { useState, type Ref } from "react";
 import { Landscape } from "./Landscape";
 import { SearchBar, type SearchBarHandle } from "./SearchBar";
 import type { LocatieserverDoc } from "../lib/locatieserver";
+import { TERMS } from "../data/place";
+import { Tip } from "./Tip";
 
 /* idle: visible and waiting for an address. going: the leaving transition
    runs (text slides away, pin drops, we dive into the landscape). hidden:
@@ -48,7 +50,11 @@ export function StartScreen({
       <div className="startbox">
         <h1>Wie houdt jouw voeten droog?</h1>
         <p className="lead">
-          Een kwart van Nederland ligt lager dan de zee. Dat je hier droog zit, gaat niet vanzelf. Al eeuwen pompen molens en
+          Een kwart van Nederland ligt lager dan de{" "}
+          <Tip kind="term" tip={TERMS.zeeniveau}>
+            zee
+          </Tip>
+          . Dat je hier droog zit, gaat niet vanzelf. Al eeuwen pompen molens en
           gemalen het water weg, en houden dijken de zee tegen. Typ je adres of woonplaats. Dan zie je wie jouw plek droog houdt, en wat er
           gebeurt als het misgaat.
         </p>

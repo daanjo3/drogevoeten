@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { Mode, PlaceData } from "../data/place";
 import { TERMS } from "../data/place";
 import { useAddressHeight } from "../lib/ahn";
@@ -29,9 +30,17 @@ export function InfoPanel({
   const height = useAddressHeight(locatie);
   const ground = height.data?.ground;
 
-  let heightText: string;
+  let heightText: ReactNode;
   if (ground) {
-    heightText = `Je huiskamer ligt ${nl(Math.abs(ground.value))} meter ${ground.value >= 0 ? "boven" : "onder"} de zee.`;
+    heightText = (
+      <>
+        Je huiskamer ligt {nl(Math.abs(ground.value))} meter {ground.value >= 0 ? "boven" : "onder"} de{" "}
+        <Tip kind="term" tip={TERMS.zeeniveau}>
+          zee
+        </Tip>
+        .
+      </>
+    );
   } else if (height.isError) {
     heightText = "Het hoogtebestand gaf geen antwoord. Probeer het later nog eens.";
   } else if (height.isSuccess) {

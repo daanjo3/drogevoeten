@@ -1,5 +1,6 @@
 import { nl } from "../lib/scenario";
 import { Tip } from "./Tip";
+import { TERMS } from "../data/place";
 
 /* Map of the Netherlands in one colour (outline from svgrepo.com, CC0) with
    a pin on the address and the height
@@ -60,7 +61,11 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
         </svg>
       </div>
       <p className="kaartcap">
-        Een kwart van Nederland ligt lager dan de zee. Het diepste stukje ligt bij Nieuwerkerk aan den IJssel, bijna 7 meter
+        Een kwart van Nederland ligt lager dan de{" "}
+        <Tip kind="term" tip={TERMS.zeeniveau}>
+          zee
+        </Tip>
+        . Het diepste stukje ligt bij Nieuwerkerk aan den IJssel, bijna 7 meter
         onder de zee. Meer dan de helft van het land kan overstromen, door de zee of door de rivieren.
       </p>
       <p className="src">

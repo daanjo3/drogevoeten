@@ -122,6 +122,7 @@ export const MIDDELBURG: PlaceData = {
    [brackets] in texts are looked up here. */
 export const TERMS: Record<string, string> = {
   NAP: "Normaal Amsterdams Peil. Daarmee meten we in Nederland hoe hoog iets ligt. Het is ongeveer de hoogte van de zee.",
+  zeeniveau: "Ongeveer de gemiddelde hoogte van de zee. In Nederland meten we hoogte vanaf het Normaal Amsterdams Peil, kortweg NAP.",
   peilgebied: "Een stuk land waar het water in de sloten overal even hoog moet staan.",
   gemaal: "Een gebouw met grote pompen. Het pompt water uit de polder naar een kanaal, rivier of de zee.",
   waterschap: "De organisatie die zorgt voor de dijken, sloten en gemalen in een gebied.",
