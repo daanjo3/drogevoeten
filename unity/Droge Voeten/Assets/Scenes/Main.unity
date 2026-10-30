@@ -1279,6 +1279,15 @@ MonoBehaviour:
   - {fileID: 7126853543136563385, guid: ba396e7b809724a24aa99dcf2b6d7e55, type: 3}
   - {fileID: 4444753632728433444, guid: f143daa60b5724147ad13ef840c1ac27, type: 3}
   - {fileID: 5920389794382689200, guid: 52ffa4b144a7440fba00b72224e5b4a2, type: 3}
+  water: {fileID: 161945107}
+  floorHeight: 0.1
+  minHeight: 0.3
+  maxHeight: 2
+  minRate: 0.05
+  maxRate: 1
+  maxFish: 15
+  margin: 0.1
+  spawnAngle: 65.2
 --- !u!1 &338090034
 GameObject:
   m_ObjectHideFlags: 0
