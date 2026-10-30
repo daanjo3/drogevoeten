@@ -1,6 +1,6 @@
 // https://api.pdok.nl/bzk/locatieserver/search/v3_1/ui/#/Locatieserver
 
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, queryOptions, useQuery } from "@tanstack/react-query";
 
 const BASE_URL = "https://api.pdok.nl/bzk/locatieserver/search/v3_1";
 
@@ -26,6 +26,9 @@ export interface FreeParams {
   rows?: number;
   sort?: string;
 }
+
+/* Same parameters as free; suggest is tuned for type-ahead. */
+export type SuggestParams = FreeParams;
 
 export interface LookupParams {
   /* object id, e.g. from a free or suggest result */
@@ -91,6 +94,21 @@ export function useFree(params: FreeParams) {
   return useQuery(freeQueryOptions(params));
 }
 
+/* Suggest (type-ahead): matches for a partial query, with id and weergavenaam. */
+export function suggestQueryOptions(params: SuggestParams) {
+  return queryOptions({
+    queryKey: ["locatieserver", "suggest", params],
+    queryFn: ({ signal }) => request("suggest", params, signal),
+    enabled: !!params.q,
+    // keep the old list on screen while the next one loads
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useSuggest(params: SuggestParams, enabled = true) {
+  return useQuery({ ...suggestQueryOptions(params), enabled: enabled && !!params.q });
+}
+
 /* Lookup a single object by id, including its (simplified) geometry. */
 export function lookupQueryOptions(params: LookupParams) {
   return queryOptions({
@@ -110,7 +128,7 @@ type Params = Record<string, string | number | string[] | undefined>;
 
 async function request(
   path: string,
-  params: FreeParams | LookupParams,
+  params: FreeParams | SuggestParams | LookupParams,
   signal?: AbortSignal,
 ): Promise<LocatieserverResponse> {
   const url = new URL(`${BASE_URL}/${path}`);

@@ -1,6 +1,7 @@
 import { useState, type Ref } from "react";
 import { Landscape } from "./Landscape";
 import { SearchBar, type SearchBarHandle } from "./SearchBar";
+import type { LocatieserverDoc } from "../lib/locatieserver";
 
 /* idle: visible and waiting for an address. going: the leaving transition
    runs (text slides away, pin drops, we dive into the landscape). hidden:
@@ -16,12 +17,14 @@ const EXAMPLES: { label: string; address: string }[] = [
 export function StartScreen({
   phase,
   onSearch,
+  onPick,
   searchHandle,
   busy = false,
   message,
 }: {
   phase: StartPhase;
   onSearch: (address: string) => void;
+  onPick: (doc: LocatieserverDoc) => void;
   searchHandle?: Ref<SearchBarHandle>;
   busy?: boolean;
   message?: string | null;
@@ -50,7 +53,7 @@ export function StartScreen({
           gemalen het water weg, en houden dijken de zee tegen. Typ je adres. Dan zie je wie jouw plek droog houdt, en wat er
           gebeurt als het misgaat.
         </p>
-        <SearchBar onSearch={onSearch} handle={searchHandle} busy={busy} message={message} />
+        <SearchBar onSearch={onSearch} onPick={onPick} handle={searchHandle} busy={busy} message={message} />
         <div className="defaults">
           {EXAMPLES.map((x) => (
             <button key={x.label} type="button" disabled={busy} onClick={() => onSearch(x.address)}>

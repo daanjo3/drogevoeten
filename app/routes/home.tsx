@@ -18,7 +18,7 @@ import { AboutCard } from "../components/AboutCard";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
-import { freeQueryOptions, useLookup } from "../lib/locatieserver";
+import { freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
@@ -98,6 +98,14 @@ export default function Home() {
     dive();
   }
 
+  /* a suggestion already has its id: no search needed */
+  function pick(doc: LocatieserverDoc) {
+    if (searching) return;
+    setSearchMsg(null);
+    setParams({ id: doc.id }, { replace: true });
+    dive();
+  }
+
   /* the leaving transition: text slides up, the pin drops, we dive into
      the landscape, then the start screen fades and the grid zooms in */
   function dive() {
@@ -149,6 +157,7 @@ export default function Home() {
         key={startKey}
         phase={phase}
         onSearch={begin}
+        onPick={pick}
         searchHandle={search}
         busy={searching}
         message={searchMsg}
