@@ -43,7 +43,9 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap: number }) {
   const h = Math.abs(nap);
   return (
     <section className="panel" id="p-map">
-      <h2>Hier woon jij</h2>
+      <h2>
+        Je woont {nl(h)} meter {nap >= 0 ? "boven" : "onder"} de zee
+      </h2>
       <div className="kaartrij">
         <svg className="nl" viewBox="0 0 512 512" aria-label="Kaart van Nederland met jouw straat" role="img">
           {OUTLINE.map((d, i) => (
@@ -56,9 +58,6 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap: number }) {
         </svg>
       </div>
       <p className="kaartcap">
-        <b>
-          Je woont {nl(h)} meter {nap >= 0 ? "boven" : "onder"} de zee.
-        </b>{" "}
         Een kwart van Nederland ligt lager dan de zee. Het diepste stukje ligt bij Nieuwerkerk aan den IJssel, bijna 7 meter
         onder de zee. Meer dan de helft van het land kan overstromen, door de zee of door de rivieren.{" "}
         <Tip kind="bron" tip="Planbureau voor de Leefomgeving (2010): 26 procent van Nederland ligt onder zeeniveau, 59 procent kan overstromen. Laagste punt: Rijkswaterstaat, 6,76 meter onder NAP.">
