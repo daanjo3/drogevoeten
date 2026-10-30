@@ -4,11 +4,11 @@ import { Icon } from "./Icons";
 import { RichText, Tip } from "./Tip";
 
 /* The time travel: a long vertical column, read from top to bottom. */
-/* `active` is true while the block is the one nearest the centre; the steps
-   then slide in one by one (css, keyed on the index) */
-export function TijdreisPanel({ place, active }: { place: PlaceData; active?: boolean }) {
+/* The steps slide in one by one (css, keyed on the index) once the canvas
+   marks the block as seen. */
+export function TijdreisPanel({ place }: { place: PlaceData }) {
   return (
-    <section className={`panel${active ? " in" : ""}`} id="p-tijd">
+    <section className="panel" id="p-tijd">
       <span className="meta">1200 → nu</span>
       <h2>
         <Icon name="tijd" />

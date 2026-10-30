@@ -180,7 +180,7 @@ export default function Home() {
         <HuiskamerPanel place={place} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
         <NlMap centroide={locatie?.centroide_ll} />
-        <TijdreisPanel place={place} active={canvas.active === "tijd"} />
+        <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
 
         <ImageTile

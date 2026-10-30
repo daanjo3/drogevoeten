@@ -103,6 +103,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .startbox h1{margin:0 0 10px}
 .startbox .lead{color:var(--mute);opacity:1;margin:0 0 24px}
 .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px}
+.search > svg{fill:var(--sun);stroke:var(--sun)}
 .search input{flex:1;background:none;border:0;color:var(--ink);font-size:20px;outline:0;min-width:0}
 .search button{border:0;border-radius:999px;background:var(--dark);color:#fff;padding:12px 20px;font-weight:700}
 .searchwrap{position:relative}
@@ -141,10 +142,14 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 /* ===== CANVAS, bento vanuit het midden ===== */
 #world{position:relative;width:100vw;height:100vh;overflow:auto}
 #canvas{position:relative;width:240vw;height:256vh}
-.panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden;box-shadow:var(--shadow)}
+.panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden;box-shadow:var(--shadow);opacity:0;translate:0 28px;transition:opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
+/* `seen` is set by useCanvas once a block scrolls into view */
+.panel.seen{opacity:1;translate:none}
+@media (hover:hover){.panel:hover{scale:1.015}}
+@media (prefers-reduced-motion:reduce){.panel{transition:none;translate:none}}
 /* middelpunt canvas 120vw,120vh = midden van de huiskamer */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
-#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); display:grid; transition:background .4s,color .4s}
+#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
 #p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); }
 #p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:linear-gradient(180deg,var(--lav) 0%,var(--lav2) 100%)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%); color:#fff; display:flex; flex-direction:column}
@@ -217,9 +222,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .tl li{position:relative;background:rgba(255,255,255,.55);border-radius:14px;padding:12px 14px}
 .tl li:before{content:"";position:absolute;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
 .tl li h3{margin-bottom:2px}
-#p-tijd.in .tl li{animation:slidein .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 90ms)}
+.tl li{opacity:0}
+#p-tijd.seen .tl li{animation:slidein .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.35s + var(--i) * 90ms)}
 @keyframes slidein{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){#p-tijd.in .tl li{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl li{opacity:1}#p-tijd.seen .tl li{animation:none}}
 .tl li p{margin:4px 0}
 
 /* buurt */
@@ -232,7 +238,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .buurt .map button{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid #fff;padding:0;transform:translate(-50%,-50%)}
 .buurt .map button[aria-pressed="true"]{background:var(--sun);border-color:var(--ink);box-shadow:0 0 0 5px rgba(255,255,255,.5)}
 .buurt .map .you{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--ink);position:absolute;transform:translate(-50%,-50%)}
-/* the list scrolls inside the panel, the detail stays in view below it */
+/* the list scrolls inside the panel, the detail stays in view above it */
 .buurt .side{display:flex;flex-direction:column;min-height:0}
 .buurt ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;align-content:start;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 .buurt li button{width:100%;text-align:left;background:rgba(255,255,255,.25);border:1.5px solid transparent;border-radius:14px;padding:12px;color:#fff;display:flex;justify-content:space-between;gap:8px;align-items:center}
@@ -240,24 +246,42 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .pill{border:1.5px solid var(--ink);border-radius:999px;padding:2px 8px;white-space:nowrap;background:#fff;color:var(--ink)}
   /* a station or mill that works now is black; the Landschapsatlas says "in bedrijf" or "maalvaardig" */
   .pill[data-status="werkt nu mee" i],.pill[data-status="in bedrijf" i],.pill[data-status="maalvaardig" i]{background:var(--ink);color:#fff;border-color:#fff}
-#detail{flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:var(--fs-p);min-height:90px;margin-top:12px}
+#detail{order:-1;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:var(--fs-p);min-height:90px;margin:0 0 12px}
+/* nothing chosen yet: a small hint */
+#detail:not(:has(b)){min-height:0;padding:8px 14px;font:500 var(--fs-label)/1.4 var(--font);text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
 #detail b{margin-bottom:4px}
 #detail.with-foto{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:start}
 #detail .foto{display:block;cursor:help}
 #detail .foto img{display:block;width:72px;height:72px;object-fit:cover;border-radius:10px;background:var(--line)}
 #detail small{color:var(--mute);display:block;margin-top:6px}
 
+/* tablet (iPad portrait and smaller): one column, the bar keeps a margin
+   on both sides, the minimap sits above it */
 @media (max-width:900px){
   #canvas{width:100vw;height:auto;padding:70px 0 110px}
   .panel{position:relative;left:0!important;top:0!important;width:calc(100vw - 24px)!important;height:auto!important;min-height:60vh;margin:12px}
   .img{min-height:40vh!important}
   .buurt{grid-template-columns:1fr;grid-template-rows:auto}
   .buurt .map{min-height:320px}
+  #nav{left:16px;right:16px;transform:none;width:auto;justify-content:space-between}
+  #nav button{flex:1;min-width:0;justify-content:center;padding:10px 8px}
   #nav .l{display:none}
   #nav .t{font-size:13px}
-  #nav button{padding:10px}
-  #mini{display:none}
+  #mini{bottom:96px;width:72px;height:140px}
   #out{position:relative;left:0;right:0;bottom:0;margin-top:50vh}
+}
+/* phone: the bar sticks to the bottom with only the titles, the street
+   name sits just above it, no minimap, a lighter vignette */
+@media (max-width:600px){
+  #world{--fade:6vmin}
+  #canvas{padding:16px 0 150px}
+  #nav{bottom:12px;left:12px;right:12px;border-radius:16px;padding:4px}
+  #nav button{padding:10px 4px}
+  #nav button svg{display:none}
+  #nav .t{font-size:11px}
+  #nav .sep{margin:8px 1px}
+  #mini{display:none}
+  #where{top:auto;bottom:76px;left:12px;right:12px;transform:none;width:auto}
 }
 
 /* search button icon (inline style in the prototype) */

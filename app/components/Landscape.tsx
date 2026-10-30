@@ -71,11 +71,10 @@ export function Landscape({ phase, dx }: { phase: LandscapePhase; dx: number }) 
         </g>
         {/* molen */}
         <g transform="translate(900 314) scale(.82)">
-          <polygon points="-36,0 36,0 24,-124 -24,-124" fill="#242424"/>
-          <path d="M-28 -122 Q0 -162 28 -122Z" fill="#242424"/>
-          <rect x="-10" y="-40" width="20" height="40" rx="10" fill="#F4EFEB"/>
+          <polygon points="-36,0 36,0 24,-124 -24,-124" fill="#FFA654"/>
+          <path d="M-28 -122 Q0 -162 28 -122Z" fill="#FFA654"/>
           <g transform="translate(0 -132)"><g className="spin">
-            <g fill="#F4EFEB" stroke="#242424" strokeWidth="4">
+            <g fill="#FFA654" stroke="#242424" strokeWidth="4">
               <rect x="6" y="-106" width="24" height="84" rx="4"/><rect x="-30" y="22" width="24" height="84" rx="4"/>
               <rect x="-106" y="-30" width="84" height="24" rx="4"/><rect x="22" y="6" width="84" height="24" rx="4"/>
             </g>

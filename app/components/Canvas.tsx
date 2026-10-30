@@ -180,6 +180,19 @@ export function useCanvas() {
     onScroll();
   }, [measure, go, onScroll]);
 
+  /* reveal: a block gets `seen` (and keeps it) once a quarter of it is in view */
+  useEffect(() => {
+    const world = worldRef.current;
+    const canvas = canvasRef.current;
+    if (!world || !canvas) return;
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("seen")),
+      { root: world, threshold: 0.25 },
+    );
+    canvas.querySelectorAll(":scope > .panel").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
   useEffect(() => {
     const world = worldRef.current;
     if (!world) return;
