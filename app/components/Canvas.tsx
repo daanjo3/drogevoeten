@@ -189,8 +189,15 @@ export function useCanvas() {
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("seen")),
       { root: world, threshold: 0.25 },
     );
-    canvas.querySelectorAll(":scope > .panel").forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    const observeAll = () => canvas.querySelectorAll(":scope > .panel:not(.seen)").forEach((el) => io.observe(el));
+    observeAll();
+    /* tiles can be added later (works per address) */
+    const mo = new MutationObserver(observeAll);
+    mo.observe(canvas, { childList: true });
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -221,7 +228,7 @@ export function useCanvas() {
     };
   }, [measure, onScroll, snap]);
 
-  return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel };
+  return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel, measure };
 }
 
 /* The visible part of the canvas, updated on scroll and resize. Use it only

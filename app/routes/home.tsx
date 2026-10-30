@@ -11,7 +11,7 @@ import { InfoPanel } from "../components/InfoPanel";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
 import { NlMap } from "../components/NlMap";
-import { RijksTile, type RijksWork } from "../components/ImageTile";
+import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
@@ -21,38 +21,52 @@ import type { SearchBarHandle } from "../components/SearchBar";
 import { freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 
-/* Works from the Rijksmuseum in the image tiles. TODO: pick them per
-   address from the data layer; these four fit the demo addresses. */
-const WORKS: Record<string, RijksWork> = {
-  getijdenmolen: {
+/* Works from the Rijksmuseum, each next to the block it belongs to and only
+   shown when the address lies in that place. The id picks the spot in the
+   grid (see app.css). */
+const WORKS: (RijksWork & { id: string })[] = [
+  {
+    id: "i-getijdenmolen",
+    place: "Middelburg",
     title: "Gezicht op het Spin- en Rasphuis, Getijdenmolen en Stadsschuur te Middelburg",
     maker: "anoniem",
     year: "1696",
     objectNumber: "RP-P-AO-15-141K-2",
     iiif: "https://iiif.micr.io/ySnWZ",
+    context:
+      "Zo zag het hier eruit in 1696. De getijdenmolen draaide op het water dat met eb en vloed in en uit stroomde. Bij de Stadsschuur ligt nu nog een sluis die meedoet.",
   },
-  beemster: {
-    title: "Tweede eeuwfeest van de droogmaking van de Beemster",
-    maker: "Willem de Wijs",
-    year: "1712",
-    objectNumber: "NG-VG-1-2060",
-    iiif: "https://iiif.micr.io/MjziZ",
-  },
-  nieuwerkerk: {
-    title: "Nieuwerkerk te Duiveland",
-    maker: "Cornelis Pronk",
-    year: "1735",
-    objectNumber: "RP-T-1921-17",
-    iiif: "https://iiif.micr.io/WSNzD",
-  },
-  stadswallen: {
+  {
+    id: "i-stadswallen",
+    place: "Middelburg",
     title: "Stadswallen van Middelburg met de Koepoort, de Oostkerk en een molen",
     maker: "anoniem",
     year: "1700-1800",
     objectNumber: "RP-T-1894-A-2959",
     iiif: "https://iiif.micr.io/tOijd",
+    context: "Op de stadswallen stonden molens. Die maalden graan, geen water. Niet elke molen hield je voeten droog.",
   },
-};
+  {
+    id: "i-beemster",
+    place: "Beemster",
+    title: "Tweede eeuwfeest van de droogmaking van de Beemster",
+    maker: "Willem de Wijs",
+    year: "1712",
+    objectNumber: "NG-VG-1-2060",
+    iiif: "https://iiif.micr.io/MjziZ",
+    context: "In 1712 was de Beemster honderd jaar droog. Daarvoor werd deze penning gemaakt.",
+  },
+  {
+    id: "i-nieuwerkerk",
+    place: "Nieuwerkerk",
+    title: "Nieuwerkerk te Duiveland",
+    maker: "Cornelis Pronk",
+    year: "1735",
+    objectNumber: "RP-T-1921-17",
+    iiif: "https://iiif.micr.io/WSNzD",
+    context: "Zo zag Nieuwerkerk eruit in 1735. In 1953 liep het dorp onder water.",
+  },
+];
 
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
@@ -88,6 +102,10 @@ export default function Home() {
     dike: 0,
   });
   const canvas = useCanvas();
+  const woonplaats = locatie?.woonplaatsnaam;
+  useEffect(() => {
+    canvas.measure();
+  }, [woonplaats, canvas.measure]);
 
   function onGo(t: NavTarget) {
     if (t.mode) setMode(t.mode);
@@ -228,10 +246,9 @@ export default function Home() {
         <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
 
-        <RijksTile id="i-asselijn" work={WORKS.nieuwerkerk} />
-        <RijksTile id="i-molen" work={WORKS.stadswallen} />
-        <RijksTile id="i-elisabeth" work={WORKS.getijdenmolen} />
-        <RijksTile id="i-prent" work={WORKS.beemster} />
+        {worksFor(WORKS, locatie?.woonplaatsnaam).map((w) => (
+          <RijksTile key={w.id} id={w.id} work={w} />
+        ))}
       </Canvas>
 
       <TooltipLayer scrollRef={canvas.worldRef} />

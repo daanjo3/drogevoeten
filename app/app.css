@@ -164,19 +164,20 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 /* beeldtegels */
 .img{display:flex;flex-direction:column;justify-content:space-between;padding:18px}
 .img .ph{flex:1;border-radius:14px;margin-bottom:12px;position:relative;overflow:hidden;background:none!important}
-.img .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.img .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .img .ph svg.art{position:absolute;inset:0;width:100%;height:100%;stroke:none}
 .img .badge{position:absolute;z-index:1;left:10px;top:10px;background:rgba(255,255,255,.85);color:var(--ink);border-radius:999px;padding:3px 9px;font:500 10px var(--font);text-transform:uppercase;letter-spacing:.06em}
 .img .cap b{margin-bottom:2px}
+.img .cap .context{margin:0 0 8px;font:400 var(--fs-p)/1.45 var(--font);text-transform:none;letter-spacing:0;color:var(--ink)}
+.img .cap .museum{display:block;color:var(--mute)}
 .img .cap a{color:inherit;text-decoration:underline;text-underline-offset:2px}
-#i-asselijn {left:126vw;top:11vh; width:22vw;height:68vh;background:#fff;border:1.5px solid var(--line)}
-#i-asselijn .ph{background:linear-gradient(170deg,#4a5a6b,#b9c3cc 70%,#e9e1d4)}
-#i-elisabeth{left:16vw; top:62vh; width:32vw;height:44vh;background:#fff;border:1.5px solid var(--line)}
-#i-elisabeth .ph{background:linear-gradient(170deg,#6a7a4f,#c9b98d 60%,#7aa0b8)}
-#i-prent   {left:152vw;top:23vh; width:28vw;height:56vh;background:#fff;border:1.5px solid var(--line)}
-#i-prent .ph{background:repeating-linear-gradient(135deg,#d8d1c8 0 2px,#efe9e2 2px 7px)}
-#i-molen   {left:184vw;top:85vh; width:34vw;height:46vh;background:#fff;border:1.5px solid var(--line)}
-#i-molen .ph{background:linear-gradient(170deg,var(--lav2),#fff3e6)}
+/* works next to their block: getijdenmolen by Gemalen, stadswallen and the
+   Beemster medal by the Tijdreis, Nieuwerkerk by Als het misgaat */
+.img{background:#fff;border:1.5px solid var(--line)}
+#i-getijdenmolen{left:152vw;top:161vh;width:28vw;height:52vh}
+#i-stadswallen  {left:16vw; top:45vh; width:32vw;height:48vh}
+#i-beemster     {left:16vw; top:99vh; width:32vw;height:60vh}
+#i-nieuwerkerk  {left:184vw;top:85vh; width:30vw;height:70vh}
 
 /* kamers */
 .room{position:absolute;inset:0}

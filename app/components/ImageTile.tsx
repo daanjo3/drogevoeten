@@ -8,6 +8,16 @@ export interface RijksWork {
   year: string;
   objectNumber: string;
   iiif: string;
+  /* the place this work belongs to, matched against the Locatieserver woonplaats */
+  place: string;
+  /* one sentence that ties the work to the block it sits next to */
+  context: string;
+}
+
+/* Does this work belong to the address? "beemster" also matches Middenbeemster. */
+export function worksFor<T extends RijksWork>(works: T[], woonplaats?: string): T[] {
+  const w = (woonplaats ?? "").toLowerCase();
+  return works.filter((x) => w.includes(x.place.toLowerCase()));
 }
 
 export function rijksSrc(w: RijksWork): string {
@@ -18,24 +28,24 @@ export function rijksUrl(w: RijksWork): string {
   return `https://www.rijksmuseum.nl/nl/collectie/${w.objectNumber}`;
 }
 
-/* Tile for a Rijksmuseum work: title, maker and year, museum and object
-   number with a link to the collection page. */
+/* Tile for a Rijksmuseum work: one context sentence, then the museum
+   caption (title, maker, year, museum, object number with a link). */
 export function RijksTile({ id, work }: { id: string; work: RijksWork }) {
   return (
-    <ImageTile
-      id={id}
-      title={work.title}
-      src={rijksSrc(work)}
-      alt={`${work.title}, ${work.maker}, ${work.year}`}
-      caption={
-        <>
-          {work.maker}, {work.year} · Rijksmuseum ·{" "}
+    <figure className="panel img" id={id}>
+      <div className="ph">
+        <img src={rijksSrc(work)} alt={`${work.title}, ${work.maker}, ${work.year}`} loading="lazy" />
+      </div>
+      <figcaption className="cap">
+        <p className="context">{work.context}</p>
+        <span className="museum">
+          {work.title} · {work.maker}, {work.year} · Rijksmuseum ·{" "}
           <a href={rijksUrl(work)} target="_blank" rel="noreferrer">
             {work.objectNumber}
           </a>
-        </>
-      }
-    />
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 
