@@ -19,6 +19,7 @@ import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
 import { freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
+import { useAddressHeight } from "../lib/ahn";
 
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
@@ -32,6 +33,8 @@ export default function Home() {
   const locatie = lookup.data?.response.docs[0];
   /* TODO: fetch the rest of the place from the data layer; only the address is real now */
   const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address) };
+  /* ground level at the address (AHN); the panels read the same cached query */
+  const height = useAddressHeight(locatie);
 
   /* with an address in the url we skip the start screen */
   const [phase, setPhase] = useState<StartPhase>(id ? "hidden" : "idle");
@@ -177,9 +180,16 @@ export default function Home() {
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
-        <HuiskamerPanel place={place} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
-        <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
-        <NlMap centroide={locatie?.centroide_ll} nap={place.nap} />
+        <HuiskamerPanel place={place} locatie={locatie} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
+        <InfoPanel
+          place={place}
+          locatie={locatie}
+          mode={mode}
+          scenario={scenario}
+          onScenario={setScenario}
+          onClose={() => setMode("info")}
+        />
+        <NlMap centroide={locatie?.centroide_ll} nap={height.data?.ground?.value} />
         <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
 

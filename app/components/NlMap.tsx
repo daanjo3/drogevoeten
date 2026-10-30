@@ -38,13 +38,15 @@ const OUTLINE = [
   "M297.184,175.631c-3.348-0.637-6.289-2.336-8.527-4.697l-22.215,24.086l-32.849,16.482l-1.029,2.23 l13.248,5.285c0.506,0.212,1.028,0.441,1.519,0.71l22.068,11.68l5.292-1.985l5.946-10.258c1.323-2.286,3.202-4.198,5.44-5.57 l21.807-13.198l6.108-10.682l-1.257-4.526c-0.622-2.254-0.735-4.524-0.376-6.689L297.184,175.631z",
 ];
 
-export function NlMap({ centroide, nap }: { centroide?: string; nap: number }) {
+/* nap: ground level in m NAP, undefined while unknown */
+export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) {
   const [x, y] = pinFor(centroide);
-  const h = Math.abs(nap);
   return (
     <section className="panel" id="p-map">
       <h2>
-        Je woont {nl(h)} meter {nap >= 0 ? "boven" : "onder"} de zee
+        {nap === undefined
+          ? "Hoe hoog woon je?"
+          : `Je woont ${nl(Math.abs(nap))} meter ${nap >= 0 ? "boven" : "onder"} de zee`}
       </h2>
       <div className="kaartrij">
         <svg className="nl" viewBox="0 0 512 512" aria-label="Kaart van Nederland met jouw straat" role="img">
