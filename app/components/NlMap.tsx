@@ -52,7 +52,6 @@ function Gauge({ nap }: { nap: number }) {
   const ticks = Array.from({ length: GAUGE_TOP - GAUGE_BOTTOM + 1 }, (_, i) => GAUGE_TOP - i);
   return (
     <svg className="gauge" viewBox="0 0 176 240" role="img" aria-label={`Meetlat: jouw huis op ${nl(nap)} meter, de zee op 0, het laagste punt op ${nl(LOWEST_POINT)} meter`}>
-      <line x1="54" y1={G_Y0} x2="54" y2={G_Y1} />
       {ticks.map((m) => (
         <line key={m} x1={m % 5 === 0 ? 46 : 50} y1={gaugeY(m)} x2="54" y2={gaugeY(m)} />
       ))}
@@ -80,7 +79,6 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap: number }) {
   const h = Math.abs(nap);
   return (
     <section className="panel" id="p-map">
-      <span className="meta">nederland</span>
       <h2>Hier woon jij</h2>
       <div className="kaartrij">
         <svg className="nl" viewBox="0 0 512 512" aria-label="Kaart van Nederland met jouw straat" role="img">
