@@ -199,9 +199,17 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #p-huis.risk .iframe{opacity:0}
 /* kaart */
 #p-map{display:flex;flex-direction:column}
-#p-map .nl{flex:1;min-height:0;width:100%;stroke:none;margin:6px 0}
-#p-map .zee{font:600 10px var(--font);letter-spacing:.14em;fill:#fff}
-#p-map .kaartcap{margin:0}
+#p-map .kaartrij{flex:1;min-height:0;display:flex;gap:8px;align-items:stretch;margin:6px 0}
+#p-map .nl{flex:1;min-width:0;height:100%;stroke:none}
+#p-map .nl path{fill:#fff;stroke:none}
+#p-map .gauge{flex:none;width:40%;height:100%;stroke:var(--ink);stroke-width:2;fill:none}
+#p-map .gauge text{fill:var(--ink);stroke:none;font:500 11px/1 var(--font);text-transform:uppercase;letter-spacing:.06em}
+#p-map .gauge .sea{stroke:#fff;stroke-dasharray:4 4}
+#p-map .gauge .low{fill:var(--ink)}
+#p-map .gauge .house{fill:var(--sun);stroke:var(--ink)}
+#p-map .gauge .you{font-weight:700}
+#p-map .kaartcap{margin:0;font-size:var(--fs-label)}
+#p-map .kaartcap b{display:block;font-size:var(--fs-p);margin-bottom:4px}
 #mapPin{transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
 .ping{animation:ping 2s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes ping{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
