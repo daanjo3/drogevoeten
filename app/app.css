@@ -1,10 +1,16 @@
 /* Global styles for Droge Voeten. Ported from design/index.html, the design reference. Design tokens live in :root. */
 :root{
-  --bg:#F4EFEB; --ink:#242424; --mute:#7a7572; --line:#242424;
+  --bg:#F4EFEB; --ink:#242424; --mute:#77736E; --line:#242424;
   --blue:#0087D8; --blue2:#5fb4ec;
-  --lav:#D28AE1; --lav2:#efd3f5;
-  --green:#617E5A; --green2:#8aa283;
-  --sun:#FFA654; --sun2:#ffd2a6;
+  --lav:#D28AE1; --lav2:#E2BBE6;
+  --green:#75724A; --green2:#467841;
+  --sun:#FFA654; --sun2:#FDDDAA;
+  /* gradients from the Figma colour set */
+  --g-lavender:linear-gradient(180deg,#D28AE1 0%,#E2BBE6 55%,#F4EFEB 100%);
+  --g-olive:linear-gradient(180deg,#75724A 0%,#657546 50%,#467841 100%);
+  --g-sunshade:linear-gradient(90deg,#F9AD65 0%,#F8BD83 50%,#F7CBA3 100%);
+  --g-bluepink:linear-gradient(180deg,#8195C0 0%,#8B90C7 25%,#A38DCD 50%,#C789D3 75%,#EB89D7 100%);
+  --g-amber:linear-gradient(90deg,#FDDDAA 0%,#FBE6CB 50%,#F4EFEB 100%);
   --dark:#242424; --water:#0087D8;
   --shadow:0 10px 30px rgba(36,36,36,.10), 0 2px 6px rgba(36,36,36,.06);
   --font:"Instrument Sans",system-ui,sans-serif;
@@ -96,12 +102,12 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 
 /* ===== START ===== */
 #start{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);transition:opacity .4s,visibility .4s;overflow:hidden}
-#start:before{content:"";position:absolute;left:-10vw;top:-20vh;width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--lav2),transparent 70%);pointer-events:none}
-#start:after{content:"";position:absolute;right:-10vw;bottom:-25vh;width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle at 60% 60%,var(--sun2),transparent 70%);pointer-events:none}
+#start:before{content:"";position:absolute;left:-10vw;top:-20vh;width:60vw;height:60vw;border-radius:50%;background:var(--g-bluepink);pointer-events:none}
+#start:after{content:"";position:absolute;right:-10vw;bottom:-25vh;width:55vw;height:55vw;border-radius:50%;background:var(--g-amber);pointer-events:none}
 #start.hide{opacity:0;visibility:hidden}
-.startbox{position:relative;z-index:2;width:min(640px,90vw);text-align:center}
-.startbox h1{margin:0 0 10px}
-.startbox .lead{color:var(--mute);opacity:1;margin:0 0 24px}
+.startbox{position:relative;z-index:2;width:min(760px,90vw);text-align:center}
+.startbox h1{margin:0 0 14px;font-size:clamp(40px,6.2vw,84px);line-height:1.02}
+.startbox .lead{color:var(--mute);opacity:1;margin:0 0 28px;font-size:clamp(18px,1.55vw,23px);line-height:1.45}
 .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px}
 .search input{flex:1;background:none;border:0;color:var(--ink);font-size:20px;outline:0;min-width:0}
 .search button{border:0;border-radius:999px;background:var(--dark);color:#fff;padding:12px 20px;font-weight:700}
@@ -148,10 +154,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 @media (prefers-reduced-motion:reduce){.panel{transition:none;translate:none}}
 /* middelpunt canvas 120vw,120vh = midden van de huiskamer */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
-#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
-#p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); }
-#p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:linear-gradient(180deg,var(--lav) 0%,var(--lav2) 100%)}
-#p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%); color:#fff; display:flex; flex-direction:column}
+#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
+#p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:var(--blue); color:#fff}
+#p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
+#p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 
 /* beeldtegels */
 .img{display:flex;flex-direction:column;justify-content:space-between;padding:18px}

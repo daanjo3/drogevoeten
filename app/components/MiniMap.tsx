@@ -3,10 +3,10 @@ import { useView, type Rect } from "./Canvas";
 
 const COLORS: Record<string, string> = {
   "p-huis": "#9fcdee",
-  "p-info": "#d9d4cf",
-  "p-map": "#5fb4ec",
+  "p-info": "#F8BD83",
+  "p-map": "#0087D8",
   "p-tijd": "#D28AE1",
-  "p-buurt": "#617E5A",
+  "p-buurt": "#657546",
 };
 
 /* Small overview at the bottom right: every block to scale, plus a frame
