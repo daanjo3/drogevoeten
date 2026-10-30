@@ -26,6 +26,13 @@ const SOURCES: { label: string; name: string; href: string }[] = [
   { label: "Koppelingen", name: "Wikidata", href: "https://www.wikidata.org" },
 ];
 
+const TEAM: { role: string; name: string }[] = [
+  { role: "design", name: "Wendy van der Waal" },
+  { role: "development", name: "Daan Meijers" },
+  { role: "development", name: "Jari Maijenburg" },
+  { role: "3D-development", name: "Wouter de Bruijn" },
+];
+
 function Ext({ href, children }: { href: string; children: ReactNode }) {
   return (
     <a href={href} target="_blank" rel="noreferrer">
@@ -96,6 +103,16 @@ export function AboutCard({ onClose }: { onClose: () => void }) {
             <li key={s.label}>
               <span className="label">{s.label}</span>
               <Ext href={s.href}>{s.name}</Ext>
+            </li>
+          ))}
+        </ul>
+
+        <h3>Gemaakt door</h3>
+        <ul className="sources">
+          {TEAM.map((t) => (
+            <li key={t.name}>
+              <span className="label">{t.role}</span>
+              <span>{t.name}</span>
             </li>
           ))}
         </ul>
