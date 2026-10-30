@@ -144,7 +144,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden;box-shadow:var(--shadow)}
 /* middelpunt canvas 120vw,120vh = midden van de huiskamer */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
-#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); border:1.5px solid var(--line); display:grid; transition:background .4s,color .4s}
+#p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); display:grid; transition:background .4s,color .4s}
 #p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); }
 #p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:linear-gradient(180deg,var(--lav) 0%,var(--lav2) 100%)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%); color:#fff; display:flex; flex-direction:column}
