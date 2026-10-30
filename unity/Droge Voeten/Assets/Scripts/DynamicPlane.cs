@@ -85,6 +85,8 @@ public class DynamicPlane : MonoBehaviour
         mesh.normals = normals;
         mesh.uv = uvs;
         mesh.triangles = triangles;
+        // Tangent-space normals (NormalTS in the Water shader) need tangents that follow the UVs
+        mesh.RecalculateTangents();
         mesh.RecalculateBounds();
     }
 }
