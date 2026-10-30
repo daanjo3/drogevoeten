@@ -5,14 +5,23 @@ import { Icon } from "./Icons";
    the Over button. Links open in a new tab. */
 
 const SOURCES: { label: string; name: string; href: string }[] = [
-  { label: "Hoogte", name: "Actueel Hoogtebestand Nederland", href: "https://www.ahn.nl" },
-  { label: "Gemalen en peilgebieden", name: "waterschapsregister, via PDOK", href: "https://www.pdok.nl" },
-  { label: "Overstromingen", name: "LIWO, Rijkswaterstaat", href: "https://basisinformatie-overstromingen.nl" },
-  { label: "Dijken en polders", name: "Provincie Zeeland", href: "https://opengeodata.zeeland.nl" },
-  { label: "Regen", name: "KNMI", href: "https://www.knmi.nl" },
-  { label: "Molens", name: "Molendatabase", href: "https://www.molendatabase.nl" },
-  { label: "Monumenten", name: "Rijksdienst voor het Cultureel Erfgoed", href: "https://linkeddata.cultureelerfgoed.nl" },
-  { label: "Beelden", name: "Rijksmuseum", href: "https://www.rijksmuseum.nl" },
+  { label: "Hoogte", name: "Actueel Hoogtebestand Nederland (AHN), Rijkswaterstaat", href: "https://www.ahn.nl" },
+  { label: "Adressen en kaart", name: "Locatieserver, BAG en Basisregistratie Topografie, Kadaster via PDOK", href: "https://www.pdok.nl" },
+  { label: "Gemalen, peilgebieden en waterschappen", name: "waterschapsregister (IMWA), Het Waterschapshuis", href: "https://www.pdok.nl" },
+  {
+    label: "Gemalen door de tijd en verdwenen molens",
+    name: "Landschapsatlas, Rijksdienst voor het Cultureel Erfgoed, met de Nederlandse Gemalenstichting",
+    href: "https://services.rce.geovoorziening.nl/landschapsatlas/wfs?request=GetCapabilities",
+  },
+  { label: "Monumenten", name: "Rijksmonumenten, Rijksdienst voor het Cultureel Erfgoed", href: "https://linkeddata.cultureelerfgoed.nl" },
+  { label: "Molens", name: "Nederlandse Molendatabase", href: "https://www.molendatabase.nl" },
+  { label: "Dijken, polders en oude kaarten", name: "Provincie Zeeland", href: "https://opengeodata.zeeland.nl" },
+  {
+    label: "Overstromingen",
+    name: "LIWO (Rijkswaterstaat, Deltares), waterstanden 1953 (Rijkswaterstaat), inundatiekaart 1953 (Provincie Noord-Brabant)",
+    href: "https://basisinformatie-overstromingen.nl",
+  },
+  { label: "Regen", name: "KNMI daggegevens en Klimaateffectatlas", href: "https://www.daggegevens.knmi.nl" },
   { label: "Koppelingen", name: "Wikidata", href: "https://www.wikidata.org" },
 ];
 
