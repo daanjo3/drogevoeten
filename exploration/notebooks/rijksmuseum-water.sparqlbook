@@ -1,0 +1,170 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Rijksmuseum: gemalen en overstromingen per plaats\n\nDit notebook laat zien hoe de collectie van het Rijksmuseum in elkaar zit, en hoe je er afbeeldingen van **gemalen en overstromingen** uit haalt voor een **stad of provincie**.\n\n**Er is geen SPARQL-endpoint.** Het Rijksmuseum publiceert zijn data via [Data Services](https://data.rijksmuseum.nl/docs/): een Search API, een resolver die per object Linked Art (CIDOC-CRM) geeft, IIIF, LDES, OAI-PMH en datadumps. Het IIIF-feed `https://data.rijksmuseum.nl/cd/260251/collection.json` is een *Change Discovery*-stroom: een logboek van wijzigingen in set 260251, \"Alle gepubliceerde objecten\" (842.479 objecten). Daarmee kun je een kopie bijhouden, maar niet zoeken.\n\n**Daarom zoekt dit notebook in een lokale oogst.** `exploration/rijksmuseum/harvest.py` zoekt in de Search API op titel en beschrijving (gemaal, watersnood, overstroming, dijkdoorbraak, doorbraak, inundatie, stormvloed, watervloed). Daarna haalt het van elk gevonden object de Linked Art-triples op, plus het \"beeld\" (VisualItem) en de plaatsen, gebeurtenissen en Iconclass-termen waarnaar dat verwijst. Plaatsen worden tot aan het land gevolgd, zodat je op stad én provincie kunt filteren. Resultaat (30-10-2026): 837 objecten, ~297.000 triples, 43 MB.\n\n```bash\npython3 -I exploration/rijksmuseum/harvest.py   # ~3 min, schrijft exploration/notebooks/rdf/rijksmuseum-water.nt\n```\n\nOpen dit bestand in VS Code met **SPARQL Notebook** (Zazuko). Elke cel wijst met `# [endpoint=./rdf/rijksmuseum-water.nt]` naar het lokale bestand; het laden duurt de eerste keer een paar seconden.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Hoe is een object opgebouwd?\n\nHet model is [Linked Art](https://linked.art/model/), een profiel van CIDOC-CRM. Wat je nodig hebt om op plaats te zoeken, zit **niet op het object zelf** maar op het beeld dat het object toont:\n\n```\nHumanMadeObject  https://id.rijksmuseum.nl/2001…        (de prent, het schilderij)\n ├─ P1_is_identified_by → Name (titel, type aat:300404670) / Identifier (objectnummer)\n ├─ P67i_is_referred_to_by → beschrijving (type aat:300435452)\n ├─ P108i_was_produced_by → Production → P4_has_time-span (jaar), P7_took_place_at (waar gemaakt)\n ├─ P129i_is_subject_of → … la:digitally_carried_by → la:access_point (IIIF-afbeelding, collectiepagina)\n └─ P65_shows_visual_item → VisualItem  https://id.rijksmuseum.nl/2021…\n       ├─ P138_represents → Place   (afgebeelde plaats)   ─ P89_falls_within → provincie → land\n       │                  → Activity (gebeurtenis, bijv. \"Watersnoodramp 1953\")\n       │                  → Person\n       └─ P199_represents_instance_of_type → Type met la:equivalent → Iconclass (bijv. 25H1991 dijkdoorbraak)\n```\n\nLet op het verschil tussen **waar het gemaakt is** (`P108i/P7_took_place_at`, vaak gewoon \"Nederland\") en **wat het toont** (`P65/P138_represents`). Voor \"beelden van deze plek\" wil je het tweede.\n\nPlaatsen hebben namen in meerdere talen (Vlissingen / Flushing), soms een punt (`P168_place_is_defined_by \"POINT(lon lat)\"`), en `la:equivalent`-links naar Wikidata, GeoNames en Getty TGN.\n\nDe eerste query telt de klassen in de oogst.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Classes in the harvest and how many resources each has\nSELECT ?class (COUNT(DISTINCT ?resource) AS ?count)\nWHERE { ?resource a ?class }\nGROUP BY ?class\nORDER BY DESC(?count)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Eén object van dichtbij\n\nPrent 16/24 uit *De Waterramp van 1855* (`RP-P-OB-89.128-16`): de dijkdoorbraak tussen Maren en Alem. De query loopt van het object via het VisualItem naar alles wat het toont, met het label van elk doel. Je ziet de afgebeelde plaatsen (Alem, Maren), de gebeurtenis (Watersnood maart 1855), een persoon en de Iconclass-term *dike-break*.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# What the visual item of one object represents, with labels and external links\nSELECT ?property ?target (GROUP_CONCAT(DISTINCT ?label; separator=\" / \") AS ?labels) ?kind\n       (GROUP_CONCAT(DISTINCT STR(?same); separator=\" \") AS ?equivalents)\nWHERE {\n  VALUES ?object { <https://id.rijksmuseum.nl/200110001> }\n  ?object crm:P65_shows_visual_item ?visual .\n  VALUES ?property { crm:P138_represents crm:P199_represents_instance_of_type }\n  ?visual ?property ?target .\n  OPTIONAL { ?target a ?kind }\n  OPTIONAL { ?target crm:P1_is_identified_by/crm:P190_has_symbolic_content ?label }\n  OPTIONAL { ?target la:equivalent ?same }\n}\nGROUP BY ?property ?target ?kind",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Een \"kaartje\" per object\n\nDit patroon (titel, jaar, afbeelding, collectiepagina, rechten op het beeld) staat in alle volgende queries. De IIIF-afbeelding wordt verkleind door `/full/max/` te vervangen door `/full/400,/` (400 px breed): bruikbaar als thumbnail in de app. Ongeveer 95% van de geoogste objecten heeft een afbeelding.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Title, year, thumbnail and collection page for the harvested objects\nSELECT ?object (SAMPLE(?titleNl) AS ?title) (MIN(YEAR(?begin)) AS ?year)\n       (SAMPLE(REPLACE(STR(?img), \"/full/max/\", \"/full/400,/\")) AS ?thumbnail) (SAMPLE(?pg) AS ?page)\n       (SAMPLE(?rights) AS ?imageRights)\nWHERE {\n  { SELECT DISTINCT ?object WHERE { ?object h:matchedSearch ?search } }\n  # Preferred title (aat:300404670) in Dutch (aat:300388256). Constants go in a FILTER:\n  # Oxigraph scans the whole store for constant IRIs inside an OPTIONAL.\n  OPTIONAL { ?object crm:P1_is_identified_by ?titleName .\n             ?titleName crm:P190_has_symbolic_content ?titleNl ;\n                        crm:P2_has_type ?titleType ; crm:P72_has_language ?titleLang .\n             FILTER(?titleType = aat:300404670 && ?titleLang = aat:300388256) }\n  OPTIONAL { ?object crm:P108i_was_produced_by/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?begin }\n  # Image (IIIF, micr.io) and collection page both hang off the object's digital surrogate\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?img .\n             FILTER(STRSTARTS(STR(?img), \"https://iiif.micr.io/\")) }\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?pg .\n             FILTER(STRSTARTS(STR(?pg), \"https://www.rijksmuseum.nl/\")) }\n  # Rights on the image: Public Domain Mark or In Copyright (rightsstatements.org)\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P104_is_subject_to/crm:P2_has_type ?rights }\n}\nGROUP BY ?object\nORDER BY ?year\nLIMIT 50",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Zoeken op stad\n\nGeef een plaatsnaam (in het Nederlands of Engels). De query zoekt de plaats op naam, neemt alles wat erin ligt mee (`P89_falls_within*`, bijv. een sluis of kerk in die stad) en geeft de objecten die zo'n plaats **afbeelden**. Voorbeelden met resultaat: `Gorinchem`, `Vlissingen`, `Zierikzee`, `Amsterdam`, `Haarlemmermeer`.\n\nPlaatsnamen zijn niet altijd uniek (\"Utrecht\" is stad én provincie). Twijfel je, gebruik dan de IRI van de plaats (zie sectie 7 en 9).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Objects that depict a place in (or equal to) the given city\nSELECT ?object (SAMPLE(?titleNl) AS ?title) (MIN(YEAR(?begin)) AS ?year)\n       (SAMPLE(REPLACE(STR(?img), \"/full/max/\", \"/full/400,/\")) AS ?thumbnail) (SAMPLE(?pg) AS ?page)\n       (SAMPLE(?rights) AS ?imageRights)\n       (GROUP_CONCAT(DISTINCT ?placeName; separator=\", \") AS ?depicts)\nWHERE {\n  VALUES ?cityName { \"vlissingen\" }\n  ?city a crm:E53_Place ; crm:P1_is_identified_by/crm:P190_has_symbolic_content ?name .\n  FILTER(LCASE(STR(?name)) = ?cityName)\n  ?place crm:P89_falls_within* ?city .\n  ?object crm:P65_shows_visual_item/crm:P138_represents ?place .\n  OPTIONAL { ?place crm:P1_is_identified_by/crm:P190_has_symbolic_content ?placeName }\n  # Preferred title (aat:300404670) in Dutch (aat:300388256). Constants go in a FILTER:\n  # Oxigraph scans the whole store for constant IRIs inside an OPTIONAL.\n  OPTIONAL { ?object crm:P1_is_identified_by ?titleName .\n             ?titleName crm:P190_has_symbolic_content ?titleNl ;\n                        crm:P2_has_type ?titleType ; crm:P72_has_language ?titleLang .\n             FILTER(?titleType = aat:300404670 && ?titleLang = aat:300388256) }\n  OPTIONAL { ?object crm:P108i_was_produced_by/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?begin }\n  # Image (IIIF, micr.io) and collection page both hang off the object's digital surrogate\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?img .\n             FILTER(STRSTARTS(STR(?img), \"https://iiif.micr.io/\")) }\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?pg .\n             FILTER(STRSTARTS(STR(?pg), \"https://www.rijksmuseum.nl/\")) }\n  # Rights on the image: Public Domain Mark or In Copyright (rightsstatements.org)\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P104_is_subject_to/crm:P2_has_type ?rights }\n}\nGROUP BY ?object\nORDER BY ?year",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Zoeken op provincie\n\nHetzelfde, maar dan alles wat (in één of meer stappen) binnen een provincie valt. Voor Zeeland komen o.a. Vlissingen, Zierikzee, Walcheren en Schouwen-Duiveland mee. Objecten die alleen \"Zeeland\" als geheel tonen, staan er ook in.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Objects that depict any place within the given province\nSELECT ?object (SAMPLE(?titleNl) AS ?title) (MIN(YEAR(?begin)) AS ?year)\n       (SAMPLE(REPLACE(STR(?img), \"/full/max/\", \"/full/400,/\")) AS ?thumbnail) (SAMPLE(?pg) AS ?page)\n       (SAMPLE(?rights) AS ?imageRights)\n       (GROUP_CONCAT(DISTINCT ?placeName; separator=\", \") AS ?depicts)\nWHERE {\n  VALUES ?provinceName { \"Zeeland\" }\n  ?province crm:P89_falls_within <https://id.rijksmuseum.nl/2301> ;   # directly within Nederland\n            crm:P1_is_identified_by/crm:P190_has_symbolic_content ?provinceName .\n  ?place crm:P89_falls_within* ?province .\n  ?object crm:P65_shows_visual_item/crm:P138_represents ?place .\n  OPTIONAL { ?place crm:P1_is_identified_by/crm:P190_has_symbolic_content ?placeName }\n  # Preferred title (aat:300404670) in Dutch (aat:300388256). Constants go in a FILTER:\n  # Oxigraph scans the whole store for constant IRIs inside an OPTIONAL.\n  OPTIONAL { ?object crm:P1_is_identified_by ?titleName .\n             ?titleName crm:P190_has_symbolic_content ?titleNl ;\n                        crm:P2_has_type ?titleType ; crm:P72_has_language ?titleLang .\n             FILTER(?titleType = aat:300404670 && ?titleLang = aat:300388256) }\n  OPTIONAL { ?object crm:P108i_was_produced_by/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?begin }\n  # Image (IIIF, micr.io) and collection page both hang off the object's digital surrogate\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?img .\n             FILTER(STRSTARTS(STR(?img), \"https://iiif.micr.io/\")) }\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?pg .\n             FILTER(STRSTARTS(STR(?pg), \"https://www.rijksmuseum.nl/\")) }\n  # Rights on the image: Public Domain Mark or In Copyright (rightsstatements.org)\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P104_is_subject_to/crm:P2_has_type ?rights }\n}\nGROUP BY ?object\nORDER BY ?year",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Overzicht: hoeveel beelden per provincie?\n\nAlles wat direct onder Nederland (`https://id.rijksmuseum.nl/2301`) hangt. Daar zitten ook rivieren en historische gebieden tussen (Lek, IJssel, Zuiderzee, \"Holland (graafschap)\"): de hiërarchie volgt de thesaurus van het museum, niet de huidige bestuurlijke indeling.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Number of harvested objects that depict something within each top-level Dutch place\nSELECT ?region (SAMPLE(?name) AS ?regionName) (COUNT(DISTINCT ?object) AS ?objects)\nWHERE {\n  ?region crm:P89_falls_within <https://id.rijksmuseum.nl/2301> ;\n          crm:P1_is_identified_by/crm:P190_has_symbolic_content ?name .\n  ?place crm:P89_falls_within* ?region .\n  ?object crm:P65_shows_visual_item/crm:P138_represents ?place .\n}\nGROUP BY ?region\nORDER BY DESC(?objects)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. Dicht bij een coördinaat\n\nVoor de app: van een adres naar de dichtstbijzijnde afgebeelde plaatsen. De punten staan als tekst (`\"POINT(3.583333 51.4500)\"`, geen `geo:wktLiteral`), dus de query knipt lengte- en breedtegraad eruit. SPARQL heeft geen wortelfunctie; de afstand is een benadering (*alpha-max-beta-min*, hooguit ~4% ernaast) en ruim voldoende om te sorteren.\n\n**Beperking:** maar een kwart van de afgebeelde plaatsen heeft een punt (67 van 266), en de punten zijn grof (Getty TGN, op de stad). Provincies hebben er vaak geen. Gebruik dit voor \"in de buurt\" en de provinciequery voor volledigheid.\n\nVoorbeeld: de Abdij in Middelburg (ongeveer `3.6136, 51.4988`), straal 40 km.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Depicted places within ?radiusKm of a point, nearest first, with object counts\nSELECT ?place (SAMPLE(?name) AS ?placeName) ?wkt (ROUND(MIN(?km)) AS ?approxKm) (COUNT(DISTINCT ?object) AS ?objects)\nWHERE {\n  VALUES (?lon0 ?lat0 ?radiusKm) { (3.6136 51.4988 40) }\n  ?object crm:P65_shows_visual_item/crm:P138_represents ?place .\n  ?place crm:P168_place_is_defined_by ?wkt .\n  OPTIONAL { ?place crm:P1_is_identified_by/crm:P190_has_symbolic_content ?name }\n  BIND(STRBEFORE(STRAFTER(?wkt, \"POINT(\"), \")\") AS ?coords)\n  BIND(xsd:double(STRBEFORE(?coords, \" \")) AS ?lon)\n  BIND(xsd:double(STRAFTER(?coords, \" \")) AS ?lat)\n  # km per degree: 111.2 north-south, 111.2 * cos(51.5°) = 69.2 east-west\n  BIND(ABS(?lon - ?lon0) * 69.2 AS ?dx)\n  BIND(ABS(?lat - ?lat0) * 111.2 AS ?dy)\n  BIND(IF(?dx > ?dy, 0.96 * ?dx + 0.4 * ?dy, 0.96 * ?dy + 0.4 * ?dx) AS ?km)\n  FILTER(?km <= ?radiusKm)\n}\nGROUP BY ?place ?wkt\nORDER BY ?approxKm",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 8. Overstromingen als gebeurtenis\n\nHet museum koppelt veel prenten aan een benoemde gebeurtenis (`crm:E7_Activity`), vaak met een Wikidata-link. Dat is preciezer dan zoeken op het woord \"watersnood\": je krijgt de stormvloed van 1953, die van 1855 of de Sint-Elisabethsvloed als eenheid.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Named events depicted in the harvest, with object counts and Wikidata link\nSELECT ?event (GROUP_CONCAT(DISTINCT ?name; separator=\" / \") AS ?names) ?wikidata (COUNT(DISTINCT ?object) AS ?objects)\nWHERE {\n  ?object crm:P65_shows_visual_item/crm:P138_represents ?event .\n  ?event a crm:E7_Activity ; crm:P1_is_identified_by/crm:P190_has_symbolic_content ?name .\n  OPTIONAL { ?event la:equivalent ?wikidata . FILTER(STRSTARTS(STR(?wikidata), \"http://www.wikidata.org/\")) }\n}\nGROUP BY ?event ?wikidata\nORDER BY DESC(?objects)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Alle beelden van één gebeurtenis, met de plaatsen die erop staan. Voorbeeld: de **Watersnoodramp 1953** (`https://id.rijksmuseum.nl/240195`, Wikidata Q504934). Vervang de IRI door een andere uit de vorige tabel.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# All objects about one event, with the places they depict\nSELECT ?object (SAMPLE(?titleNl) AS ?title) (MIN(YEAR(?begin)) AS ?year)\n       (SAMPLE(REPLACE(STR(?img), \"/full/max/\", \"/full/400,/\")) AS ?thumbnail) (SAMPLE(?pg) AS ?page)\n       (SAMPLE(?rights) AS ?imageRights)\n       (GROUP_CONCAT(DISTINCT ?placeName; separator=\", \") AS ?depicts)\nWHERE {\n  VALUES ?event { <https://id.rijksmuseum.nl/240195> }\n  ?object crm:P65_shows_visual_item ?visual .\n  ?visual crm:P138_represents ?event .\n  OPTIONAL { ?visual crm:P138_represents ?place . ?place a crm:E53_Place ;\n             crm:P1_is_identified_by/crm:P190_has_symbolic_content ?placeName }\n  # Preferred title (aat:300404670) in Dutch (aat:300388256). Constants go in a FILTER:\n  # Oxigraph scans the whole store for constant IRIs inside an OPTIONAL.\n  OPTIONAL { ?object crm:P1_is_identified_by ?titleName .\n             ?titleName crm:P190_has_symbolic_content ?titleNl ;\n                        crm:P2_has_type ?titleType ; crm:P72_has_language ?titleLang .\n             FILTER(?titleType = aat:300404670 && ?titleLang = aat:300388256) }\n  OPTIONAL { ?object crm:P108i_was_produced_by/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?begin }\n  # Image (IIIF, micr.io) and collection page both hang off the object's digital surrogate\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?img .\n             FILTER(STRSTARTS(STR(?img), \"https://iiif.micr.io/\")) }\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?pg .\n             FILTER(STRSTARTS(STR(?pg), \"https://www.rijksmuseum.nl/\")) }\n  # Rights on the image: Public Domain Mark or In Copyright (rightsstatements.org)\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P104_is_subject_to/crm:P2_has_type ?rights }\n}\nGROUP BY ?object\nORDER BY ?year",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 9. Gemalen: zoek op Iconclass, niet op het woord\n\nDe Search API zoekt op hele woorden in titel en beschrijving. \"gemaal\" levert daardoor ook *koningin-gemaal* en *prins-gemaal* op (echtgenoten), en mist \"Bemaling van de Dongepolders\". De betrouwbare haak is **Iconclass**: elk VisualItem heeft `P199_represents_instance_of_type` naar een term met `la:equivalent` naar iconclass.org.\n\nRelevante codes in de oogst:\n\n| Iconclass | Betekenis |\n|---|---|\n| 25H1921 | pumping installation, pumping-engine (~ polder) |\n| 25H1922 | technical aspects and details of pumping-engine |\n| 25H192 | polder, reclaimed land |\n| 25H223 | sluice, weir |\n| 25H199 / 25H1991 / 25H1992 | flood / dike-break / rescue work during a flood |\n| 25H23122 | flood, high tide |\n\nDe eerste query geeft alle Iconclass-codes onder 25H (landschap: water, polders, dijken) die in de oogst voorkomen.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Iconclass terms under 25H (water landscape) used in the harvest\nSELECT ?iconclass (SAMPLE(?label) AS ?meaning) (COUNT(DISTINCT ?object) AS ?objects)\nWHERE {\n  ?object crm:P65_shows_visual_item/crm:P199_represents_instance_of_type ?type .\n  ?type la:equivalent ?iconclass .\n  FILTER(STRSTARTS(STR(?iconclass), \"https://iconclass.org/25H\"))\n  OPTIONAL { ?type crm:P1_is_identified_by/crm:P190_has_symbolic_content ?label .\n             FILTER(!REGEX(?label, \"^[0-9]\")) }\n}\nGROUP BY ?iconclass\nORDER BY DESC(?objects)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Gemalen volgens Iconclass, met de afgebeelde plaats. Hier staan o.a. het Wieringergemaal, Gemaal Lely, de stoomgemalen bij Gouda en Halfweg en Gemaal De Leeghwater. Zet een `#` voor de tweede `VALUES`-regel om ook sluizen mee te nemen.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Objects showing a pumping station (Iconclass 25H1921 / 25H1922), with depicted places\nSELECT ?object (SAMPLE(?titleNl) AS ?title) (MIN(YEAR(?begin)) AS ?year)\n       (SAMPLE(REPLACE(STR(?img), \"/full/max/\", \"/full/400,/\")) AS ?thumbnail) (SAMPLE(?pg) AS ?page)\n       (SAMPLE(?rights) AS ?imageRights)\n       (GROUP_CONCAT(DISTINCT ?placeName; separator=\", \") AS ?depicts)\nWHERE {\n  VALUES ?iconclass { <https://iconclass.org/25H1921> <https://iconclass.org/25H1922> <https://iconclass.org/25H1921%28%2B0%29> }\n  # VALUES ?iconclass { <https://iconclass.org/25H1921> <https://iconclass.org/25H1922> <https://iconclass.org/25H223> }\n  ?object crm:P65_shows_visual_item ?visual .\n  ?visual crm:P199_represents_instance_of_type/la:equivalent ?iconclass .\n  OPTIONAL { ?visual crm:P138_represents ?place . ?place a crm:E53_Place ;\n             crm:P1_is_identified_by/crm:P190_has_symbolic_content ?placeName }\n  # Preferred title (aat:300404670) in Dutch (aat:300388256). Constants go in a FILTER:\n  # Oxigraph scans the whole store for constant IRIs inside an OPTIONAL.\n  OPTIONAL { ?object crm:P1_is_identified_by ?titleName .\n             ?titleName crm:P190_has_symbolic_content ?titleNl ;\n                        crm:P2_has_type ?titleType ; crm:P72_has_language ?titleLang .\n             FILTER(?titleType = aat:300404670 && ?titleLang = aat:300388256) }\n  OPTIONAL { ?object crm:P108i_was_produced_by/crm:P4_has_time-span/crm:P82a_begin_of_the_begin ?begin }\n  # Image (IIIF, micr.io) and collection page both hang off the object's digital surrogate\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?img .\n             FILTER(STRSTARTS(STR(?img), \"https://iiif.micr.io/\")) }\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?pg .\n             FILTER(STRSTARTS(STR(?pg), \"https://www.rijksmuseum.nl/\")) }\n  # Rights on the image: Public Domain Mark or In Copyright (rightsstatements.org)\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P104_is_subject_to/crm:P2_has_type ?rights }\n}\nGROUP BY ?object\nORDER BY ?year",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 10. Plaatsen koppelen aan de rest van Droge Voeten\n\nDe app kent een adres via PDOK (gemeente, provincie). De plaatsen van het Rijksmuseum linken met `la:equivalent` naar Wikidata, GeoNames en Getty TGN. Via Wikidata kom je bij CBS-gemeentecodes (P382) en provincies (P131), dus dit is het koppelpunt voor een linkset *afgebeelde plaats ↔ gemeente*.\n\nDeze query geeft per afgebeelde Nederlandse plaats de externe links en het aantal objecten.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Depicted places in the Netherlands with their Wikidata / GeoNames / TGN equivalents\nSELECT ?place (SAMPLE(?name) AS ?placeName) (SAMPLE(?provName) AS ?province)\n       (SAMPLE(?wd) AS ?wikidata) (SAMPLE(?gn) AS ?geonames) (SAMPLE(?tgn) AS ?getty)\n       (COUNT(DISTINCT ?object) AS ?objects)\nWHERE {\n  ?object crm:P65_shows_visual_item/crm:P138_represents ?place .\n  ?place a crm:E53_Place ; crm:P89_falls_within+ <https://id.rijksmuseum.nl/2301> .\n  OPTIONAL { ?place crm:P1_is_identified_by/crm:P190_has_symbolic_content ?name }\n  OPTIONAL { ?place crm:P89_falls_within* ?prov . ?prov crm:P89_falls_within <https://id.rijksmuseum.nl/2301> ;\n             crm:P1_is_identified_by/crm:P190_has_symbolic_content ?provName }\n  OPTIONAL { ?place la:equivalent ?wd . FILTER(STRSTARTS(STR(?wd), \"http://www.wikidata.org/\")) }\n  OPTIONAL { ?place la:equivalent ?gn . FILTER(STRSTARTS(STR(?gn), \"https://sws.geonames.org/\")) }\n  OPTIONAL { ?place la:equivalent ?tgn . FILTER(STRSTARTS(STR(?tgn), \"http://vocab.getty.edu/tgn/\")) }\n}\nGROUP BY ?place\nORDER BY DESC(?objects)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 11. Dekking en beperkingen\n\nHoeveel van de geoogste objecten zijn echt bruikbaar voor \"beelden van deze plek\"?",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./rdf/rijksmuseum-water.nt]\nPREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>\nPREFIX la: <https://linked.art/ns/terms/>\nPREFIX aat: <http://vocab.getty.edu/aat/>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX h: <https://w3id.org/drogevoeten/harvest#>\n\n# Coverage: objects with a depicted place, a depicted event, an image, and a depicted place that has a point\nSELECT (COUNT(DISTINCT ?object) AS ?objects) (COUNT(DISTINCT ?withPlace) AS ?depictsPlace)\n       (COUNT(DISTINCT ?withEvent) AS ?depictsEvent) (COUNT(DISTINCT ?withImage) AS ?hasImage)\n       (COUNT(DISTINCT ?withPoint) AS ?hasPoint)\nWHERE {\n  ?object h:matchedSearch ?search .\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P138_represents ?p . ?p a ?pClass .\n             FILTER(?pClass = crm:E53_Place) BIND(?object AS ?withPlace) }\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P138_represents ?e . ?e a ?eClass .\n             FILTER(?eClass = crm:E7_Activity) BIND(?object AS ?withEvent) }\n  OPTIONAL { ?object crm:P129i_is_subject_of/la:digitally_carried_by/la:access_point ?img .\n             FILTER(STRSTARTS(STR(?img), \"https://iiif.micr.io/\")) BIND(?object AS ?withImage) }\n  OPTIONAL { ?object crm:P65_shows_visual_item/crm:P138_represents ?pp . ?pp crm:P168_place_is_defined_by ?wkt .\n             BIND(?object AS ?withPoint) }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "**Wat je moet weten voordat je dit in de app zet:**\n\n- **De oogst is een selectie.** Alleen objecten waarin een zoekwoord in titel of beschrijving staat, komen erin. Een prent van een gemaal zonder het woord \"gemaal\" ontbreekt, ook al heeft hij Iconclass 25H1921. De Search API kan niet zoeken op Iconclass, afgebeelde plaats of gebeurtenis (onbekende parameters geven een fout; getest op 30-10-2026).\n- **Zoekwoorden zijn hele woorden.** `doorbraak` vindt geen `dijkdoorbraak` (74 tegen 121 treffers op titel). Parameters combineren als EN: `title=Zierikzee&description=watersnood` geeft 0.\n- **Per regio kan het live, maar alleen op tekst:** `https://data.rijksmuseum.nl/search/collection?description=Zierikzee&imageAvailable=true` werkt (192 treffers op beschrijving), maar zegt niets over wat er afgebeeld is.\n- **Volledig wordt het pas met de hele collectie.** De datadumps bevatten plaatsen (37.101), gebeurtenissen (2.412) en Iconclass, maar geen objecten. Voor alle objecten kun je de LDES-stroom of het IIIF-feed hierboven aflopen. Dan kun je de queries van dit notebook ongewijzigd draaien op de hele collectie.\n- **Hiërarchie en punten zijn grof.** Plaatsen volgen de thesaurus van het museum (rivieren en historische gebieden staan naast provincies), en maar ~25% van de afgebeelde plaatsen heeft een coördinaat.\n- **Rechten:** de metadata zijn CC0. De rechten op het beeld staan op het VisualItem (`crm:P104_is_subject_to/crm:P2_has_type`): in de oogst 803× Public Domain Mark en 34× *In Copyright* (rightsstatements.org), o.a. bij werk rond 1953. De kaartjes geven daarom een kolom `imageRights`; toon in de app alleen beelden met de Public Domain Mark, of vraag toestemming.",
+    "metadata": {}
+  }
+]

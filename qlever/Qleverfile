@@ -1,0 +1,39 @@
+# Qleverfile for the Rijksmuseum water subset, use with docker-compose.yml in
+# this folder (or with https://github.com/ad-freiburg/qlever-control).
+#
+# Two named graphs; QLever's default graph is their union, so queries don't
+# need GRAPH clauses:
+#   - linked-art: the harvest in the Rijksmuseum's own model (CIDOC-CRM /
+#     Linked Art), written by exploration/rijksmuseum/harvest.py. Used by the
+#     notebook exploration/notebooks/rijksmuseum-water.sparqlbook.
+#   - app: a small schema.org view of the same objects, written by
+#     exploration/rijksmuseum/slim.py. Used by app/lib/rijksmuseum.ts.
+#
+# Make the input files first (from the repo root):
+#   python3 -I exploration/rijksmuseum/harvest.py   # ~10 min, network
+#   python3 -I exploration/rijksmuseum/slim.py      # seconds
+
+[data]
+NAME         = rijksmuseum-water
+DESCRIPTION  = Rijksmuseum: objects about floods and water infrastructure, harvested from data.rijksmuseum.nl (Search API + Linked Art), with depicted places, events and Iconclass
+FORMAT       = nt
+
+[index]
+MULTI_INPUT_JSON = [{ "cmd": "cat data/rijksmuseum-linked-art.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-linked-art" },
+                    { "cmd": "cat data/rijksmuseum-app.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-app" }]
+SETTINGS_JSON    = { "num-triples-per-batch": 1000000 }
+
+[server]
+PORT               = 7001
+ACCESS_TOKEN       = rijksmuseum-water-local
+MEMORY_FOR_QUERIES = 2G
+CACHE_MAX_SIZE     = 1G
+TIMEOUT            = 60s
+
+# native, because docker-compose.yml already runs these commands inside the
+# QLever image, where the binaries are on the PATH
+[runtime]
+SYSTEM = native
+
+[ui]
+UI_CONFIG = default

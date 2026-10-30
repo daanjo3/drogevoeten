@@ -1,0 +1,25 @@
+# SPARQL endpoint for the Rijksmuseum water subset, on http://localhost:7001
+#
+#   cd qlever
+#   UID=$(id -u) GID=$(id -g) docker compose up -d     # builds the index on first start
+#   UID=$(id -u) GID=$(id -g) docker compose run --rm qlever qlever index --overwrite-existing
+#                                                      # rebuild after new data, then restart
+#
+# The image's entrypoint runs the command as user `qlever` with your UID/GID,
+# in /data (this folder), so index files end up here owned by you.
+
+services:
+  qlever:
+    image: docker.io/adfreiburg/qlever:commit-4f9ffab5e3
+    working_dir: /data
+    volumes:
+      - ./:/data
+    environment:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
+    ports:
+      - "7001:7001"
+    # Index once if there is none yet, then serve in the foreground.
+    # No quotes in this command: the entrypoint wraps it in quotes itself.
+    command: ["test -f rijksmuseum-water.meta-data.json || qlever index; exec qlever start --run-in-foreground"]
+    restart: unless-stopped

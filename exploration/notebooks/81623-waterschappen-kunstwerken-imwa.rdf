@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+   xmlns:dcat="http://www.w3.org/ns/dcat#"
+   xmlns:dcatap="http://data.europa.eu/r5r/"
+   xmlns:dct="http://purl.org/dc/terms/"
+   xmlns:donl="https://data.overheid.nl/dcat.rdf#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:v="http://www.w3.org/2006/vcard/"
+>
+  <rdf:Description rdf:about="https://data.overheid.nl/dataset/81623-waterschappen-kunstwerken-imwa">
+    <dcat:distribution rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.3"/>
+    <dcat:keyword xml:lang="nl">waterstaatswerken</dcat:keyword>
+    <dcat:keyword xml:lang="nl">HVD</dcat:keyword>
+    <dcat:distribution rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.2"/>
+    <donl:status rdf:resource="http://data.overheid.nl/status/beschikbaar"/>
+    <dcatap:hvdCategory rdf:resource="http://data.europa.eu/bna/c_dd313021"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2017-01-01T00:00:00</dct:issued>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/deed.nl"/>
+    <dct:creator rdf:resource="http://standaarden.overheid.nl/owms/terms/wsh"/>
+    <dct:language rdf:resource="http://publications.europa.eu/resource/authority/language/NLD"/>
+    <dcat:keyword xml:lang="nl">Hoogwaardige dataset - EU</dcat:keyword>
+    <dct:modified rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2017-01-01T00:00:00</dct:modified>
+    <donl:sourceCatalog rdf:resource="https://nationaalgeoregister.nl"/>
+    <dcat:distribution rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.1"/>
+    <dct:title xml:lang="nl">Waterschappen Kunstwerken IMWA</dct:title>
+    <dct:publisher rdf:resource="http://standaarden.overheid.nl/owms/terms/wsh"/>
+    <dct:accessRights rdf:resource="http://publications.europa.eu/resource/authority/access-right/PUBLIC"/>
+    <dcat:contactPoint rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.contactPoint"/>
+    <dcat:distribution rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.0"/>
+    <dcat:theme rdf:resource="http://standaarden.overheid.nl/owms/terms/Water_(verkeer-thema)"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Dataset"/>
+    <dct:conformsTo rdf:resource="http://data.europa.eu/eli/reg_impl/2023/138/oj"/>
+    <dct:identifier>https://nationaalgeoregister.nl/geonetwork?uuid=c2b698a7-563d-47ed-82d2-55249c82213a</dct:identifier>
+    <dct:description xml:lang="nl">Deze dataset is gebaseerd op (niet geharmoniseerde) data van alle waterschappen in Nederland conform het Informatiemodel water (IMWA). 
+
+De data is gestructureerd volgens het Informatiemodel Water (IMWA), onderdeel van de Aquo-standaard. Meer informatie hierover is te vinden op de Aquo-website. De gegevens worden in Geopackage-formaat geleverd in het RD-New coördinatenstelsel.
+
+De data zijn afkomstig van de individuele waterschappen, maar worden via PDOK als één landsdekkend bestand uitgeleverd. Individuele waterschappen bieden hun actuele gegevens hiervoor aan via het ‘Gegevensknooppunt waterschappen’ (GkW) van Het Waterschapshuis. Alle waterschappen zijn aangesloten op deze voorziening, maar nog niet elk waterschap levert de complete set gegevens aan.
+
+Voor informatie over de inhoud van de data kan contact worden opgenomen met het desbetreffende waterschap. Het waterschap is te herkennen aan de waterschapscode die als kenmerk is opgenomen bij ieder object in de dataset. Voor algemene informatie over de dataset, het melden van (data) kwaliteitsbevindingen en de herleidbaarheid van de data via het GkW kan contact worden opgenomen met het Waterschapshuis via datastromen@hetwaterschapshuis.nl.</dct:description>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.0">
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-15T05:42:48</dct:issued>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dcat:accessURL rdf:resource="https://service.pdok.nl/hwh/waterschappen-kunstwerken-imwa/atom/index.xml"/>
+    <dct:title xml:lang="nl">Waterschappen Kunstwerken IMWA ATOM</dct:title>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/ATOM"/>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/deed.nl"/>
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/atom+xml"/>
+    <dct:description xml:lang="nl">Service</dct:description>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.1">
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:title xml:lang="nl">Waterschappen Kunstwerken IMWA WMS</dct:title>
+    <dct:description xml:lang="nl">accessPoint</dct:description>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/deed.nl"/>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/WMS_SRVC"/>
+    <dcat:accessURL rdf:resource="https://service.pdok.nl/hwh/waterschappen-kunstwerken-imwa/wms/v2_0?SERVICE=WMS&amp;REQUEST=GetCapabilities"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-15T05:42:48</dct:issued>
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/xml"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.2">
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/WFS_SRVC"/>
+    <dct:description xml:lang="nl">accessPoint</dct:description>
+    <dcat:mediaType rdf:resource="https://www.iana.org/assignments/media-types/application/xml"/>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/deed.nl"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-15T05:42:48</dct:issued>
+    <dct:title xml:lang="nl">Waterschappen Kunstwerken IMWA WFS</dct:title>
+    <dcat:accessURL rdf:resource="https://service.pdok.nl/hwh/waterschappen-kunstwerken-imwa/wfs/v2_0?SERVICE=WFS&amp;REQUEST=GetCapabilities"/>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.distribution.3">
+    <dct:title xml:lang="nl">Gegenereerde grafische weergave</dct:title>
+    <dct:format rdf:resource="http://publications.europa.eu/resource/authority/file-type/PNG"/>
+    <dct:issued rdf:datatype="http://www.w3.org/2001/XMLSchema#datetime">2026-08-15T05:42:48</dct:issued>
+    <rdf:type rdf:resource="http://www.w3.org/ns/dcat#Distribution"/>
+    <dct:license rdf:resource="http://creativecommons.org/licenses/by-sa/4.0/deed.nl"/>
+    <donl:distributionType rdf:resource="https://data.overheid.nl/distributiontype/visualization"/>
+    <dcat:accessURL rdf:resource="https://www.nationaalgeoregister.nl/geonetwork/srv/api/records/c2b698a7-563d-47ed-82d2-55249c82213a/attachments/Thumbnail%20-%20Kunstwerken.png"/>
+    <dct:description xml:lang="nl">Dit is een grafische representatie van de dataset die via het NationaalGeoregister.nl aangeboden wordt. 
+
+Het is mogelijk dat deze grafische representatie geen weerspiegeling van de data is, maar dient als ondersteunende afbeelding. Indien de dataset via een OGC:WMS service aangeboden wordt, is het mogelijk om zelf een grafische weergave van de dataset te genereren.</dct:description>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="dataset.81623-waterschappen-kunstwerken-imwa.contactPoint">
+    <rdf:type rdf:resource="http://www.w3.org/2006/vcard/Kind"/>
+    <v:fn xml:lang="nl">Het Waterschapshuis</v:fn>
+    <v:email>mailto:datastromen@hetwaterschapshuis.nl</v:email>
+  </rdf:Description>
+</rdf:RDF>
