@@ -114,17 +114,6 @@ export type NearFeature<P> = Feature<P> & {
   distance: number;
 };
 
-export function getFeatureQueryOptions<T extends TypeName>(params: GetFeatureParams<T>) {
-  return queryOptions({
-    queryKey: ["wfs", "getFeature", params],
-    queryFn: ({ signal }) => getFeature(params, signal),
-  });
-}
-
-export function useGetFeature<T extends TypeName>(params: GetFeatureParams<T>) {
-  return useQuery(getFeatureQueryOptions(params));
-}
-
 /* Nearest features around a point. The WFS can only filter by bbox, so this
    fetches the bbox around the circle and sorts by distance client side. */
 export function nearQueryOptions<T extends TypeName>(params: NearParams<T>) {

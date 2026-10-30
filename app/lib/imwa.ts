@@ -59,17 +59,6 @@ export interface NearParams<C extends CollectionId> {
   limit: number;
 }
 
-export function itemsQueryOptions<C extends CollectionId>(params: ItemsParams<C>) {
-  return queryOptions({
-    queryKey: ["imwa", "items", params],
-    queryFn: ({ signal }) => getItems(params, signal),
-  });
-}
-
-export function useItems<C extends CollectionId>(params: ItemsParams<C>) {
-  return useQuery(itemsQueryOptions(params));
-}
-
 /* Nearest features around a point: fetch the bbox around the circle, then
    sort by distance client side. */
 export function nearQueryOptions<C extends CollectionId>(params: NearParams<C>) {

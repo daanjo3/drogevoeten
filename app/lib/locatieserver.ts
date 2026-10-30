@@ -73,14 +73,6 @@ export interface LocatieserverResponse {
   };
 }
 
-export interface LocatieserverError {
-  error: {
-    code: number;
-    msg: string;
-    metadata?: string[];
-  };
-}
-
 /* Free search (classic geocoding): results directly from a query. */
 export function freeQueryOptions(params: FreeParams) {
   return queryOptions({
@@ -88,10 +80,6 @@ export function freeQueryOptions(params: FreeParams) {
     queryFn: ({ signal }) => request("free", params, signal),
     enabled: !!params.q,
   });
-}
-
-export function useFree(params: FreeParams) {
-  return useQuery(freeQueryOptions(params));
 }
 
 /* Suggest (type-ahead): matches for a partial query, with id and weergavenaam. */
@@ -150,7 +138,7 @@ async function request(
 
   const res = await fetch(url, { signal });
   if (!res.ok) {
-    // TODO: 400 may be JSON (LocatieserverError) or plain text
+    // TODO: 400 may be JSON ({ error: { code, msg } }) or plain text
     throw new Error(`Locatieserver ${path} failed: ${res.status} ${res.statusText}`);
   }
   return res.json() as Promise<LocatieserverResponse>;
