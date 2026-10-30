@@ -164,10 +164,10 @@ export default function Home() {
       />
 
       <button type="button" className="corner" id="infoBtn" onClick={() => setAbout(true)}>
-        <Icon name="info" /> Over de data
+        <Icon name="info" /> Over
       </button>
       <div id="where">
-        jullie plek <b id="whereTxt">{place.address}</b>
+        jouw straat <b id="whereTxt">{place.address}</b>
       </div>
       <button type="button" className="corner" id="shareBtn" onClick={share}>
         <Icon name="share" /> {copied ? "Link gekopieerd" : "Deel"}
@@ -180,7 +180,7 @@ export default function Home() {
         <HuiskamerPanel place={place} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
         <NlMap address={place.address} />
-        <TijdreisPanel place={place} />
+        <TijdreisPanel place={place} active={canvas.active === "tijd"} />
         <BuurtPanel place={locatie} />
 
         <ImageTile

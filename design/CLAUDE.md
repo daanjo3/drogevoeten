@@ -89,6 +89,10 @@ Gebouwd en werkend: startscherm met landschap en vertrektransitie, het canvas me
 
 De Unity WebGL-build staat in `app/public/woonkamer/` en is bewust niet in git (te groot, zie `.gitignore`); de bron staat in `unity/`. `UnityRoom.tsx` laadt hem via `mount()` uit `woonkamer/unity-embed.js`, pas nadat een adres is gekozen. Tijdens het laden staat de render-png met een voortgangsbalk; mislukt het laden, dan blijft de png staan. Het canvas heeft `pointer-events: none`, zodat het grid eroverheen blijft scrollen; interactie met de kamer kan via de knop "volledig scherm".
 
+### Navigatie en afwerking
+
+Het canvas is 256vh hoog, zodat ook het onderste blok (gemalen) in het midden kan staan. Scrollt iemand tot vlak bij een blok (binnen 30% van het scherm), dan schuift `useCanvas` het blok af (`snap`, op `scrollend`); een lopende klik op de navigatie wordt daarbij met rust gelaten. De tijdlijnstappen schuiven één voor één in zodra het tijdreisblok het dichtstbijzijnde blok is (class `in` op `#p-tijd`). De lijst in het gemalenblok scrolt in zijn eigen kolom (`.buurt .side`). Alle blokken en vaste elementen hebben een zachte schaduw (`--shadow`); de knoppen "Over" en "Deel" zijn donker, de minimap ook.
+
 ### Copy
 
 De teksten zijn aangepast (startscherm, "Welkom thuis", infokaart, gemalenblok, navigatie, regenknoppen, bronnenkaart). In de infokaart variëren hoogte, boven/onder, gemaal, waterschap en jaartal per adres; die velden staan in `PlaceData`.

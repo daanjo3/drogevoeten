@@ -27,6 +27,8 @@ const SECTION_IDS: Record<SectionKey, string[]> = {
 };
 
 const TOP_OFFSET_TIJD = 90;
+/* how close (as a share of the viewport) a section must be to snap into place */
+const SNAP_REACH = 0.3;
 
 function rectOfEl(el: HTMLElement): Rect {
   return { l: el.offsetLeft, t: el.offsetTop, r: el.offsetLeft + el.offsetWidth, b: el.offsetTop + el.offsetHeight };
@@ -72,31 +74,81 @@ export function useCanvas() {
     return union(els.map(rectOfEl));
   }, []);
 
-  const go = useCallback(
-    (key: SectionKey, smooth = true) => {
+  /* the scroll position at which a section sits in its place: the time
+     travel starts at the top, the rest is centred */
+  const targetFor = useCallback(
+    (key: SectionKey): { left: number; top: number } | null => {
       const world = worldRef.current;
       const R = sectionRect(key);
-      if (!world || !R) return;
+      if (!world || !R) return null;
       const vw = world.clientWidth;
       const vh = world.clientHeight;
       const left = (R.l + R.r) / 2 - vw / 2;
-      /* the time travel starts at the top, the rest is centred */
       const top = key === "tijd" ? R.t - TOP_OFFSET_TIJD : (R.t + R.b) / 2 - vh / 2;
-      world.scrollTo({ left, top, behavior: smooth ? "smooth" : "auto" });
+      return { left, top };
     },
     [sectionRect],
   );
+
+  /* a programmatic scroll that is still on its way; the snap leaves it alone
+     until it arrives, or until this expires (the user took over) */
+  const pending = useRef<{ left: number; top: number; until: number } | null>(null);
+  const scrollWorld = useCallback((left: number, top: number, smooth: boolean) => {
+    const world = worldRef.current;
+    if (!world) return;
+    pending.current = smooth ? { left, top, until: performance.now() + 1500 } : null;
+    world.scrollTo({ left, top, behavior: smooth ? "smooth" : "auto" });
+  }, []);
+
+  const go = useCallback(
+    (key: SectionKey, smooth = true) => {
+      const t = targetFor(key);
+      if (t) scrollWorld(t.left, t.top, smooth);
+    },
+    [targetFor, scrollWorld],
+  );
+
+  /* snap: when scrolling stops close to a section's place, finish the move.
+     Not on narrow screens, where the blocks are a plain column. */
+  const snap = useCallback(() => {
+    const world = worldRef.current;
+    if (!world || world.clientWidth < 900) return;
+    const p = pending.current;
+    if (p) {
+      const arrived = Math.hypot(p.left - world.scrollLeft, p.top - world.scrollTop) < 2;
+      if (!arrived && performance.now() < p.until) return;
+      pending.current = null;
+      if (arrived) return;
+    }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const maxLeft = world.scrollWidth - world.clientWidth;
+    const maxTop = world.scrollHeight - world.clientHeight;
+    let best: { left: number; top: number } | null = null;
+    let bd = Infinity;
+    (["huis", "tijd", "buurt"] as SectionKey[]).forEach((k) => {
+      const t = targetFor(k);
+      if (!t) return;
+      /* the browser clamps, so compare with what is reachable */
+      t.left = Math.max(0, Math.min(t.left, maxLeft));
+      t.top = Math.max(0, Math.min(t.top, maxTop));
+      const d = Math.hypot(t.left - world.scrollLeft, t.top - world.scrollTop);
+      if (d < bd) {
+        bd = d;
+        best = t;
+      }
+    });
+    const reach = Math.min(world.clientWidth, world.clientHeight) * SNAP_REACH;
+    if (!best || bd < 2 || bd > reach) return;
+    const to: { left: number; top: number } = best;
+    scrollWorld(to.left, to.top, !reduce);
+  }, [targetFor, scrollWorld]);
 
   const goPanel = useCallback((id: string) => {
     const world = worldRef.current;
     const el = canvasRef.current?.querySelector<HTMLElement>(`#${id}`);
     if (!world || !el) return;
-    world.scrollTo({
-      left: el.offsetLeft + el.offsetWidth / 2 - world.clientWidth / 2,
-      top: el.offsetTop + el.offsetHeight / 2 - world.clientHeight / 2,
-      behavior: "smooth",
-    });
-  }, []);
+    scrollWorld(el.offsetLeft + el.offsetWidth / 2 - world.clientWidth / 2, el.offsetTop + el.offsetHeight / 2 - world.clientHeight / 2, true);
+  }, [scrollWorld]);
 
   /* track the section closest to the centre. The viewport itself is tracked
      by useView in the minimap only: it changes every scroll frame, and as
@@ -132,6 +184,16 @@ export function useCanvas() {
     const world = worldRef.current;
     if (!world) return;
     world.addEventListener("scroll", onScroll, { passive: true });
+    /* scrollend where the browser has it, otherwise a short pause in scroll events */
+    const hasScrollEnd = "onscrollend" in world;
+    let timer = 0;
+    const onScrollIdle = () => {
+      if (hasScrollEnd) return;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(snap, 160);
+    };
+    world.addEventListener("scroll", onScrollIdle, { passive: true });
+    world.addEventListener("scrollend", snap);
     const onResize = () => {
       measure();
       onScroll();
@@ -139,9 +201,12 @@ export function useCanvas() {
     window.addEventListener("resize", onResize);
     return () => {
       world.removeEventListener("scroll", onScroll);
+      world.removeEventListener("scroll", onScrollIdle);
+      world.removeEventListener("scrollend", snap);
+      window.clearTimeout(timer);
       window.removeEventListener("resize", onResize);
     };
-  }, [measure, onScroll]);
+  }, [measure, onScroll, snap]);
 
   return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel };
 }

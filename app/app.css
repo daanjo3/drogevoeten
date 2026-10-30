@@ -6,6 +6,7 @@
   --green:#617E5A; --green2:#8aa283;
   --sun:#FFA654; --sun2:#ffd2a6;
   --dark:#242424; --water:#0087D8;
+  --shadow:0 10px 30px rgba(36,36,36,.10), 0 2px 6px rgba(36,36,36,.06);
   --font:"Instrument Sans",system-ui,sans-serif;
   --mono:var(--font);
 }
@@ -118,10 +119,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .defaults button:hover{background:var(--dark);color:#fff}
 
 /* ===== FIXED ===== */
-#where{position:fixed;z-index:40;left:50%;top:16px;transform:translateX(-50%);text-align:center;background:#fff;border:1.5px solid var(--line);padding:8px 18px;border-radius:999px;color:var(--mute)}
+#where{position:fixed;z-index:40;left:50%;top:16px;transform:translateX(-50%);text-align:center;background:#fff;border:1.5px solid var(--line);padding:8px 18px;border-radius:999px;color:var(--mute);box-shadow:var(--shadow)}
 #where b{color:var(--ink);display:block;font:600 var(--fs-p) var(--font)}
 
-#nav{position:fixed;z-index:40;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:4px;background:var(--dark);border-radius:20px;padding:6px}
+#nav{position:fixed;z-index:40;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:4px;background:var(--dark);border-radius:20px;padding:6px;box-shadow:var(--shadow)}
 #nav button{display:flex;align-items:center;gap:10px;background:transparent;color:#fff;border:0;border-radius:14px;padding:10px 14px;text-align:left}
 #nav button svg{width:22px;height:22px;flex:none}
 #nav .t{display:block;font-weight:700;font-size:15px;line-height:1.2;white-space:nowrap}
@@ -132,15 +133,15 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #nav button.risk[aria-current="true"]{background:var(--sun);color:var(--ink)}
 #nav .sep{width:1px;background:#444;margin:10px 3px}
 
-#mini{position:fixed;z-index:40;right:16px;bottom:16px;width:140px;height:140px;background:#fff;border:1.5px solid var(--line);border-radius:14px}
+#mini{position:fixed;z-index:40;right:16px;bottom:16px;width:140px;height:140px;background:var(--dark);border:1.5px solid var(--dark);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
 #mini i{position:absolute;border-radius:3px;opacity:.75;cursor:pointer}
 #mini i:hover{opacity:1}
-#mini .view{position:absolute;border:2px solid var(--ink);border-radius:3px;pointer-events:none}
+#mini .view{position:absolute;border:2px solid #fff;border-radius:3px;pointer-events:none}
 
 /* ===== CANVAS, bento vanuit het midden ===== */
 #world{position:relative;width:100vw;height:100vh;overflow:auto}
-#canvas{position:relative;width:240vw;height:240vh}
-.panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden}
+#canvas{position:relative;width:240vw;height:256vh}
+.panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden;box-shadow:var(--shadow)}
 /* middelpunt canvas 120vw,120vh = midden van de huiskamer */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
 #p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); border:1.5px solid var(--line); display:grid; transition:background .4s,color .4s}
@@ -170,9 +171,9 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .room{position:absolute;inset:0}
 .room .water{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#5fb4ec,var(--water));opacity:.9;transition:height .7s cubic-bezier(.3,.8,.3,1)}
 .room .line{position:absolute;left:0;right:0;border-top:2px dashed currentColor;padding:4px 12px;transition:bottom .6s}
-.room .tag{position:absolute;left:24px;top:24px;opacity:.8}
+.room .tag{position:absolute;left:72px;top:36px;opacity:.8}
 .room .iframe{position:absolute;right:16px;bottom:16px;opacity:.7}
-.room .icon{position:absolute;left:24px;top:48px;width:40px;height:40px}
+.room .icon{position:absolute;left:24px;top:24px;width:40px;height:40px}
 #p-info p{margin:0 0 10px}
 #out{position:absolute;left:20px;right:20px;bottom:20px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;font-size:var(--fs-p);color:var(--ink)}
 #out small{display:block;color:var(--mute);margin-top:6px}
@@ -189,7 +190,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #p-huis #out{opacity:0;transform:translateY(12px);transition:opacity .3s,transform .4s;pointer-events:none}
 #p-huis.risk .line{opacity:1}
 #p-huis.risk #out{opacity:1;transform:none;pointer-events:auto}
-#p-huis.risk{border-color:var(--sun);box-shadow:0 0 0 4px rgba(255,166,84,.35)}
+#p-huis.risk{border-color:var(--sun);box-shadow:0 0 0 4px rgba(255,166,84,.35),var(--shadow)}
 #p-huis.risk .iframe{opacity:0}
 /* kaart */
 #p-map{display:flex;flex-direction:column}
@@ -216,10 +217,14 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .tl li{position:relative;background:rgba(255,255,255,.55);border-radius:14px;padding:12px 14px}
 .tl li:before{content:"";position:absolute;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
 .tl li h3{margin-bottom:2px}
+#p-tijd.in .tl li{animation:slidein .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * 90ms)}
+@keyframes slidein{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#p-tijd.in .tl li{animation:none}}
 .tl li p{margin:4px 0}
 
 /* buurt */
-.buurt{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100% - 70px)}
+.buurt{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100% - 70px);min-height:0}
+.buurt .side{min-height:0;overflow:auto;padding-right:4px;scrollbar-width:thin}
 .buurt .map{background:rgba(255,255,255,.25);border-radius:16px;position:relative;overflow:hidden;min-height:320px}
 .buurt .map .leaflet-container{position:absolute;inset:0;height:100%;width:100%}
 .buurt .map > button,.buurt .map > .you{z-index:500}
@@ -276,9 +281,9 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .close:hover{background:#fff;color:var(--ink)}
 
 /* round buttons top left (info) and top right (share) */
-.corner{position:fixed;z-index:40;top:16px;display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:var(--fs-p);color:var(--ink)}
+.corner{position:fixed;z-index:40;top:16px;display:flex;align-items:center;gap:8px;background:var(--dark);border:1.5px solid var(--dark);border-radius:999px;padding:8px 14px;font-weight:700;font-size:var(--fs-p);color:#fff;box-shadow:var(--shadow)}
 .corner svg{width:20px;height:20px}
-.corner:hover{background:var(--dark);color:#fff}
+.corner:hover{background:#fff;color:var(--ink)}
 #infoBtn{left:16px}
 #shareBtn{right:16px}
 

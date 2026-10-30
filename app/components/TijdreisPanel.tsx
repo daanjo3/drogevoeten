@@ -1,11 +1,14 @@
+import type { CSSProperties } from "react";
 import type { PlaceData } from "../data/place";
 import { Icon } from "./Icons";
 import { RichText, Tip } from "./Tip";
 
 /* The time travel: a long vertical column, read from top to bottom. */
-export function TijdreisPanel({ place }: { place: PlaceData }) {
+/* `active` is true while the block is the one nearest the centre; the steps
+   then slide in one by one (css, keyed on the index) */
+export function TijdreisPanel({ place, active }: { place: PlaceData; active?: boolean }) {
   return (
-    <section className="panel" id="p-tijd">
+    <section className={`panel${active ? " in" : ""}`} id="p-tijd">
       <span className="meta">1200 → nu</span>
       <h2>
         <Icon name="tijd" />
@@ -15,8 +18,8 @@ export function TijdreisPanel({ place }: { place: PlaceData }) {
       <div className="tl">
         <div className="axis" />
         <ol>
-          {place.timeline.map((step) => (
-            <li key={step.year}>
+          {place.timeline.map((step, i) => (
+            <li key={step.year} style={{ "--i": i } as CSSProperties}>
               <h3>{step.year}</h3>
               <p>
                 <RichText text={step.text} />
