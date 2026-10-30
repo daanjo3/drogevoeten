@@ -2,7 +2,7 @@ import { nl } from "../lib/scenario";
 import { Tip } from "./Tip";
 
 /* Map of the Netherlands in one colour (outline from svgrepo.com, CC0) with
-   a pin on the address, a small vertical gauge next to it, and the height
+   a pin on the address and the height
    of the address under it. */
 
 /* WGS84 to svg units (viewBox 0 0 512 512): the outline's bounding box
@@ -38,42 +38,6 @@ const OUTLINE = [
   "M297.184,175.631c-3.348-0.637-6.289-2.336-8.527-4.697l-22.215,24.086l-32.849,16.482l-1.029,2.23 l13.248,5.285c0.506,0.212,1.028,0.441,1.519,0.71l22.068,11.68l5.292-1.985l5.946-10.258c1.323-2.286,3.202-4.198,5.44-5.57 l21.807-13.198l6.108-10.682l-1.257-4.526c-0.622-2.254-0.735-4.524-0.376-6.689L297.184,175.631z",
 ];
 
-/* the gauge: +5 m at the top, -7 m at the bottom */
-const GAUGE_TOP = 5;
-const GAUGE_BOTTOM = -7;
-const LOWEST_POINT = -6.76;
-const G_Y0 = 18;
-const G_Y1 = 222;
-const gaugeY = (m: number) => G_Y0 + ((GAUGE_TOP - m) / (GAUGE_TOP - GAUGE_BOTTOM)) * (G_Y1 - G_Y0);
-
-function Gauge({ nap }: { nap: number }) {
-  const above = nap > GAUGE_TOP;
-  const houseY = gaugeY(Math.min(nap, GAUGE_TOP));
-  const ticks = Array.from({ length: GAUGE_TOP - GAUGE_BOTTOM + 1 }, (_, i) => GAUGE_TOP - i);
-  return (
-    <svg className="gauge" viewBox="0 0 176 240" role="img" aria-label={`Meetlat: jouw huis op ${nl(nap)} meter, de zee op 0, het laagste punt op ${nl(LOWEST_POINT)} meter`}>
-      {ticks.map((m) => (
-        <line key={m} x1={m % 5 === 0 ? 46 : 50} y1={gaugeY(m)} x2="54" y2={gaugeY(m)} />
-      ))}
-      <text x="40" y={gaugeY(GAUGE_TOP) + 4} textAnchor="end">+5 m</text>
-      <text x="40" y={gaugeY(-5) + 4} textAnchor="end">-5 m</text>
-      {/* sea level: dashed line and a wave */}
-      <line className="sea" x1="54" y1={gaugeY(0)} x2="170" y2={gaugeY(0)} />
-      <text x="62" y={gaugeY(0) - 5}>zee · 0</text>
-      {/* lowest point: small triangle */}
-      <path className="low" d={`M54 ${gaugeY(LOWEST_POINT)} l10 -6 v12 z`} />
-      <text x="68" y={gaugeY(LOWEST_POINT) + 4}>laagste punt</text>
-      {/* the address: pin shape, with an arrow when it is above the scale */}
-      <g className="house" transform={`translate(54 ${houseY})`}>
-        {above ? <path d="M0 6 l-7 8 h14 z M0 14 v8" /> : <circle r="6" />}
-      </g>
-      <text className="you" x="68" y={houseY + 4}>
-        jouw huis{above ? " ↑" : ""}
-      </text>
-    </svg>
-  );
-}
-
 export function NlMap({ centroide, nap }: { centroide?: string; nap: number }) {
   const [x, y] = pinFor(centroide);
   const h = Math.abs(nap);
@@ -90,7 +54,6 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap: number }) {
             <circle r="11" fill="#FFA654" stroke="#242424" strokeWidth="3.5" />
           </g>
         </svg>
-        <Gauge nap={nap} />
       </div>
       <p className="kaartcap">
         <b>
