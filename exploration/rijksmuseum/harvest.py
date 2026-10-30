@@ -1,8 +1,8 @@
 """Harvest a water-themed subset of the Rijksmuseum collection as N-Triples.
 
 The Rijksmuseum has no public SPARQL endpoint. This script uses the Search API
-(https://data.rijksmuseum.nl/docs/search) to find objects about pumping
-stations and floods, then dereferences every object, its visual item, and the
+(https://data.rijksmuseum.nl/docs/search) to find objects about floods and
+water infrastructure (pumping stations, dikes, sluices, polders), then dereferences every object, its visual item, and the
 places, events and Iconclass concepts those refer to (Linked Art profile,
 N-Triples). Places are followed up their P89_falls_within chain, so the
 notebook can filter on city or province.
@@ -30,7 +30,7 @@ QUERIES = [
     (field, term)
     for field in ("title", "description")
     for term in (
-        "gemaal",
+        # floods
         "watersnood",
         "overstroming",
         "dijkdoorbraak",
@@ -38,6 +38,20 @@ QUERIES = [
         "inundatie",
         "stormvloed",
         "watervloed",
+        # water infrastructure; terms match whole words only, so plurals are separate
+        "gemaal",
+        "stoomgemaal",
+        "bemaling",
+        "dijk",
+        "dijken",
+        "zeedijk",
+        "dijkwerkers",
+        "dijkherstel",
+        "waterkering",
+        "sluis",
+        "sluizen",
+        "polder",
+        "droogmaking",
     )
 ]
 
