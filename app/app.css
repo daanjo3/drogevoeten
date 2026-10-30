@@ -109,7 +109,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #start.hide{opacity:0;visibility:hidden}
 .startbox{position:relative;z-index:2;width:min(760px,90vw);text-align:center}
 .startbox h1{margin:0 0 14px;font-size:clamp(40px,6.2vw,84px);line-height:1.02}
-.startbox .lead{color:var(--mute);opacity:1;margin:0 0 28px;font-size:clamp(18px,1.55vw,23px);line-height:1.45}
+.startbox .lead{color:var(--ink);opacity:1;margin:0 0 28px;font-size:clamp(18px,1.55vw,23px);line-height:1.45}
 .search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:999px;padding:8px 8px 8px 16px}
 .search input{flex:1;background:none;border:0;color:var(--ink);font-size:20px;outline:0;min-width:0}
 .search button{border:0;border-radius:999px;background:var(--dark);color:#fff;padding:12px 20px;font-weight:700}
