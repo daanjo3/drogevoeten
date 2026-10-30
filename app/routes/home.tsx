@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { MIDDELBURG, type Mode } from "../data/place";
@@ -117,16 +117,28 @@ const WORKS: (RijksWork & { id: string })[] = [
 const LOCAL = WORKS.filter((w) => w.place);
 const FEATURED = WORKS.filter((w) => !w.place);
 
-/* Two per theme for the four featured spots, plus a spare in case one is
-   already shown as a local work */
-const LIMITS: Record<Theme, number> = { flood: 3, infrastructure: 3 };
+/* Two per theme for the four featured spots, out of a few more candidates,
+   so there is something to vary between visits */
+const LIMITS: Record<Theme, number> = { flood: 8, infrastructure: 8 };
+
+/* How many places an image can move up or down in its list: enough for some
+   variety, while nearby images still tend to win */
+const JITTER = 3;
+
+/* Keep the order of the list, but with a little noise. */
+function jitter<T>(list: T[]): T[] {
+  return list
+    .map((x, i) => ({ x, score: i + Math.random() * JITTER }))
+    .sort((a, b) => a.score - b.score)
+    .map(({ x }) => x);
+}
 
 /* Endpoint images for the featured spots, flood and infrastructure in turn,
-   each list nearest first (as the query orders them). */
+   each list roughly nearest first (as the query orders them, plus jitter). */
 function pickFeatured(images: RijksImage[], shown: Set<string>): RijksImage[] {
   const free = images.filter((img) => !img.objectNumber || !shown.has(img.objectNumber));
-  const flood = free.filter((img) => img.theme === "flood");
-  const infrastructure = free.filter((img) => img.theme === "infrastructure");
+  const flood = jitter(free.filter((img) => img.theme === "flood"));
+  const infrastructure = jitter(free.filter((img) => img.theme === "infrastructure"));
   const out: RijksImage[] = [];
   for (let i = 0; i < Math.max(flood.length, infrastructure.length); i++) {
     if (flood[i]) out.push(flood[i]);
@@ -183,7 +195,15 @@ export default function Home() {
      when it fails (or is not running), or has too few images, the fallbacks. */
   const local = worksFor(LOCAL, locatie?.woonplaatsnaam);
   const endpoint = useQuery(endpointImagesQueryOptions(locationOf(locatie), { limits: LIMITS }));
-  const fetched = endpoint.isSuccess ? pickFeatured(endpoint.data, new Set(local.map((w) => w.objectNumber))) : [];
+  /* picked once per result and woonplaats, so the random pick holds between renders */
+  const woonplaatsnaam = locatie?.woonplaatsnaam;
+  const fetched = useMemo(
+    () =>
+      endpoint.data
+        ? pickFeatured(endpoint.data, new Set(worksFor(LOCAL, woonplaatsnaam).map((w) => w.objectNumber)))
+        : [],
+    [endpoint.data, woonplaatsnaam],
+  );
   const featured =
     endpoint.fetchStatus === "fetching" && !endpoint.isSuccess
       ? []
