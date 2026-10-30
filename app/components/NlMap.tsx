@@ -1,23 +1,29 @@
 import { Tip } from "./Tip";
 
-/* Hand-drawn map of the Netherlands with a pin. Placeholder: the real map
-   should come from PDOK, with the pin on real coordinates. */
+/* Hand-drawn map of the Netherlands with a pin on the address. */
 
-/* Pin positions in svg units for the four places the prototype knows. */
-export const PLACES: Record<string, [number, number]> = {
-  middelburg: [26.6, 254.4],
-  beemster: [123.4, 128.4],
-  nieuwerkerk: [55.4, 236.4],
-  lemmer: [181.7, 93.6],
-};
+/* WGS84 to svg units. Linear fit on four known addresses (Middelburg,
+   Middenbeemster, Nieuwerkerk, Lemmer); off by at most ~1 unit there. The
+   drawing is rough, so the pin is only as accurate as the outline. */
+const LON_SCALE = 73.97;
+const LON_OFFSET = -240.89;
+const LAT_SCALE = -119.0;
+const LAT_OFFSET = 6383.31;
 
-export function placeKeyFor(address: string): string {
-  const a = address.toLowerCase();
-  return Object.keys(PLACES).find((k) => a.includes(k)) ?? "middelburg";
+/* Abdij 4, Middelburg: shown until an address is known */
+const DEFAULT_PIN: [number, number] = [26.6, 254.4];
+
+/* Parse a Locatieserver centroide_ll ("POINT(lon lat)") into svg units. */
+export function pinFor(centroide?: string): [number, number] {
+  const m = centroide?.match(/POINT\(\s*(-?[\d.]+)\s+(-?[\d.]+)\s*\)/);
+  if (!m) return DEFAULT_PIN;
+  const lon = Number(m[1]);
+  const lat = Number(m[2]);
+  return [lon * LON_SCALE + LON_OFFSET, lat * LAT_SCALE + LAT_OFFSET];
 }
 
-export function NlMap({ address }: { address: string }) {
-  const [x, y] = PLACES[placeKeyFor(address)];
+export function NlMap({ centroide }: { centroide?: string }) {
+  const [x, y] = pinFor(centroide);
   return (
     <section className="panel" id="p-map">
       <span className="meta">nederland</span>

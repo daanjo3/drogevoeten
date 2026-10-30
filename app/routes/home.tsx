@@ -179,7 +179,7 @@ export default function Home() {
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
         <HuiskamerPanel place={place} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
         <InfoPanel place={place} mode={mode} scenario={scenario} onScenario={setScenario} onClose={() => setMode("info")} />
-        <NlMap address={place.address} />
+        <NlMap centroide={locatie?.centroide_ll} />
         <TijdreisPanel place={place} active={canvas.active === "tijd"} />
         <BuurtPanel place={locatie} />
 
