@@ -59,6 +59,8 @@ public sealed class UnderwaterRendererFeature : ScriptableRendererFeature
             profilingSampler = new ProfilingSampler(passName);
             // The shader reads the camera color, so URP must render into a texture rather than the backbuffer
             requiresIntermediateTexture = true;
+            // The fog reads the scene depth (Scene Depth node)
+            ConfigureInput(ScriptableRenderPassInput.Depth);
         }
 
         public void Setup(Material material, float intensity)
@@ -70,6 +72,10 @@ public sealed class UnderwaterRendererFeature : ScriptableRendererFeature
         public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData)
         {
             UniversalResourceData resources = frameData.Get<UniversalResourceData>();
+            if (!resources.cameraDepthTexture.IsValid())
+            {
+                return;
+            }
 
             // Blit the camera color through the material into a new texture (bound as _BlitTexture), then make that the camera color
             TextureDesc desc = renderGraph.GetTextureDesc(resources.cameraColor);
@@ -80,7 +86,10 @@ public sealed class UnderwaterRendererFeature : ScriptableRendererFeature
             // Pass 0 of a Fullscreen Shader Graph is the procedural-triangle pass
             var blit = new RenderGraphUtils.BlitMaterialParameters(resources.cameraColor, destination, material, 0,
                 propertyBlock, RenderGraphUtils.FullScreenGeometryType.ProceduralTriangle);
-            renderGraph.AddBlitPass(blit, passName);
+            using (IBaseRenderGraphBuilder builder = renderGraph.AddBlitPass(blit, passName, returnBuilder: true))
+            {
+                builder.UseTexture(resources.cameraDepthTexture);
+            }
 
             resources.cameraColor = destination;
         }
