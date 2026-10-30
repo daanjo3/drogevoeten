@@ -69,10 +69,10 @@ export function StartScreen({
       </div>
       {/* credit line: NDE logo and the hackathon, leaves with the rest */}
       <div className="nde">
+        <span>Een project uit HackaLOD 2026, georganiseerd door</span>
         <a href="https://netwerkdigitaalerfgoed.nl" target="_blank" rel="noreferrer">
           <img src="/img/nde-logo-wit.png" alt="Netwerk Digitaal Erfgoed" />
         </a>
-        <span>Gemaakt in 24 uur tijdens HackaLOD 2026, een hackathon van het Netwerk Digitaal Erfgoed.</span>
       </div>
     </section>
   );
