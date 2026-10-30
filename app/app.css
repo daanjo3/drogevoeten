@@ -110,7 +110,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #start{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:var(--bg);transition:opacity .4s,visibility .4s;overflow:hidden}
 /* the two circles: soft, see-through edges */
 #start:before,#start:after{filter:blur(18px);-webkit-mask-image:radial-gradient(circle,#000 45%,transparent 70%);mask-image:radial-gradient(circle,#000 45%,transparent 70%)}
-#start:before{content:"";position:absolute;left:-6vw;top:-12vh;width:42vw;height:42vw;border-radius:50%;background:var(--g-bluepink);pointer-events:none}
+#start:before{content:"";position:absolute;left:-10vw;top:-16vh;width:30vw;height:30vw;border-radius:50%;background:var(--g-bluepink);opacity:.45;pointer-events:none}
 #start:after{content:"";position:absolute;right:-10vw;bottom:-25vh;width:55vw;height:55vw;border-radius:50%;background:var(--g-amber);pointer-events:none}
 #start.hide{opacity:0;visibility:hidden}
 .startbox{position:relative;z-index:2;width:min(760px,90vw);text-align:center}
