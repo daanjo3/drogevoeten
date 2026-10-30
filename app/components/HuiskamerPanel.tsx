@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import type { Mode, PlaceData } from "../data/place";
 import type { Scenario } from "../lib/scenario";
-import { calcScenario, nl, nlRaw } from "../lib/scenario";
+import { calcScenario, nl, nlRaw, nlSigned } from "../lib/scenario";
+import { useAddressHeight } from "../lib/ahn";
+import type { LocatieserverDoc } from "../lib/locatieserver";
 import { Icon } from "./Icons";
 import { Tip } from "./Tip";
 import { UnityRoom } from "./UnityRoom";
@@ -11,11 +13,14 @@ import { TERMS } from "../data/place";
    In risk mode the water rises and the explanation card appears. */
 export function HuiskamerPanel({
   place,
+  locatie,
   mode,
   scenario,
   loadRoom,
 }: {
   place: PlaceData;
+  /* the chosen address; its height comes from the AHN */
+  locatie?: LocatieserverDoc;
   mode: Mode;
   scenario: Scenario;
   /* start loading the 3D room (only after an address was chosen) */
@@ -23,6 +28,9 @@ export function HuiskamerPanel({
 }) {
   const risk = mode === "risk";
   const r = calcScenario(scenario, place.areaKm2, risk);
+  const height = useAddressHeight(locatie);
+  const ground = height.data?.ground;
+  const nap = ground ? `${nlSigned(ground.value)} m` : height.isError || height.isSuccess ? "onbekend" : "…";
 
   let explanation: ReactNode;
   if (scenario.dike >= 2) {
@@ -69,7 +77,7 @@ export function HuiskamerPanel({
           <Tip kind="term" tip={TERMS.NAP}>
             NAP
           </Tip>{" "}
-          +{nl(place.nap)} m
+          {nap}
           <br />
           <Tip kind="term" tip={TERMS.peilgebied}>
             peilgebied

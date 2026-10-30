@@ -36,6 +36,12 @@ export function nl(n: number): string {
   return n.toFixed(1).replace(".", ",");
 }
 
+/* Like nl, with a sign: "+2,0" or "−3,5". */
+export function nlSigned(n: number): string {
+  const r = Math.round(n * 10) / 10;
+  return `${r < 0 ? "−" : "+"}${nl(Math.abs(r))}`;
+}
+
 export function nlRaw(n: number): string {
   return String(n).replace(".", ",");
 }

@@ -124,6 +124,13 @@ export function useLookup(params: LookupParams) {
   return useQuery(lookupQueryOptions(params));
 }
 
+/* "POINT(a b)" -> [a, b], in WKT order: [lon, lat] for centroide_ll,
+   [x, y] for centroide_rd. */
+export function wktPoint(wkt?: string): [number, number] | undefined {
+  const m = wkt?.match(/POINT\(\s*(-?[\d.]+)\s+(-?[\d.]+)\s*\)/);
+  return m ? [Number(m[1]), Number(m[2])] : undefined;
+}
+
 type Params = Record<string, string | number | string[] | undefined>;
 
 async function request(

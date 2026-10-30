@@ -1,6 +1,8 @@
 import type { Mode, PlaceData } from "../data/place";
 import { TERMS } from "../data/place";
-import { nl, type Scenario } from "../lib/scenario";
+import { useAddressHeight } from "../lib/ahn";
+import type { LocatieserverDoc } from "../lib/locatieserver";
+import { nl, nlSigned, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
 import { ScenarioControls } from "./ScenarioControls";
 import { Tip } from "./Tip";
@@ -9,32 +11,50 @@ import { Tip } from "./Tip";
    mode "risk" shows the scenario buttons. The css crossfades between them. */
 export function InfoPanel({
   place,
+  locatie,
   mode,
   scenario,
   onScenario,
   onClose,
 }: {
   place: PlaceData;
+  /* the chosen address; its height comes from the AHN */
+  locatie?: LocatieserverDoc;
   mode: Mode;
   scenario: Scenario;
   onScenario: (s: Scenario) => void;
   /* the cross on the scenario panel: back to info mode */
   onClose: () => void;
 }) {
+  const height = useAddressHeight(locatie);
+  const ground = height.data?.ground;
+
+  let heightText: string;
+  if (ground) {
+    heightText = `Je voordeur ligt ${nl(Math.abs(ground.value))} meter ${ground.value >= 0 ? "boven" : "onder"} de zee.`;
+  } else if (height.isError) {
+    heightText = "Het hoogtebestand gaf geen antwoord. Probeer het later nog eens.";
+  } else if (height.isSuccess) {
+    heightText = "Hoe hoog je voordeur ligt, konden we hier niet vinden.";
+  } else {
+    heightText = "We zoeken op hoe hoog je voordeur ligt…";
+  }
+  const heightSource = ground
+    ? `Hoogte: Actueel Hoogtebestand Nederland (AHN), ${nlSigned(ground.value)} m NAP. Gemeten op de grond ${nl(ground.distance)} meter van je adres, want onder een huis meet het AHN de grond niet. Je drempel ligt vaak iets hoger.`
+    : "Hoogte: Actueel Hoogtebestand Nederland (AHN).";
+
   return (
     <section className="panel" id="p-info" data-mode={mode}>
       <div className="mode m-info" aria-hidden={mode !== "info"}>
         <span className="meta">
-          <Tip kind="bron" tip="Hoogte: Actueel Hoogtebestand Nederland (AHN). Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.">
+          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.`}>
             bronnen
           </Tip>
         </span>
         <h2 id="huisAdres" style={{ paddingRight: 120 }}>
           {place.address}
         </h2>
-        <p>
-          Je voordeur ligt {nl(Math.abs(place.nap))} meter {place.nap >= 0 ? "boven" : "onder"} de zee.
-        </p>
+        <p>{heightText}</p>
         <p>
           Elke dag pompt{" "}
           <Tip kind="term" tip={TERMS.gemaal}>
