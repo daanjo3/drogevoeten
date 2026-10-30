@@ -10,7 +10,7 @@ export type StartPhase = "idle" | "going" | "hidden";
 
 const EXAMPLES: { label: string; address: string }[] = [
   { label: "Middelburg", address: "Abdij 4, Middelburg" },
-  { label: "Beemster", address: "Middenweg 68a, Middenbeemster" },
+  { label: "Middenbeemster", address: "Middenweg 68a, Middenbeemster" },
   { label: "Nieuwerkerk", address: "Koningin Maudplein 1, Nieuwerkerk" },
 ];
 
