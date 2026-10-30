@@ -50,13 +50,35 @@ public class WebBridge : MonoBehaviour
         WebBridge_Emit(eventName, detail ?? "");
     }
 
+    // True while the browser shows the player fullscreen (in the editor: while the player window is fullscreen)
+    public static bool IsFullscreen()
+    {
+        return WebBridge_IsFullscreen() != 0;
+    }
+
+    // Leave fullscreen and give keyboard focus back to the page
+    public static void ExitFullscreen()
+    {
+        WebBridge_ExitFullscreen();
+    }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void WebBridge_Emit(string eventName, string detail);
+
+    [DllImport("__Internal")]
+    private static extern int WebBridge_IsFullscreen();
+
+    [DllImport("__Internal")]
+    private static extern void WebBridge_ExitFullscreen();
 #else
     private static void WebBridge_Emit(string eventName, string detail)
     {
         Debug.Log($"[WebBridge] {eventName}: {detail}");
     }
+
+    private static int WebBridge_IsFullscreen() => Screen.fullScreen ? 1 : 0;
+
+    private static void WebBridge_ExitFullscreen() => Screen.fullScreen = false;
 #endif
 }
