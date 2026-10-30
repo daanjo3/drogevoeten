@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { CircleMarker, Tooltip } from "react-leaflet";
+import { CircleMarker, Polygon, Tooltip } from "react-leaflet";
 import { Icon } from "./Icons";
 import { Tip } from "./Tip";
 import LeafletMap from "./leaflet-map";
@@ -7,6 +7,8 @@ import type { LocatieserverDoc } from "../lib/locatieserver";
 import { featureUrl, useNear as useNearLandschapsatlas } from "../lib/landschapsatlas";
 import { itemUrl, useNear } from "../lib/imwa";
 import { combineGemalen, webUrl, MATCH_MAX_M, type CombinedGemaal } from "../lib/linkset";
+import { toLatLngs, usePeilgebied } from "../lib/waterbeheergebieden";
+import { TERMS } from "../data/place";
 
 interface Props {
   /* undefined until the address lookup is done */
@@ -135,6 +137,11 @@ export function BuurtPanel({ place }: Props) {
     limit: 1000,
   });
 
+  // the area around the address where one water level is kept
+  const { peilgebied } = usePeilgebied(lat, lon);
+  const pg = peilgebied?.properties;
+  const pgName = pg?.naam?.trim() || pg?.code || "zonder naam";
+
   // wait for both, so the list doesn't reshuffle; a failed source counts as empty
   const loading = imwa.isLoading || atlas.isLoading;
   const failed = imwa.isError && atlas.isError;
@@ -159,10 +166,34 @@ export function BuurtPanel({ place }: Props) {
       <p className="lead">
         Een gemaal is een gebouw met grote pompen. Het pompt water uit de polder naar de rivier of de zee. Vroeger deden molens dat,
         op de wind. Klik op een stip en zie wie hier nog meedoet.
+        {pg && (
+          <>
+            {" "}
+            De lijn is jouw{" "}
+            <Tip kind="term" tip={TERMS.peilgebied}>
+              peilgebied
+            </Tip>{" "}
+            {pgName}
+            {pg.waterbeheerder ? `, van ${pg.waterbeheerder}` : ""}.
+          </>
+        )}
       </p>
       <div className="buurt">
         <div className="map" id="map">
           <LeafletMap center={here ?? FALLBACK} zoom={13} style={{}}>
+            {peilgebied && (
+              <Polygon
+                key={peilgebied.id}
+                positions={toLatLngs(peilgebied.geometry)}
+                pathOptions={{ color: "#16324f", weight: 3, dashArray: "6 6", fillColor: "#16324f", fillOpacity: 0.08 }}
+              >
+                <Tooltip sticky>
+                  peilgebied {pgName}
+                  {pg?.code && pg.code !== pgName ? ` (${pg.code})` : ""}
+                  {pg?.waterbeheerder ? ` · ${pg.waterbeheerder}` : ""}
+                </Tooltip>
+              </Polygon>
+            )}
             {here && (
               <CircleMarker center={here} radius={7} pathOptions={{ color: "#16324f", weight: 3, fillColor: "#fff", fillOpacity: 1 }}>
                 <Tooltip>dit adres</Tooltip>
