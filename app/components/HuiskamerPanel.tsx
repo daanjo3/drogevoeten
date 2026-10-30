@@ -58,7 +58,7 @@ export function HuiskamerPanel({
         <Tip kind="term" tip={TERMS.kuub}>
           kuub
         </Tip>{" "}
-        per minuut. Na ongeveer <b>{nl(r.hours)} uur</b> is alles weg. Jullie voeten blijven droog.
+        per minuut. Na ongeveer <b>{nl(r.hours)} uur</b> is alles weg. Jouw voeten blijven droog.
       </>
     );
   }

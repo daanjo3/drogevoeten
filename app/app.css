@@ -67,10 +67,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #tooltip.show{opacity:1;transform:none}
 
 /* landschapje op het startscherm */
-.land{position:absolute;z-index:1;left:-3vw;right:-3vw;bottom:0;height:48vh;pointer-events:none}
+.land{position:absolute;z-index:1;left:-3vw;right:-3vw;bottom:0;height:68vh;pointer-events:none}
 .land .lyr{position:absolute;inset:0;width:100%;height:100%;stroke:none;stroke-linejoin:round;transition:transform .6s cubic-bezier(.2,.7,.2,1)}
-.startbox{margin-bottom:30vh}
-@media (max-height:760px){.land{height:44vh}.startbox{margin-bottom:26vh}}
+.startbox{margin-bottom:10vh}
+@media (max-height:760px){.land{height:62vh}.startbox{margin-bottom:8vh}}
 /* subtiele animaties */
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{transform-box:fill-box;transform-origin:center;animation:spin 18s linear infinite}
@@ -101,19 +101,17 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* vertrek-transitie */
 .startbox{transition:opacity .35s,transform .45s cubic-bezier(.5,0,.75,0)}
 #start.going .startbox{opacity:0;transform:translateY(-40px)}
-/* credit line at the bottom: logo left, text right, on a dark blurred pill */
+/* credit line at the bottom: logo left, text right */
 #start .nde{position:absolute;z-index:3;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:10px 20px;color:#fff;font:400 15px/1.3 var(--font);white-space:nowrap;transition:opacity .4s}
-/* the dark shape itself is soft: a blurred layer behind the text */
-#start .nde:before{content:"";position:absolute;inset:-6px -10px;border-radius:999px;background:rgba(0,0,0,.5);filter:blur(10px);z-index:-1}
 #start .nde a{display:flex;flex:none}
-#start .nde img{height:28px;width:auto;display:block}
+#start .nde img{height:38px;width:auto;display:block}
 #start.going .nde{opacity:0}
 @media (max-width:600px){
   #start .nde{width:max-content;max-width:calc(100% - 32px);white-space:normal;text-align:center;font-size:13px;gap:10px;padding:8px 14px}
   /* the example buttons wrap instead of running off the screen */
   .defaults{flex-wrap:wrap}
   .defaults button{flex:1 1 auto;padding:12px 14px}
-  #start .nde img{height:22px}
+  #start .nde img{height:30px}
 }
 #drop{position:absolute;z-index:3;left:56%;top:-12vh;width:64px;height:64px;margin-left:-32px;stroke:none;opacity:0;filter:drop-shadow(0 6px 0 rgba(36,36,36,.15))}
 #start.going #drop{animation:drop .7s .2s cubic-bezier(.3,1.5,.55,1) forwards}
@@ -151,6 +149,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* ===== FIXED ===== */
 #where{position:fixed;z-index:40;left:50%;top:16px;transform:translateX(-50%);text-align:center;background:#fff;border:1.5px solid var(--line);padding:8px 18px;border-radius:999px;color:var(--mute);box-shadow:var(--shadow)}
+#where .where-lbl{font-family:var(--head),var(--font);font-weight:var(--headw);font-variation-settings:var(--headvar);font-size:var(--fs-p);text-transform:none;letter-spacing:0;color:var(--ink)}
 #where b{color:var(--ink);display:block;font:600 var(--fs-p) var(--font)}
 
 #nav{position:fixed;z-index:40;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:4px;background:var(--dark);border-radius:20px;padding:6px;box-shadow:var(--shadow)}
@@ -184,6 +183,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue-deep); color:#fff}
 #p-tijd {left:52vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
+#p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:linear-gradient(180deg,var(--green2) 0%,var(--blue-deep) 100%); color:#fff}
+#p-gemaal p{margin:0 0 10px}
+#p-gemaal h2{margin:6px 0 12px}
+#p-gemaal .src-link{display:inline-block;margin-top:6px;font:500 var(--fs-label)/1.4 var(--font);color:#fff;opacity:.8}
 
 /* beeldtegels */
 /* print tiles size to their content: the print keeps its ratio, the caption sits under it */

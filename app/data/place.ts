@@ -85,7 +85,7 @@ export const MIDDELBURG: PlaceData = {
       status: "werkt nu mee",
       x: 65,
       y: 25,
-      text: "Dit gemaal pompt elke dag water uit jullie polder. Het is gebouwd in 1929 en draait nog steeds.",
+      text: "Dit gemaal pompt elke dag water uit jouw polder. Het is gebouwd in 1929 en draait nog steeds.",
       source: "waterschapsregister · Gemalenstichting",
     },
     {

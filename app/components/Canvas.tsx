@@ -23,7 +23,7 @@ export interface PanelBox {
 const SECTION_IDS: Record<SectionKey, string[]> = {
   huis: ["p-huis", "p-info"],
   tijd: ["p-tijd"],
-  buurt: ["p-buurt"],
+  buurt: ["p-buurt", "p-gemaal"],
 };
 
 const TOP_OFFSET_TIJD = 90;

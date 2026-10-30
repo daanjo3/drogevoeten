@@ -10,6 +10,7 @@ import { HuiskamerPanel } from "../components/HuiskamerPanel";
 import { InfoPanel } from "../components/InfoPanel";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
+import { GemaalPanel } from "../components/GemaalPanel";
 import { NlMap } from "../components/NlMap";
 import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
@@ -265,7 +266,7 @@ export default function Home() {
         <Icon name="info" /> Over
       </button>
       <div id="where">
-        jouw straat <b id="whereTxt">{place.address}</b>
+        <span className="where-lbl">jouw straat</span> <b id="whereTxt">{place.address}</b>
       </div>
       <button type="button" className="corner" id="shareBtn" onClick={share}>
         <Icon name="share" /> {copied ? "Link gekopieerd" : "Deel"}
@@ -287,6 +288,7 @@ export default function Home() {
         <NlMap centroide={locatie?.centroide_ll} nap={height.data?.ground?.value} />
         <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
+        <GemaalPanel />
 
         {worksFor(WORKS, locatie?.woonplaatsnaam).map((w) => (
           <RijksTile key={w.id} id={w.id} work={w} />
