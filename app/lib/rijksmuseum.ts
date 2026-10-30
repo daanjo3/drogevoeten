@@ -1,6 +1,6 @@
 /* Rijksmuseum images for a location, queried with Comunica over a local
    N-Triples file. The file is a slim schema.org view of the harvest, made by
-   exploration/rijksmuseum/slim.py (the Rijksmuseum has no SPARQL endpoint). */
+   qlever/rijksmuseum/slim.py (the Rijksmuseum has no SPARQL endpoint). */
 
 import { QueryEngine } from "@comunica/query-sparql-rdfjs-lite";
 import { Parser, Store } from "n3";

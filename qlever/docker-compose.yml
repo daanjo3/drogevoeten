@@ -1,14 +1,30 @@
 # SPARQL endpoint for the Rijksmuseum water subset, on http://localhost:7001
 #
-#   cd qlever
-#   UID=$(id -u) GID=$(id -g) docker compose up -d     # builds the index on first start
-#   UID=$(id -u) GID=$(id -g) docker compose run --rm qlever qlever index --overwrite-existing
-#                                                      # rebuild after new data, then restart
+#   qlever/compose.sh       # harvest, index and serve (docker compose up -d
+#                           # with your UID/GID; other arguments go to compose)
 #
-# The image's entrypoint runs the command as user `qlever` with your UID/GID,
-# in /data (this folder), so index files end up here owned by you.
+# Every step is idempotent, so `up` is safe to repeat:
+#   - data: harvests only if data/rijksmuseum-linked-art.nt is missing (~10 min,
+#     network), and slims only if data/rijksmuseum-app.nt is older than that.
+#   - qlever: indexes only if there is no index yet or the data is newer.
+# To harvest again, delete data/rijksmuseum-linked-art.nt (or run
+# `qlever/compose.sh run --rm data python3 -I rijksmuseum/harvest.py --force`)
+# and run compose.sh again.
+#
+# Both services run as your UID/GID in /data (this folder), so the data and
+# index files end up here owned by you.
 
 services:
+  data:
+    image: docker.io/library/python:3.13-slim
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /data
+    volumes:
+      - ./:/data
+    environment:
+      PYTHONUNBUFFERED: "1"
+    command: ["sh", "-c", "python3 -I rijksmuseum/harvest.py && python3 -I rijksmuseum/slim.py"]
+
   qlever:
     image: docker.io/adfreiburg/qlever:commit-4f9ffab5e3
     working_dir: /data
@@ -19,7 +35,10 @@ services:
       GID: ${GID:-1000}
     ports:
       - "7001:7001"
-    # Index once if there is none yet, then serve in the foreground.
+    depends_on:
+      data:
+        condition: service_completed_successfully
+    # Index if there is no index yet or the data is newer, then serve in the foreground.
     # No quotes in this command: the entrypoint wraps it in quotes itself.
-    command: ["test -f rijksmuseum-water.meta-data.json || qlever index; exec qlever start --run-in-foreground"]
+    command: ["for f in data/*.nt; do [ $$f -nt rijksmuseum-water.meta-data.json ] && rm -f rijksmuseum-water.meta-data.json; done; test -f rijksmuseum-water.meta-data.json || qlever index --overwrite-existing; exec qlever start --run-in-foreground"]
     restart: unless-stopped

@@ -1,4 +1,4 @@
-# Input files: regenerate with exploration/rijksmuseum/harvest.py and slim.py
+# Input files: regenerate with rijksmuseum/harvest.py and slim.py (or docker compose up)
 data/
 # Index, settings and log files written by qlever index / qlever start
 rijksmuseum-water.*

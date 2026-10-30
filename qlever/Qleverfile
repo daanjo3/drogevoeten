@@ -4,14 +4,15 @@
 # Two named graphs; QLever's default graph is their union, so queries don't
 # need GRAPH clauses:
 #   - linked-art: the harvest in the Rijksmuseum's own model (CIDOC-CRM /
-#     Linked Art), written by exploration/rijksmuseum/harvest.py. Used by the
-#     notebook exploration/notebooks/rijksmuseum-water.sparqlbook.
+#     Linked Art), written by rijksmuseum/harvest.py. Used by the notebook
+#     exploration/notebooks/rijksmuseum-water.sparqlbook.
 #   - app: a small schema.org view of the same objects, written by
-#     exploration/rijksmuseum/slim.py. Used by app/lib/rijksmuseum.ts.
+#     rijksmuseum/slim.py. Used by app/lib/rijksmuseum.ts.
 #
-# Make the input files first (from the repo root):
-#   python3 -I exploration/rijksmuseum/harvest.py   # ~10 min, network
-#   python3 -I exploration/rijksmuseum/slim.py      # seconds
+# The `data` service in docker-compose.yml makes the input files. Without
+# Docker (from the repo root; both skip work that is already done):
+#   python3 -I qlever/rijksmuseum/harvest.py   # ~10 min, network
+#   python3 -I qlever/rijksmuseum/slim.py      # seconds
 
 [data]
 NAME         = rijksmuseum-water
