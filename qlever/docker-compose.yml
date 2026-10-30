@@ -27,18 +27,20 @@ services:
 
   qlever:
     image: docker.io/adfreiburg/qlever:commit-4f9ffab5e3
+    # Run as your UID/GID directly, not with -e UID/GID: then the entrypoint
+    # renames its user with usermod, which fails when the UID is taken in the
+    # image (1000 is its `ubuntu` user). As another user, it skips that and
+    # runs the command in a login shell. working_dir must be /data.
+    user: "${UID:-1000}:${GID:-1000}"
     working_dir: /data
     volumes:
       - ./:/data
-    environment:
-      UID: ${UID:-1000}
-      GID: ${GID:-1000}
     ports:
       - "7001:7001"
     depends_on:
       data:
         condition: service_completed_successfully
-    # Index if there is no index yet or the data is newer, then serve in the foreground.
-    # No quotes in this command: the entrypoint wraps it in quotes itself.
-    command: ["for f in data/*.nt; do [ $$f -nt rijksmuseum-water.meta-data.json ] && rm -f rijksmuseum-water.meta-data.json; done; test -f rijksmuseum-water.meta-data.json || qlever index --overwrite-existing; exec qlever start --run-in-foreground"]
+    # Index if there is no index yet or the data is newer, then serve in the
+    # foreground. A failed index stops here, instead of starting without one.
+    command: ["for f in data/*.nt; do [ $$f -nt rijksmuseum-water.meta-data.json ] && rm -f rijksmuseum-water.meta-data.json; done; { test -f rijksmuseum-water.meta-data.json || qlever index --overwrite-existing; } && exec qlever start --run-in-foreground"]
     restart: unless-stopped

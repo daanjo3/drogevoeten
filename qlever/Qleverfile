@@ -20,6 +20,8 @@ DESCRIPTION  = Rijksmuseum: objects about floods and water infrastructure, harve
 FORMAT       = nt
 
 [index]
+# Required by `qlever index` (it checks the files exist); MULTI_INPUT_JSON reads them
+INPUT_FILES      = data/rijksmuseum-linked-art.nt data/rijksmuseum-app.nt
 MULTI_INPUT_JSON = [{ "cmd": "cat data/rijksmuseum-linked-art.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-linked-art" },
                     { "cmd": "cat data/rijksmuseum-app.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-app" }]
 SETTINGS_JSON    = { "num-triples-per-batch": 1000000 }

@@ -1,11 +1,21 @@
-/* Rijksmuseum images for a location, queried with Comunica over a local
-   N-Triples file. The file is a slim schema.org view of the harvest, made by
-   qlever/rijksmuseum/slim.py (the Rijksmuseum has no SPARQL endpoint). */
+/* Rijksmuseum images for a location. The data is a slim schema.org view of
+   the harvest, made by qlever/rijksmuseum/slim.py (the Rijksmuseum has no
+   SPARQL endpoint). Two ways to query it with the same SPARQL:
+   - our QLever endpoint (qlever/compose.sh), used by the app;
+   - Comunica over a local N-Triples file, used by the test page. */
 
 import { QueryEngine } from "@comunica/query-sparql-rdfjs-lite";
+import { queryOptions } from "@tanstack/react-query";
 import { Parser, Store } from "n3";
+import { wktPoint, type LocatieserverDoc } from "./locatieserver";
 
 export const DATA_URL = `${import.meta.env?.BASE_URL ?? "/"}data/rijksmuseum-water.nt`;
+
+/* QLever from qlever/docker-compose.yml; set VITE_RIJKSMUSEUM_SPARQL for another one */
+export const SPARQL_URL: string = import.meta.env?.VITE_RIJKSMUSEUM_SPARQL ?? "http://localhost:7001";
+
+/* Give up on the endpoint after this long, so callers can fall back */
+const ENDPOINT_TIMEOUT_MS = 8000;
 
 /* Themes are Iconclass subtrees. Iconclass codes are hierarchical by prefix,
    so "25H199" also covers 25H1991 (dike-break) and 25H1992 (rescue work). */
@@ -59,6 +69,18 @@ export interface RijksImage {
   license?: string;
   objectNumber?: string;
   depicts: string;
+}
+
+/* The location of a Locatieserver record, or undefined without a centroid. */
+export function locationOf(doc?: LocatieserverDoc): Location | undefined {
+  const point = wktPoint(doc?.centroide_ll);
+  if (!doc || !point) return undefined;
+  return {
+    lon: point[0],
+    lat: point[1],
+    places: [doc.woonplaatsnaam, doc.gemeentenaam].filter((x): x is string => !!x),
+    province: doc.provincienaam,
+  };
 }
 
 /* Same normalisation as slim.py's match_name: lowercase, no "(provincie)". */
@@ -191,25 +213,66 @@ export function loadStore(text?: string): Promise<Store> {
 
 const engine = new QueryEngine();
 
+/* One result row, given a lookup of its variables. */
+function toImage(v: (name: string) => string | undefined): RijksImage {
+  const km = Number(v("km"));
+  return {
+    object: v("object")!,
+    theme: v("theme") as Theme,
+    rank: Number(v("rank")),
+    km: km < 9999 ? km : undefined,
+    title: v("title")!,
+    year: v("year") ? Number(v("year")) : undefined,
+    iiif: v("image")!,
+    page: v("page"),
+    license: v("license"),
+    objectNumber: v("number"),
+    depicts: v("depicts") ?? "",
+  };
+}
+
+/* Comunica over the local N-Triples file. */
 export async function findImages(loc: Location, options?: ImagesOptions): Promise<RijksImage[]> {
   const store = await loadStore();
   const stream = await engine.queryBindings(imagesQuery(loc, options), { sources: [store] });
   const rows = await stream.toArray();
-  return rows.map((b) => {
-    const v = (name: string) => b.get(name)?.value;
-    const km = Number(v("km"));
-    return {
-      object: v("object")!,
-      theme: v("theme") as Theme,
-      rank: Number(v("rank")),
-      km: km < 9999 ? km : undefined,
-      title: v("title")!,
-      year: v("year") ? Number(v("year")) : undefined,
-      iiif: v("image")!,
-      page: v("page"),
-      license: v("license"),
-      objectNumber: v("number"),
-      depicts: v("depicts") ?? "",
-    };
+  return rows.map((b) => toImage((name) => b.get(name)?.value));
+}
+
+interface SparqlResults {
+  results: { bindings: Record<string, { value: string } | undefined>[] };
+}
+
+/* The same query at the SPARQL endpoint. Throws when the endpoint is down,
+   slow or answers with an error, so callers can fall back. */
+export async function findImagesAtEndpoint(
+  loc: Location,
+  options?: ImagesOptions,
+  signal?: AbortSignal,
+): Promise<RijksImage[]> {
+  const timeout = AbortSignal.timeout(ENDPOINT_TIMEOUT_MS);
+  // form-encoded POST: a "simple" CORS request, so no preflight
+  const res = await fetch(SPARQL_URL, {
+    method: "POST",
+    headers: { Accept: "application/sparql-results+json" },
+    body: new URLSearchParams({ query: imagesQuery(loc, options) }),
+    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
+  });
+  if (!res.ok) {
+    throw new Error(`Rijksmuseum SPARQL failed: ${res.status} ${res.statusText}`);
+  }
+  const json = (await res.json()) as SparqlResults;
+  return json.results.bindings.map((b) => toImage((name) => b[name]?.value));
+}
+
+export function endpointImagesQueryOptions(loc: Location | undefined, options?: ImagesOptions) {
+  return queryOptions({
+    queryKey: ["rijksmuseum", "endpoint", loc, options],
+    queryFn: ({ signal }) => findImagesAtEndpoint(loc!, options, signal),
+    enabled: !!loc,
+    // no retries: when the endpoint is not running, fall back right away
+    retry: false,
+    // the data only changes with a new harvest
+    staleTime: Infinity,
   });
 }

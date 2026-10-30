@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { MIDDELBURG, type Mode } from "../data/place";
 import type { Scenario } from "../lib/scenario";
@@ -21,6 +21,7 @@ import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
 import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
+import { endpointImagesQueryOptions, locationOf, type RijksImage, type Theme } from "../lib/rijksmuseum";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
    with a place show only when the address lies there; works without a
@@ -68,7 +69,8 @@ const WORKS: (RijksWork & { id: string })[] = [
     iiif: "https://iiif.micr.io/WSNzD",
     context: "Zo zag Nieuwerkerk eruit in 1735. In 1953 liep het dorp onder water.",
   },
-  /* general: four featured works, spread over the grid, shown for every address */
+  /* general: four featured works, spread over the grid, shown for every address.
+     Fallbacks: their spots get images from our SPARQL endpoint when it answers. */
   {
     id: "i-keere",
     place: "",
@@ -112,6 +114,53 @@ const WORKS: (RijksWork & { id: string })[] = [
   },
 ];
 
+const LOCAL = WORKS.filter((w) => w.place);
+const FEATURED = WORKS.filter((w) => !w.place);
+
+/* Two per theme for the four featured spots, plus a spare in case one is
+   already shown as a local work */
+const LIMITS: Record<Theme, number> = { flood: 3, infrastructure: 3 };
+
+/* Endpoint images for the featured spots, flood and infrastructure in turn,
+   each list nearest first (as the query orders them). */
+function pickFeatured(images: RijksImage[], shown: Set<string>): RijksImage[] {
+  const free = images.filter((img) => !img.objectNumber || !shown.has(img.objectNumber));
+  const flood = free.filter((img) => img.theme === "flood");
+  const infrastructure = free.filter((img) => img.theme === "infrastructure");
+  const out: RijksImage[] = [];
+  for (let i = 0; i < Math.max(flood.length, infrastructure.length); i++) {
+    if (flood[i]) out.push(flood[i]);
+    if (infrastructure[i]) out.push(infrastructure[i]);
+  }
+  return out.slice(0, FEATURED.length);
+}
+
+/* The context sentence only says what the data says: the theme, the
+   depicted places and how they relate to the address. */
+function toWork(img: RijksImage): RijksWork {
+  const where =
+    img.rank === 1
+      ? "in jouw woonplaats of gemeente"
+      : img.rank === 2
+        ? img.km !== undefined
+          ? `op zo'n ${Math.max(1, Math.round(img.km))} km van je adres`
+          : "in de buurt"
+        : img.rank === 3
+          ? "in jouw provincie"
+          : "";
+  const what = img.theme === "flood" ? "Hoog water" : "Waterwerken";
+  return {
+    place: "",
+    title: img.title,
+    maker: "",
+    year: img.year ? String(img.year) : "",
+    objectNumber: img.objectNumber ?? "",
+    iiif: img.iiif,
+    url: img.page ?? img.object,
+    context: `${what}${img.depicts ? ` in ${img.depicts}` : ""}${where ? ` (${where})` : ""}.`,
+  };
+}
+
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
    and the scenario choices. */
@@ -128,6 +177,17 @@ export default function Home() {
   const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address) };
   /* ground level at the address (AHN); the panels read the same cached query */
   const height = useAddressHeight(locatie);
+
+  /* Rijksmuseum works: the local ones for this woonplaats, and the featured
+     spots from the endpoint. While it answers the featured spots stay empty;
+     when it fails (or is not running), or has too few images, the fallbacks. */
+  const local = worksFor(LOCAL, locatie?.woonplaatsnaam);
+  const endpoint = useQuery(endpointImagesQueryOptions(locationOf(locatie), { limits: LIMITS }));
+  const fetched = endpoint.isSuccess ? pickFeatured(endpoint.data, new Set(local.map((w) => w.objectNumber))) : [];
+  const featured =
+    endpoint.fetchStatus === "fetching" && !endpoint.isSuccess
+      ? []
+      : FEATURED.map((fallback, i) => (fetched[i] ? { ...toWork(fetched[i]), id: fallback.id } : fallback));
 
   /* with an address in the url we skip the start screen */
   const [phase, setPhase] = useState<StartPhase>(id ? "hidden" : "idle");
@@ -290,7 +350,7 @@ export default function Home() {
         <BuurtPanel place={locatie} />
         <GemaalPanel />
 
-        {worksFor(WORKS, locatie?.woonplaatsnaam).map((w) => (
+        {[...local, ...featured].map((w) => (
           <RijksTile key={w.id} id={w.id} work={w} />
         ))}
       </Canvas>

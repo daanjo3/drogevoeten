@@ -4,10 +4,13 @@ import type { ReactNode } from "react";
    is plenty for a tile and much faster than /full/max/. */
 export interface RijksWork {
   title: string;
+  /* empty when unknown (the SPARQL view has no makers) */
   maker: string;
   year: string;
   objectNumber: string;
   iiif: string;
+  /* collection page; built from objectNumber when absent */
+  url?: string;
   /* the place this work belongs to, matched against the Locatieserver woonplaats */
   place: string;
   /* one sentence that ties the work to the block it sits next to */
@@ -26,7 +29,7 @@ export function rijksSrc(w: RijksWork): string {
 }
 
 export function rijksUrl(w: RijksWork): string {
-  return `https://www.rijksmuseum.nl/nl/collectie/${w.objectNumber}`;
+  return w.url ?? `https://www.rijksmuseum.nl/nl/collectie/${w.objectNumber}`;
 }
 
 /* Tile for a Rijksmuseum work: one context sentence, then the museum
@@ -45,10 +48,11 @@ export function RijksTile({ id, work }: { id: string; work: RijksWork }) {
       <figcaption className="cap">
         <p className="context">{work.context}</p>
         <span className="museum">
-          {work.title} · {work.maker}
+          {work.title}
+          {work.maker ? ` · ${work.maker}` : ""}
           {work.year ? `, ${work.year}` : ""} · Rijksmuseum ·{" "}
           <a href={rijksUrl(work)} target="_blank" rel="noreferrer">
-            {work.objectNumber}
+            {work.objectNumber || "collectie"}
           </a>
         </span>
       </figcaption>

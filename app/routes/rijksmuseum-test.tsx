@@ -4,8 +4,8 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { freeQueryOptions, wktPoint } from "../lib/locatieserver";
-import { DATA_URL, findImages, imagesQuery, loadStore, RANK_LABELS, type Location } from "../lib/rijksmuseum";
+import { freeQueryOptions } from "../lib/locatieserver";
+import { DATA_URL, findImages, imagesQuery, loadStore, locationOf, RANK_LABELS } from "../lib/rijksmuseum";
 
 const DEMO_ADDRESSES = [
   "Abdij 4, Middelburg",
@@ -27,16 +27,7 @@ export default function RijksmuseumTest() {
 
   const geocode = useQuery(freeQueryOptions({ q, fq: ["type:adres"], rows: 1 }));
   const doc = geocode.data?.response.docs[0];
-  const point = wktPoint(doc?.centroide_ll);
-  const loc: Location | undefined =
-    doc && point
-      ? {
-          lon: point[0],
-          lat: point[1],
-          places: [doc.woonplaatsnaam, doc.gemeentenaam].filter((x): x is string => !!x),
-          province: doc.provincienaam,
-        }
-      : undefined;
+  const loc = locationOf(doc);
 
   const store = useQuery({
     queryKey: ["rijksmuseum", "store"],
