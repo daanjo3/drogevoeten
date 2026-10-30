@@ -45,7 +45,10 @@ interface Poi {
 
 function fromGemaal(f: NearFeature<Gemaal>): Poi {
   const p = f.properties;
-  const since = p.stichtingsjaar ? `, gesticht in ${p.stichtingsjaar}` : "";
+  // the WFS uses " " for empty fields
+  const year = p.stichtingsjaar?.trim();
+  const outlet = p.lozend_op?.trim();
+  const since = year ? `, gesticht in ${year}` : "";
   return {
     id: f.id,
     name: p.naam_gemaal,
@@ -53,7 +56,7 @@ function fromGemaal(f: NearFeature<Gemaal>): Poi {
     lon: f.geometry.coordinates[0],
     distance: f.distance,
     status: p.status || "onbekend",
-    text: `${p.functie}${since}. Loost op ${p.lozend_op || "onbekend"}.`,
+    text: `${p.functie}${since}. Loost op ${outlet || "onbekend"}.`,
     source: p.infolink || undefined,
     metadata: featureUrl("landschapsatlas:gemalen", f.id),
     photo: isAllowedPhoto(p.foto_thumb)

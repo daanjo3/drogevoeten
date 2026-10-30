@@ -147,7 +147,7 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 #p-info {left:150vw;top:85vh;  width:28vw; height:70vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); border:1.5px solid var(--line); display:grid; transition:background .4s,color .4s}
 #p-map  {left:92vw; top:10vh;  width:30vw; height:68vh; background:linear-gradient(170deg,var(--blue2),#cfe8f8); }
 #p-tijd {left:50vw; top:45vh;  width:36vw; height:150vh;background:linear-gradient(180deg,var(--lav) 0%,var(--lav2) 100%)}
-#p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%); color:#fff}
+#p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:linear-gradient(160deg,var(--green) 0%,var(--green2) 100%); color:#fff; display:flex; flex-direction:column}
 
 /* beeldtegels */
 .img{display:flex;flex-direction:column;justify-content:space-between;padding:18px}
@@ -223,9 +223,10 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 .tl li p{margin:4px 0}
 
 /* buurt */
-.buurt{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100% - 70px);min-height:0}
+/* the map and list fill whatever the heading and lead leave over */
+.buurt{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr);gap:16px;flex:1;min-height:0}
 .buurt .side{min-height:0;overflow:auto;padding-right:4px;scrollbar-width:thin}
-.buurt .map{background:rgba(255,255,255,.25);border-radius:16px;position:relative;overflow:hidden;min-height:320px}
+.buurt .map{background:rgba(255,255,255,.25);border-radius:16px;position:relative;overflow:hidden;min-height:0}
 .buurt .map .leaflet-container{position:absolute;inset:0;height:100%;width:100%}
 .buurt .map > button,.buurt .map > .you{z-index:500}
 .buurt .map button{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--ink);border:3px solid #fff;padding:0;transform:translate(-50%,-50%)}
@@ -250,7 +251,8 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
   #canvas{width:100vw;height:auto;padding:70px 0 110px}
   .panel{position:relative;left:0!important;top:0!important;width:calc(100vw - 24px)!important;height:auto!important;min-height:60vh;margin:12px}
   .img{min-height:40vh!important}
-  .buurt{grid-template-columns:1fr}
+  .buurt{grid-template-columns:1fr;grid-template-rows:auto}
+  .buurt .map{min-height:320px}
   #nav .l{display:none}
   #nav .t{font-size:13px}
   #nav button{padding:10px}
