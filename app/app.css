@@ -291,6 +291,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .pill{border:1.5px solid var(--ink);border-radius:999px;padding:2px 8px;white-space:nowrap;background:#fff;color:var(--ink)}
   /* a station or mill that works now is black; the Landschapsatlas says "in bedrijf" or "maalvaardig" */
   .pill[data-status="werkt nu mee" i],.pill[data-status="in bedrijf" i],.pill[data-status="maalvaardig" i]{background:var(--ink);color:#fff;border-color:#fff}
+/* Leaflet zoom buttons in the house style: one dark pill, white plus and minus */
+.buurt .map .leaflet-control-zoom{border:0!important;border-radius:999px;overflow:hidden;box-shadow:var(--shadow);margin:12px}
+.buurt .map .leaflet-control-zoom a{width:36px;height:36px;line-height:36px;background:var(--dark);color:#fff;border:0!important;font:700 20px/36px var(--font);text-align:center}
+.buurt .map .leaflet-control-zoom a:hover{background:#fff;color:var(--ink)}
+.buurt .map .leaflet-control-zoom a.leaflet-disabled{opacity:.4}
+.buurt .map .leaflet-control-zoom a + a{border-top:1px solid #444!important}
+.buurt .map .leaflet-control-attribution{font:500 10px/1.4 var(--font);background:rgba(255,255,255,.8);color:var(--mute);border-radius:8px 0 0 0;padding:2px 8px}
+.buurt .map .leaflet-control-attribution a{color:var(--ink)}
 #detail{order:-1;flex:none;background:#fff;color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font-size:var(--fs-p);min-height:90px;margin:0 0 12px}
 /* nothing chosen yet: a small hint */
 #detail:not(:has(b)){min-height:0;padding:8px 14px;font:500 var(--fs-label)/1.4 var(--font);text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:#fff;border-color:var(--ink)}
