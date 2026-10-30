@@ -86,7 +86,7 @@ export default function Home() {
       </div>
 
       <FloatingNav active={canvas.active} mode={mode} onGo={onGo} onBack={onBack} />
-      <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} view={canvas.view} onPick={canvas.goPanel} />
+      <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
         <HuiskamerPanel place={place} mode={mode} scenario={scenario} />

@@ -1,4 +1,5 @@
-import type { Rect } from "./Canvas";
+import type { RefObject } from "react";
+import { useView, type Rect } from "./Canvas";
 
 const SIZE = 140;
 
@@ -15,14 +16,16 @@ const COLORS: Record<string, string> = {
 export function MiniMap({
   panels,
   canvas,
-  view,
+  worldRef,
   onPick,
 }: {
   panels: { id: string; rect: Rect }[];
   canvas: { width: number; height: number };
-  view: Rect;
+  /* the scrolling element, to track what is on screen */
+  worldRef: RefObject<HTMLDivElement | null>;
   onPick: (id: string) => void;
 }) {
+  const view = useView(worldRef);
   if (!canvas.width || !canvas.height) return <div id="mini" aria-label="Overzicht" />;
   const sx = SIZE / canvas.width;
   const sy = SIZE / canvas.height;

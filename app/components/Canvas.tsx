@@ -53,7 +53,6 @@ export function useCanvas() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [panels, setPanels] = useState<PanelBox[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
-  const [view, setView] = useState<Rect>({ l: 0, t: 0, r: 0, b: 0 });
   const [active, setActive] = useState<SectionKey>("huis");
 
   const measure = useCallback(() => {
@@ -99,11 +98,12 @@ export function useCanvas() {
     });
   }, []);
 
-  /* track the viewport and the section closest to the centre */
+  /* track the section closest to the centre. The viewport itself is tracked
+     by useView in the minimap only: it changes every scroll frame, and as
+     state here it would re-render every panel. */
   const onScroll = useCallback(() => {
     const world = worldRef.current;
     if (!world) return;
-    setView({ l: world.scrollLeft, t: world.scrollTop, r: world.scrollLeft + world.clientWidth, b: world.scrollTop + world.clientHeight });
     const cx = world.scrollLeft + world.clientWidth / 2;
     const cy = world.scrollTop + world.clientHeight / 2;
     let best: SectionKey = "huis";
@@ -143,7 +143,29 @@ export function useCanvas() {
     };
   }, [measure, onScroll]);
 
-  return { worldRef, canvasRef, panels, canvasSize, view, active, go, goPanel };
+  return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel };
+}
+
+/* The visible part of the canvas, updated on scroll and resize. Use it only
+   in small components: whoever calls it re-renders every scroll frame. */
+export function useView(worldRef: RefObject<HTMLDivElement | null>): Rect {
+  const [view, setView] = useState<Rect>({ l: 0, t: 0, r: 0, b: 0 });
+
+  useEffect(() => {
+    const world = worldRef.current;
+    if (!world) return;
+    const update = () =>
+      setView({ l: world.scrollLeft, t: world.scrollTop, r: world.scrollLeft + world.clientWidth, b: world.scrollTop + world.clientHeight });
+    update();
+    world.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      world.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [worldRef]);
+
+  return view;
 }
 
 export function Canvas({
