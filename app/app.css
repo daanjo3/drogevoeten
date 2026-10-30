@@ -30,10 +30,10 @@ h1,h2,h3,#detail b,.img .cap b{font-family:var(--head),var(--font);font-weight:v
   h3,#detail b,.img .cap b{font-size:var(--fs-h3);line-height:1.3;display:block}
   p{font-size:var(--fs-p)}
   .lead{font-size:var(--fs-p);opacity:.65;margin:0 0 14px}
-  .label,.src,.meta,.tag,.pill,.iframe,.line,.row small,#nav .l,#where,#out small,#detail small,.img .cap{font:500 var(--fs-label)/1.4 var(--font)}
+  .label,.src,.meta,.tag,.pill,.row small,#nav .l,#where,#out small,#detail small,.img .cap{font:500 var(--fs-label)/1.4 var(--font)}
 h2{margin:0 0 6px;font-size:var(--fs-h2);display:flex;align-items:center;gap:10px}
 /* labels in caps */
-.src,.meta,.tag,.pill,.iframe,.line,.row small,.seg button span,#nav .l,#where,
+.src,.meta,.tag,.pill,.row small,.seg button span,#nav .l,#where,
 #out small,#detail small,.img .cap{ text-transform:uppercase; letter-spacing:.06em; font-weight:500 }
 .img .cap b,#where b,.line b{ text-transform:none; letter-spacing:0 }
 h2 svg{width:28px;height:28px;flex:none}
@@ -173,8 +173,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #world{position:relative;width:100vw;height:100vh;overflow:auto}
 #canvas{position:relative;width:240vw;height:264vh}
 .panel{position:absolute;border-radius:22px;padding:24px;overflow:hidden;box-shadow:var(--shadow);opacity:0;translate:0 28px;transition:opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
-/* `seen` is set by useCanvas once a block scrolls into view */
-.panel.seen{opacity:1;translate:none}
+/* `data-seen` is set by useCanvas once a block scrolls into view */
+.panel[data-seen]{opacity:1;translate:none}
 @media (hover:hover){.panel:hover{scale:1.015}}
 @media (prefers-reduced-motion:reduce){.panel{transition:none;translate:none}}
 /* middelpunt canvas 120vw,120vh = midden van de huiskamer; 4vw tussen kolommen, 6vh tussen rijen */
@@ -218,10 +218,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* kamers */
 .room{position:absolute;inset:0}
-.room .water{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#5fb4ec,var(--water));opacity:.9;transition:height .7s cubic-bezier(.3,.8,.3,1)}
-.room .line{position:absolute;left:0;right:0;border-top:2px dashed currentColor;padding:4px 12px;transition:bottom .6s}
 .room .tag{position:absolute;left:72px;top:36px;opacity:.8}
-.room .iframe{position:absolute;right:16px;bottom:16px;opacity:.7}
 .room .icon{position:absolute;left:24px;top:24px;width:40px;height:40px}
 #p-info p{margin:0 0 10px}
 #out{position:absolute;left:20px;right:20px;bottom:20px;background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:14px;font-size:var(--fs-p);color:var(--ink)}
@@ -234,16 +231,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-info[data-mode=info] .m-info,#p-info[data-mode=risk] .m-risk{transition-delay:.12s,.12s,0s}
 #p-info[data-mode=risk]{background:var(--dark);color:#fff;border-color:var(--dark)}
 #p-info .meta{z-index:1}
-/* huiskamer: water en uitleg alleen als het misgaat */
-/* water and waterline only when it goes wrong; in info mode the room is dry */
-#p-huis .water{opacity:0;transition:opacity .4s,height .7s cubic-bezier(.3,.8,.3,1)}
-#p-huis.risk .water{opacity:.9}
-#p-huis .line{opacity:0;transition:opacity .3s,bottom .6s}
+/* huiskamer: uitleg alleen als het misgaat (het water zelf zit in de Unity-kamer) */
 #p-huis #out{opacity:0;transform:translateY(12px);transition:opacity .3s,transform .4s;pointer-events:none}
-#p-huis.risk .line{opacity:1}
 #p-huis.risk #out{opacity:1;transform:none;pointer-events:auto}
 #p-huis.risk{border-color:var(--sun);box-shadow:0 0 0 4px rgba(255,166,84,.35),var(--shadow)}
-#p-huis.risk .iframe{opacity:0}
 /* kaart */
 #p-map{display:flex;flex-direction:column}
 #p-map .kaartrij{flex:1;min-height:0;display:flex;margin:6px 0}
@@ -273,9 +264,9 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .tl li:before{content:"";position:absolute;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
 .tl li h3{margin-bottom:2px}
 .tl li{opacity:0}
-#p-tijd.seen .tl li{animation:slidein .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.35s + var(--i) * 90ms)}
+#p-tijd[data-seen] .tl li{animation:slidein .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.35s + var(--i) * 90ms)}
 @keyframes slidein{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.tl li{opacity:1}#p-tijd.seen .tl li{animation:none}}
+@media (prefers-reduced-motion:reduce){.tl li{opacity:1}#p-tijd[data-seen] .tl li{animation:none}}
 .tl li p{margin:4px 0}
 .tl li .src{margin-top:6px!important}
 
@@ -367,7 +358,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* a scaled or shifted block would pin the fixed wrapper to itself, so the block stays still */
 .panel:has(.scene-wrap.faux){scale:none!important;translate:none!important}
 .scene-wrap:fullscreen .scene-canvas,.scene-wrap.faux .scene-canvas{pointer-events:auto}
-.scene-wrap .fs.exit{position:fixed;right:16px;top:16px;z-index:5}
+.scene-wrap .fs.exit{position:fixed;right:16px;top:16px;bottom:auto;z-index:5}
 .room .loadbar{position:absolute;left:24px;right:24px;bottom:24px;height:10px;border-radius:999px;background:rgba(255,255,255,.3);border:1.5px solid rgba(255,255,255,.6);overflow:visible}
 .room .loadbar i{display:block;height:100%;border-radius:999px;background:var(--sun);transition:width .3s}
 .room .loadbar .label{position:absolute;left:0;bottom:16px;color:#fff;opacity:.9}
@@ -375,7 +366,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .room .fs svg{width:16px;height:16px}
 .room .fs:hover{background:var(--dark);color:#fff}
 /* in risk mode the explanation card sits at the bottom, so the button moves up */
-#p-huis.risk .fs{bottom:auto;top:70px}
+#p-huis.risk .fs:not(.exit){bottom:auto;top:70px}
 #p-huis .room .icon{color:#fff}
 #p-huis .meta,#p-huis .tag{color:#fff}
 #p-huis .room > .meta .tip.term{color:#fff}

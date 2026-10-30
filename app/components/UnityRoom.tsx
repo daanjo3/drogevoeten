@@ -13,6 +13,8 @@ const PLACEHOLDER = "/img/huiskamer-3d.png";
 /* the part of the api of unity-embed.js we use */
 interface UnityPlayer {
   setFullscreen: (on?: boolean) => void;
+  /* calls a public method on the C# WebBridge */
+  send: (method: string, value?: string | number) => void;
   quit: () => Promise<void>;
 }
 interface UnityEmbed {
@@ -24,7 +26,8 @@ interface UnityEmbed {
 
 type State = "idle" | "loading" | "ready" | "failed";
 
-export function UnityRoom({ active }: { active: boolean }) {
+/* waterLevel: water in the room in meters above the floor, 0 is dry */
+export function UnityRoom({ active, waterLevel }: { active: boolean; waterLevel: number }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   /* wrapper that goes fullscreen, so our own exit button can sit on top of the room */
   const wrap = useRef<HTMLDivElement>(null);
@@ -58,6 +61,11 @@ export function UnityRoom({ active }: { active: boolean }) {
       }
     })();
   }, [active]);
+
+  /* Unity moves its water to the new level; the first level after loading is applied at once */
+  useEffect(() => {
+    if (state === "ready") player.current?.send("SetWaterHeight", waterLevel);
+  }, [state, waterLevel]);
 
   useEffect(() => {
     const onChange = () => setFull(document.fullscreenElement === wrap.current);

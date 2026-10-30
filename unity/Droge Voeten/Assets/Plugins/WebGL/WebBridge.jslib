@@ -11,14 +11,4 @@ mergeInto(LibraryManager.library, {
     var element = document.fullscreenElement || document.webkitFullscreenElement;
     return element && element.contains(Module.canvas) ? 1 : 0;
   },
-
-  // Leave fullscreen and take keyboard focus off the canvas, so the page gets its input back
-  WebBridge_ExitFullscreen: function () {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(function () {});
-    } else if (document.webkitFullscreenElement) {
-      document.webkitExitFullscreen();
-    }
-    Module.canvas.blur();
-  },
 });

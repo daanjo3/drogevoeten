@@ -9,8 +9,8 @@ import { Tip } from "./Tip";
 import { UnityRoom } from "./UnityRoom";
 import { TERMS } from "../data/place";
 
-/* The living room. The team's 3D room will be embedded here as an iframe.
-   In risk mode the water rises and the explanation card appears. */
+/* The living room: the team's 3D Unity room. In risk mode the water in the
+   room rises to the scenario's level and the explanation card appears. */
 export function HuiskamerPanel({
   place,
   locatie,
@@ -27,7 +27,7 @@ export function HuiskamerPanel({
   loadRoom: boolean;
 }) {
   const risk = mode === "risk";
-  const r = calcScenario(scenario, place.areaKm2, risk);
+  const r = calcScenario(scenario, place.areaKm2);
   const height = useAddressHeight(locatie);
   const ground = height.data?.ground;
   const nap = ground ? `${nlSigned(ground.value)} m` : height.isError || height.isSuccess ? "onbekend" : "…";
@@ -66,11 +66,8 @@ export function HuiskamerPanel({
   return (
     <section className={`panel${risk ? " risk" : ""}`} id="p-huis">
       <div className="room">
-        <UnityRoom active={loadRoom} />
-        <div className="water" id="water" style={{ height: `${r.percent}%` }} />
-        <div className="line" id="line" style={{ bottom: `${r.percent}%` }}>
-          waterlijn <b id="lineTxt">{nl(r.level)} m</b>
-        </div>
+        {/* in info mode the room is dry */}
+        <UnityRoom active={loadRoom} waterLevel={risk ? r.level : 0} />
         <span className="tag" id="huisTag">{risk ? "WELKOM THUIS · als het misgaat" : "WELKOM THUIS"}</span>
         <Icon name="huis" className="icon" />
         <span className="meta">

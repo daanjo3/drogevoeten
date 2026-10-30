@@ -66,7 +66,7 @@ Placeholder:
 
 ## Open punten
 
-- [x] De 3D-huiskamer in `#p-huis`, als WebGL-build van het Unity-project in `unity/`. Zit in de app (`app/components/UnityRoom.tsx`). De waterlijn ligt nog als html-laag over het canvas; die naar Unity brengen is een volgende stap.
+- [x] De 3D-huiskamer in `#p-huis`, als WebGL-build van het Unity-project in `unity/`. Zit in de app (`app/components/UnityRoom.tsx`). Het water zit in de Unity-kamer: `UnityRoom` stuurt het waterniveau uit het scenario (meter boven de vloer, 0 buiten de risicomodus) naar `SetWaterHeight` in Unity. De oude html-laag met water en waterlijn is weg.
 - [ ] Data per adres ophalen via het koppelvlak van de datalaag, in plaats van hardcoded.
 - [ ] Beelden via IIIF bij de bron (Rijksmuseum, RCE beeldbank). Bronnen van de drie beelden in `img/` invullen.
 - [ ] Kaart van Nederland uit open data (PDOK), speld op echte coördinaten van de PDOK Locatieserver.

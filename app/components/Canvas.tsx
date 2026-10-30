@@ -180,16 +180,17 @@ export function useCanvas() {
     onScroll();
   }, [measure, go, onScroll]);
 
-  /* reveal: a block gets `seen` (and keeps it) once a quarter of it is in view */
+  /* reveal: a block gets `data-seen` (and keeps it) once a quarter of it is in view. An attribute, not a class:
+     React rewrites className when a panel re-renders (e.g. "panel risk"), which would drop a class added here */
   useEffect(() => {
     const world = worldRef.current;
     const canvas = canvasRef.current;
     if (!world || !canvas) return;
     const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("seen")),
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.setAttribute("data-seen", "")),
       { root: world, threshold: 0.25 },
     );
-    const observeAll = () => canvas.querySelectorAll(":scope > .panel:not(.seen)").forEach((el) => io.observe(el));
+    const observeAll = () => canvas.querySelectorAll(":scope > .panel:not([data-seen])").forEach((el) => io.observe(el));
     observeAll();
     /* tiles can be added later (works per address) */
     const mo = new MutationObserver(observeAll);

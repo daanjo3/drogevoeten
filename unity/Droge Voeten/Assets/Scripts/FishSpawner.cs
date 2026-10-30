@@ -94,11 +94,10 @@ public class FishSpawner : MonoBehaviour
 
     private void Spawn(float surface)
     {
-        float depth = surface - floorHeight - 2f * margin;
         fitting.Clear();
         foreach (FishType type in fishTypes)
         {
-            if (type.body.size.y <= depth)
+            if (surface >= MinSurfaceFor(type.body))
             {
                 fitting.Add(type);
             }
@@ -109,10 +108,33 @@ public class FishSpawner : MonoBehaviour
         }
         FishType fish = fitting[Random.Range(0, fitting.Count)];
 
-        // Pick a wall, a point along it and a heading away from it, keeping the whole body inside the room
+        // Try a few spots; skip this spawn if they're all inside furniture
+        Vector3 position = Vector3.zero;
+        Quaternion rotation = Quaternion.identity;
+        bool found = false;
+        for (int attempt = 0; attempt < 5 && !found; attempt++)
+        {
+            PickSpawn(fish, surface, out position, out rotation);
+            found = !Physics.CheckBox(position + rotation * fish.body.center, fish.body.extents, rotation, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+        }
+        if (!found)
+        {
+            return;
+        }
+
+        GameObject instance = Instantiate(fish.prefab, position, rotation);
+        if (instance.TryGetComponent(out FishController controller))
+        {
+            controller.SetArea(this, fish.body);
+        }
+        alive.Add(instance);
+    }
+
+    // A point along a random wall and a heading away from it, keeping the whole body inside the room and the water
+    private void PickSpawn(FishType fish, float surface, out Vector3 position, out Quaternion rotation)
+    {
         Bounds room = Room;
         float clearance = HorizontalRadius(fish.body) + margin;
-        Vector3 position;
         Vector3 away;
         float along = Random.value;
         switch (Random.Range(0, 4))
@@ -135,14 +157,14 @@ public class FishSpawner : MonoBehaviour
                 break;
         }
         position.y = Random.Range(floorHeight + margin - fish.body.min.y, surface - margin - fish.body.max.y);
-        Quaternion rotation = Quaternion.LookRotation(Quaternion.Euler(0f, Random.Range(-spawnAngle, spawnAngle), 0f) * away);
+        rotation = Quaternion.LookRotation(Quaternion.Euler(0f, Random.Range(-spawnAngle, spawnAngle), 0f) * away);
+    }
 
-        GameObject instance = Instantiate(fish.prefab, position, rotation);
-        if (instance.TryGetComponent(out FishController controller))
-        {
-            controller.SetArea(this, fish.body);
-        }
-        alive.Add(instance);
+    // Lowest water surface (world Y) at which a fish with this body can spawn: at least minHeight, and deep enough for
+    // the body between the floor and the surface. Fish despawn when the water drops below it again.
+    public float MinSurfaceFor(Bounds body)
+    {
+        return Mathf.Max(minHeight, floorHeight + 2f * margin + body.size.y);
     }
 
     // Distance from the pivot to the farthest point of the body horizontally, for any heading

@@ -34,13 +34,14 @@ public class WebBridge : MonoBehaviour
         Emit("pong", message);
     }
 
+    // unity.send("SetWaterHeight", meters): water level in the room, in meters above the floor (0 = dry)
     public void SetWaterHeight(float meters)
     {
         WaterHeight waterHeight = FindAnyObjectByType<WaterHeight>();
 
         if(waterHeight != null)
         {
-            waterHeight.SetHeight(meters);
+            waterHeight.SetLevel(meters);
         }
     }
 
@@ -56,21 +57,12 @@ public class WebBridge : MonoBehaviour
         return WebBridge_IsFullscreen() != 0;
     }
 
-    // Leave fullscreen and give keyboard focus back to the page
-    public static void ExitFullscreen()
-    {
-        WebBridge_ExitFullscreen();
-    }
-
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void WebBridge_Emit(string eventName, string detail);
 
     [DllImport("__Internal")]
     private static extern int WebBridge_IsFullscreen();
-
-    [DllImport("__Internal")]
-    private static extern void WebBridge_ExitFullscreen();
 #else
     private static void WebBridge_Emit(string eventName, string detail)
     {
@@ -78,7 +70,5 @@ public class WebBridge : MonoBehaviour
     }
 
     private static int WebBridge_IsFullscreen() => Screen.fullScreen ? 1 : 0;
-
-    private static void WebBridge_ExitFullscreen() => Screen.fullScreen = false;
 #endif
 }

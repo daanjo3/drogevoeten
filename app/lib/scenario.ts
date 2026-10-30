@@ -16,19 +16,16 @@ export interface ScenarioResult {
   level: number;
   /* hours until the pump has removed the rain, 0 when the pump is off */
   hours: number;
-  /* water height as a percentage of the room, for the visual */
-  percent: number;
 }
 
 const MAX_LEVEL = 2.4;
 
-export function calcScenario(s: Scenario, areaKm2: number, risk: boolean): ScenarioResult {
+export function calcScenario(s: Scenario, areaKm2: number): ScenarioResult {
   const m3 = (s.rain / 1000) * areaKm2 * 1e6;
   const hours = s.pump ? m3 / (s.pump * 60) : 0;
   const fromRain = s.pump ? Math.max(0, (s.rain - 393) / 1000) : s.rain / 1000;
   const level = Math.min(MAX_LEVEL, s.dike + fromRain);
-  const percent = risk ? Math.max(6, (level / MAX_LEVEL) * 100) : 4;
-  return { level, hours, percent };
+  return { level, hours };
 }
 
 /* Dutch number formatting with a comma, one decimal. */
