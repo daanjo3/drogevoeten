@@ -58,9 +58,9 @@ export function InfoPanel({
         </button>
         <h2>
           <Icon name="drop" />
-          Kies wat er gebeurt
+          Als het misgaat
         </h2>
-        <p className="lead">Kijk daarna naar de waterlijn.</p>
+        <p className="lead">Laat het hard regenen, zet het gemaal uit of breek de dijk. Dan zie je hoe hoog het water in je huiskamer komt.</p>
         <ScenarioControls place={place} scenario={scenario} onChange={onScenario} />
       </div>
     </section>
