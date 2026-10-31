@@ -234,7 +234,7 @@ export default function Home() {
   const [scenario, setScenario] = useState<Scenario>({
     rain: place.rain.record,
     pumpsOff: [],
-    dike: 0,
+    dike: "holds",
   });
   const canvas = useCanvas();
   const woonplaats = locatie?.woonplaatsnaam;

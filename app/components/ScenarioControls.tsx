@@ -1,23 +1,23 @@
 import type { PlaceData } from "../data/place";
 import type { Drainage } from "../lib/drainage";
-import type { Scenario } from "../lib/scenario";
+import type { Dike, Scenario } from "../lib/scenario";
 
-interface Option {
+interface Option<T> {
   label: string;
   sub?: string;
-  value: number;
+  value: T;
 }
 
-function Segment({
+function Segment<T extends string | number>({
   label,
   options,
   value,
   onPick,
 }: {
   label: string;
-  options: Option[];
-  value: number;
-  onPick: (v: number) => void;
+  options: Option<T>[];
+  value: T;
+  onPick: (v: T) => void;
 }) {
   return (
     <div className="row">
@@ -31,9 +31,14 @@ function Segment({
         ))}
       </div>
       {/* on phones the css shows this dropdown instead of the buttons */}
-      <select className="pick" aria-label={label} value={value} onChange={(e) => onPick(Number(e.target.value))}>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
+      <select
+        className="pick"
+        aria-label={label}
+        value={options.findIndex((o) => o.value === value)}
+        onChange={(e) => onPick(options[Number(e.target.value)].value)}
+      >
+        {options.map((o, i) => (
+          <option key={o.value} value={i}>
             {o.label}
             {o.sub ? ` · ${o.sub}` : ""}
           </option>
@@ -101,11 +106,11 @@ export function ScenarioControls({
       <Segment
         label="dijk"
         value={scenario.dike}
-        onPick={(dike) => onChange({ ...scenario, dike })}
+        onPick={(dike: Dike) => onChange({ ...scenario, dike })}
         options={[
-          { label: "Houdt", value: 0 },
-          { label: "Lekt", value: 0.5 },
-          { label: "Breekt", value: 2 },
+          { label: "Houdt", value: "holds" },
+          { label: "Breekt", value: "breaks" },
+          { label: "Geen dijk", sub: "zee komt binnen", value: "none" },
         ]}
       />
     </>

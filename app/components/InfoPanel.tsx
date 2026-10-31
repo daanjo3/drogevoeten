@@ -124,7 +124,7 @@ export function InfoPanel({
           <Icon name="drop" />
           Als het misgaat
         </h2>
-        <p className="lead">Laat het hard regenen, zet het gemaal uit of breek de dijk. Dan zie je hoe hoog het water in je huiskamer komt.</p>
+        <p className="lead">Laat het hard regenen, zet het gemaal uit, breek de dijk of haal hem helemaal weg. Dan zie je hoe hoog het water in je huiskamer komt.</p>
         <ScenarioControls place={place} drainage={drainage} scenario={scenario} onChange={onScenario} />
       </div>
     </section>
