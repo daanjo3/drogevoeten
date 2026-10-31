@@ -7,13 +7,19 @@
 # > Actions > Variables) to a public HTTPS endpoint; without it the app shows
 # its fallback Rijksmuseum images.
 #
-# Not deployed: the Unity living room (/woonkamer/, not in git); the app keeps
-# showing its placeholder render instead.
+# The Unity living room (/woonkamer/) is not in git: it comes from the asset
+# woonkamer.tar.gz on a GitHub release (upload it with
+# app/scripts/upload-woonkamer.sh). Without that asset the deploy still runs
+# and the app keeps showing its placeholder render.
 
 name: Deploy app to GitHub Pages
 
 on:
   workflow_dispatch:
+    inputs:
+      woonkamer_release:
+        description: Release tag with the Unity build (woonkamer.tar.gz)
+        default: v0.1.0
 
 permissions:
   contents: read
@@ -46,6 +52,19 @@ jobs:
           cache-dependency-path: app/pnpm-lock.yaml
 
       - run: pnpm install --frozen-lockfile
+
+      - name: Fetch Unity living room
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.woonkamer_release || 'v0.1.0' }}
+        run: |
+          if gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern woonkamer.tar.gz --dir "$RUNNER_TEMP"; then
+            mkdir -p public/woonkamer
+            tar -xzf "$RUNNER_TEMP/woonkamer.tar.gz" -C public/woonkamer
+            ls -la public/woonkamer public/woonkamer/Build
+          else
+            echo "::warning::No woonkamer.tar.gz on release $TAG; deploying without the Unity room"
+          fi
 
       - name: Build
         run: pnpm run build

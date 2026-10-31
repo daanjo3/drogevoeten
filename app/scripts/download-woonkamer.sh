@@ -1,0 +1,1 @@
+rsync -av jari@136.144.154.86:~/woonkamer ./app/public/
