@@ -106,7 +106,18 @@ export function InfoPanel({
     </Tip>
   );
   let pumpText: ReactNode;
-  if (pumps.length) {
+  if (locatie?.type === "woonplaats") {
+    // a town gives its centre point, often on canal or boezem water, so no pump can be tied to it
+    pumpText = (
+      <>
+        Om te zien welke{" "}
+        <Tip kind="term" tip={TERMS.gemaal}>
+          gemalen
+        </Tip>{" "}
+        je voeten droog houden, vul je hele adres in.
+      </>
+    );
+  } else if (pumps.length) {
     pumpText = (
       <>
         Elke dag {pumps.length > 1 ? "pompen" : "pompt"} {gemaal} {pumps.map((p) => p.name).join(" en ")} het water uit jouw{" "}

@@ -388,7 +388,7 @@ export default function Home() {
         <Icon name="info" /> Over
       </button>
       <div id="where">
-        <span className="where-lbl">jouw straat</span> <b id="whereTxt">{place.address}</b>
+        <span className="where-lbl">jouw locatie</span> <b id="whereTxt">{place.address}</b>
       </div>
       <button type="button" className="corner" id="shareBtn" onClick={share}>
         <Icon name="share" /> {copied ? "Link gekopieerd" : "Deel"}

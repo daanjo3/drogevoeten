@@ -52,7 +52,7 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
             : `Je woont ${nl(Math.abs(nap))} meter ${nap >= 0 ? "boven" : "onder"} zeeniveau`}
       </h2>
       <div className="kaartrij">
-        <svg className="nl" viewBox="0 0 512 512" aria-label="Kaart van Nederland met jouw straat" role="img">
+        <svg className="nl" viewBox="0 0 512 512" aria-label="Kaart van Nederland met jouw locatie" role="img">
           {OUTLINE.map((d, i) => (
             <path key={i} d={d} />
           ))}
