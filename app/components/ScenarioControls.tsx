@@ -7,7 +7,7 @@ interface Option<T> {
   value: T;
 }
 
-function Segment<T extends string | number>({
+export function Segment<T extends string | number>({
   label,
   options,
   value,

@@ -11,6 +11,7 @@ import { InfoPanel } from "../components/InfoPanel";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
 import { GemaalPanel } from "../components/GemaalPanel";
+import { RegenPanel } from "../components/RegenPanel";
 import { NlMap } from "../components/NlMap";
 import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
@@ -382,6 +383,7 @@ export default function Home() {
         <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
         <GemaalPanel />
+        <RegenPanel locatie={locatie} drainage={drainage} />
 
         {[...local, ...featured].map((w) => (
           <RijksTile key={w.id} id={w.id} work={w} />

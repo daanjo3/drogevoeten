@@ -184,6 +184,14 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-tijd {left:52vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 #p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:var(--g-lavender)}
+/* rain sum next to the gemalen; height follows the content (two pumps, slider) */
+#p-regen{left:184vw;top:161vh; width:30vw; height:auto; min-height:70vh; background:var(--dark); color:#fff; display:flex; flex-direction:column}
+#p-regen h2{margin:6px 0 10px;padding-right:110px}
+#p-regen .hint .tip.term{color:#fff}
+#p-regen input.mm{width:100%;accent-color:var(--sun);margin:0}
+#p-regen .uitkomst{margin-top:auto;background:#fff;color:var(--ink);border-radius:16px;padding:14px;font-size:var(--fs-p)}
+#p-regen .uitkomst small{display:block;color:var(--mute);margin-top:6px}
+#p-regen .uitkomst small a{color:inherit}
 #p-gemaal p{margin:0 0 10px}
 #p-gemaal h2{margin:6px 0 12px}
 #p-gemaal .src-link{display:inline-block;margin-top:6px;font:500 var(--fs-label)/1.4 var(--font);color:var(--ink);opacity:.7}
@@ -207,13 +215,13 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #i-nieuwerkerk  {left:184vw;top:85vh; width:24vw}
 /* stadswallen and the Beemster medal share a spot: they never show together */
 #i-stadswallen,#i-beemster{left:16vw;top:45vh;width:32vw}
-/* featured works for every address, spread over the grid: two in the top
-   row next to the map, one to the right of Gemalen, one under the Tijdreis */
+/* featured works for every address, spread over the grid: three in the top
+   row next to the map, one under the Tijdreis (right of Gemalen is the rain sum) */
 /* the two top tiles hang from the bottom of the top row (79vh, like the map), so the
    gap to the living-room row stays 6vh whatever their height; canvas is 264vh */
 #i-cruquius     {left:126vw;bottom:185vh;width:22vw}
 #i-dongepolders {left:152vw;bottom:185vh;width:28vw}
-#i-keere        {left:184vw;top:161vh;width:30vw}
+#i-keere        {left:184vw;bottom:185vh;width:30vw}
 #i-kinderdijk   {left:52vw; top:201vh;width:36vw}
 
 /* kamers */
