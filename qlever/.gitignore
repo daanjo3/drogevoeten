@@ -2,3 +2,5 @@
 data/
 # Index, settings and log files written by qlever index / qlever start
 rijksmuseum-water.*
+# Access token of the deployed endpoint, written by deploy.sh
+.access-token
