@@ -10,7 +10,7 @@
    - the mills within 1 km: how many polder mills stood here, the oldest, the
      last one to disappear, and polder mills that still stand;
    - the 3 pumping stations nearest by (3 km), with their drive then and
-     now, also those without a founding year;
+     now (only those with a founding year);
    - dike-breach pools within 1 km;
    - a gift house after the 1953 flood: the house itself, or those within 500 m.
    Not here, because they are no linked data (yet): the Waterstaatskaart, the
@@ -398,13 +398,8 @@ const DRIVE: Record<string, string> = {
 };
 const drive = (s?: string) => DRIVE[(s ?? "").trim().toLowerCase()];
 
-/* sort: Infinity for a step without a year; those go last */
+/* Every step has a year; a fact without one is left out of the timeline */
 type Step = TimelineStep & { sort: number };
-const UNDATED = "Onbekend";
-
-function undated(text: string, source: string): Step {
-  return { year: UNDATED, sort: Infinity, text, source };
-}
 
 function polderStep(r: Row): Step | undefined {
   const w = when(r.start, r.end, r.precision, r.dateText);
@@ -420,12 +415,6 @@ function polderStep(r: Row): Step | undefined {
   return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.precision, r.dateText, literature) };
 }
 
-/* No polder or drained lake: say so, as the prototype does */
-const NO_POLDER_STEP = undated(
-  "Wanneer deze plek is ingedijkt of drooggemaakt, weten we niet: onze kaarten van polders en droogmakerijen komen niet tot hier. Er kan best een [polder] zijn.",
-  "Bron: Droge Voeten linked data (polders van de Provincie Zeeland, droogmakerijen van de RCE).",
-);
-
 function landStep(r: Row): Step | undefined {
   if (!r.name) return undefined;
   const w = when(r.execStart, r.execEnd, r.execPrecision, r.execText);
@@ -436,7 +425,7 @@ function landStep(r: Row): Step | undefined {
   const later = [deed && `in ${deed} volgt de akte`, done && `in ${done} is het project afgerond`].filter(Boolean);
   if (later.length) text += ` ${capital(list(later as string[]))}.`;
   const tip = sourceTip(r.source, r.execPrecision, undefined, r.status ? `Status: ${r.status}.` : undefined);
-  return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
+  return w ? { year: w.label, sort: w.sort, text, source: tip } : undefined;
 }
 
 function stationStep(r: Row, homeAreas: Set<string>): Step | undefined {
@@ -461,7 +450,7 @@ function stationStep(r: Row, homeAreas: Set<string>): Step | undefined {
   else if (status === "werkende staat") text += " Het kan nog steeds draaien.";
   else if (status === "niet werkend" && !(then && noDrive)) text += " Het werkt niet meer.";
   else if (gone) text += " Inmiddels is het gesloopt.";
-  if (!w) return undated(`${text} Wanneer het is gebouwd, weten we niet.`, sourceTip(r.source));
+  if (!w) return undefined;
   return { year: w.label, sort: w.sort, text, source: sourceTip(r.source) };
 }
 
@@ -494,25 +483,16 @@ function villageStep(r: Row): Step | undefined {
     : `Een dorp op ${dist} van je huis verdrinkt: de zee neemt het land terug. Hoe het heette, weten we niet.`;
   if (r.altNames) text += ` Het heette ook ${r.altNames.split(/,\s*/).join(" of ")}.`;
   const tip = sourceTip(r.source, r.precision, r.dateText);
-  return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
+  return w ? { year: w.label, sort: w.sort, text, source: tip } : undefined;
 }
 
 /* The lost polder mills: how many, the oldest, and the last one to go.
-   Without polder mills, the other lost mills as one step without a year. */
+   Other lost mills (corn, oil, saw) only count along with the polder mills. */
 function lostMillSteps(rows: Row[]): Step[] {
   const polder = rows.filter((r) => r.polderMill);
   const other = rows.length - polder.length;
   const source = rows[0]?.source;
-  if (!polder.length) {
-    return other
-      ? [
-          undated(
-            `Binnen ${MILL_KM} km van je huis kennen we geen [poldermolens]. Wel ${other === 1 ? "stond hier een andere molen" : `stonden hier ${other} andere molens`}, voor bijvoorbeeld graan, olie of hout. ${other === 1 ? "Die maalde geen water en is verdwenen." : "Die maalden geen water en zijn verdwenen."}`,
-            sourceTip(source),
-          ),
-        ]
-      : [];
-  }
+  if (!polder.length) return [];
   const built = polder
     .map((r) => ({ r, w: whenOf(r, r.built, "built") }))
     .filter((x): x is { r: Row; w: When } => !!x.w)
@@ -533,7 +513,7 @@ function lostMillSteps(rows: Row[]): Step[] {
   if (other) text += ` Ook ${other === 1 ? "een andere molen" : `${other} andere molens`} (voor bijvoorbeeld graan, olie of hout) ${other === 1 ? "is" : "zijn"} verdwenen.`;
   const first = oldest ? oldest.r : undefined;
   const tip = sourceTip(source, first && precisionOf(first, first.built, "built"), first?.builtText);
-  const steps: Step[] = [oldest ? { year: oldest.w.label, sort: oldest.w.sort, text, source: tip } : undated(text, tip)];
+  const steps: Step[] = oldest ? [{ year: oldest.w.label, sort: oldest.w.sort, text, source: tip }] : [];
   const last = gone[0];
   if (last) {
     const lastName = named(last.r.name);
@@ -551,7 +531,7 @@ function lostMillSteps(rows: Row[]): Step[] {
 }
 
 /* A polder mill that still stands */
-function standingMillStep(r: Row): Step {
+function standingMillStep(r: Row): Step | undefined {
   const w = whenOf(r, r.built, "built");
   const name = named(r.name);
   const dist = distance(Number(r.km));
@@ -565,7 +545,7 @@ function standingMillStep(r: Row): Step {
   else if (status === "restant") text += " Er staat nog een stuk van.";
   else if (status === "in aanbouw") text += " Op dit moment wordt er aan hem gebouwd.";
   const tip = sourceTip(r.source, precisionOf(r, r.built, "built"), r.built ? undefined : r.builtText);
-  return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
+  return w ? { year: w.label, sort: w.sort, text, source: tip } : undefined;
 }
 
 /* Pools with the same name, type and river ("Wiel bij Krimpen aan de Lek
@@ -576,7 +556,7 @@ function poolSteps(rows: Row[]): Step[] {
     const key = [r.name, r.type, r.river].join("|");
     groups.set(key, [...(groups.get(key) ?? []), r]);
   }
-  return [...groups.values()].slice(0, MAX_POOLS).map((g) => {
+  return [...groups.values()].map((g): Step | undefined => {
     const r = g[0];
     const n = g.length;
     const w = when(r.breachStart, r.breachEnd, r.breachPrecision, r.breachText);
@@ -584,15 +564,14 @@ function poolSteps(rows: Row[]): Step[] {
     const maybe = (r.type ?? "").toLowerCase().startsWith("mogelijk");
     const where = `${distance(Number(r.km))} van je huis${r.river ? `, langs de ${r.river}` : ""}`;
     const pools = n === 1 ? "een diepe kolk" : `${n} diepe kolken`;
-    let text = w
-      ? `Een dijk breekt door, en het water slaat ${pools} uit: ${n === 1 ? "een [wiel]" : "[wielen]"}.`
-      : `Ooit brak hier een dijk door, en het water sloeg ${pools} uit: ${n === 1 ? "een [wiel]" : "[wielen]"}.`;
+    if (!w) return undefined;
+    let text = `Een dijk breekt door, en het water slaat ${pools} uit: ${n === 1 ? "een [wiel]" : "[wielen]"}.`;
     if (n === 1) text += name ? ` Het heet ${name} en ligt op ${where}.` : ` Het ligt op ${where}.`;
     else text += `${name ? ` Ze heten allemaal ${name}.` : ""} De dichtstbijzijnde ligt op ${where}.`;
     if (maybe) text += " Of het echt een wiel is, is niet zeker.";
     const tip = sourceTip(r.source, r.breachPrecision, r.breachText);
-    return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
-  });
+    return { year: w.label, sort: w.sort, text, source: tip };
+  }).filter((s): s is Step => !!s).slice(0, MAX_POOLS);
 }
 
 /* "Malmöweg 5" and "malmöweg  5" are the same address */
@@ -609,7 +588,7 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
     const from = own.countries ? ` uit ${list(own.countries.split(", "))}` : "";
     const text = `Je huis is een [geschenkwoning]${from}. Na de watersnoodramp van 1953 gaven andere landen huizen aan mensen die alles kwijt waren.`;
     const tip = sourceTip(own.source, precisionOf(own, own.built, "built"), own.built ? undefined : own.builtText);
-    return [w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip)];
+    return w ? [{ year: w.label, sort: w.sort, text, source: tip }] : [];
   }
   const countries = [...new Set(rows.flatMap((r) => (r.countries ? r.countries.split(", ") : [])))];
   const dated = rows
@@ -622,8 +601,8 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
       ? `Binnen ${distance(GIFT_KM)} van je huis staat een [geschenkwoning]: een huis dat een ander land gaf na de watersnoodramp van 1953.`
       : `Binnen ${distance(GIFT_KM)} van je huis staan ${n} [geschenkwoningen]: huizen die andere landen gaven na de watersnoodramp van 1953.`;
   if (countries.length) text += ` ${n === 1 ? "Het komt" : "Ze komen"} uit ${list(countries)}.`;
-  const tip = sourceTip(rows[0].source, undefined, undefined, dated.length ? "Het jaar is dat van de oudste woning." : undefined);
-  return [dated[0] ? { year: dated[0].label, sort: dated[0].sort, text, source: tip } : undated(text, tip)];
+  const tip = sourceTip(rows[0].source, undefined, undefined, "Het jaar is dat van de oudste woning.");
+  return dated[0] ? [{ year: dated[0].label, sort: dated[0].sort, text, source: tip }] : [];
 }
 
 /* Shown when the data has nothing for this address */
@@ -646,32 +625,32 @@ export async function findTimeline(p: Point, address?: Address, signal?: AbortSi
   const stationSteps = stations
     .map((r) => ({ r, home: (r.drainsAreas ?? "").split(" ").some((a) => homeAreas.has(a)) }))
     .sort((a, b) => Number(b.home) - Number(a.home))
-    .slice(0, MAX_STATIONS)
-    .map(({ r }) => stationStep(r, homeAreas));
+    .map(({ r }) => stationStep(r, homeAreas))
+    .filter((s): s is Step => !!s)
+    .slice(0, MAX_STATIONS);
   const lost = mills.filter((r) => r.ds === `${DS}lost-windmills`);
-  const standing = mills.filter((r) => r.ds === `${DS}windmills` && r.polderMill).slice(0, MAX_STANDING_MILLS);
+  const standing = mills.filter((r) => r.ds === `${DS}windmills` && r.polderMill);
   // one step per village: its earliest drowning
   const firstDrowning = new Map<string, Row>();
   for (const r of [...villages].sort((a, b) => (year(a.start ?? a.end) ?? 1e9) - (year(b.start ?? b.end) ?? 1e9)))
     if (r.village && !firstDrowning.has(r.village)) firstDrowning.set(r.village, r);
-  const nearestVillages = [...firstDrowning.values()].sort((a, b) => Number(a.km) - Number(b.km)).slice(0, MAX_VILLAGES);
+  const nearestVillages = [...firstDrowning.values()].sort((a, b) => Number(a.km) - Number(b.km));
 
   const history = [
     ...polders.map(polderStep),
     ...lands.map(landStep),
     ...dikes.slice(0, MAX_DIKES).map((r) => dikeStep(r, homeAreas)),
-    ...nearestVillages.map(villageStep),
+    ...nearestVillages.map(villageStep).filter((s): s is Step => !!s).slice(0, MAX_VILLAGES),
     ...lostMillSteps(lost),
-    ...standing.map(standingMillStep),
+    ...standing.map(standingMillStep).filter((s): s is Step => !!s).slice(0, MAX_STANDING_MILLS),
     ...stationSteps,
     ...poolSteps(pools),
     ...giftSteps(gifts, address),
   ].filter((s): s is Step => !!s);
   if (!history.length) return [UNKNOWN_STEP];
-  const steps = homeAreas.size ? history : [...history, NO_POLDER_STEP];
   // stable sort: steps in the same year keep the order above
-  steps.sort((a, b) => a.sort - b.sort);
-  return steps.map(({ sort: _, ...s }) => s);
+  history.sort((a, b) => a.sort - b.sort);
+  return history.map(({ sort: _, ...s }) => s);
 }
 
 /* The street address and locality of a Locatieserver address, as the gift
