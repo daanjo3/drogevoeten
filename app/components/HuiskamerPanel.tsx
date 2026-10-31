@@ -10,7 +10,7 @@ import { liwoClass, useLiwo } from "../lib/liwo";
 import { Icon } from "./Icons";
 import { ScenarioControls } from "./ScenarioControls";
 import { Tip } from "./Tip";
-import { UnityRoom } from "./UnityRoom";
+import { UnityRoom, type RoomView } from "./UnityRoom";
 import { TERMS } from "../data/place";
 
 /* The living room: the team's 3D Unity room. In risk mode the water in the
@@ -21,6 +21,7 @@ export function HuiskamerPanel({
   scenario,
   onScenario,
   loadRoom,
+  view,
 }: {
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
@@ -30,6 +31,8 @@ export function HuiskamerPanel({
   onScenario: (s: Scenario) => void;
   /* start loading the 3D room (only after an address was chosen) */
   loadRoom: boolean;
+  /* camera view in the 3D room (temporary switch in the risk panel) */
+  view: RoomView;
 }) {
   const risk = mode === "risk";
   const here = locationOf(locatie);
@@ -111,6 +114,7 @@ export function HuiskamerPanel({
         <UnityRoom
           active={loadRoom}
           waterLevel={risk ? r.level : 0}
+          view={view}
           overlay={
             risk && (
               <div className="fs-panel">

@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 // Look around without moving: drag with the mouse or a finger, or use the gamepad's right stick.
 // Only active while the player is fullscreen; otherwise the camera eases back to its current view pose.
 // The mouse never locks, so the fullscreen exit button stays clickable.
-// SetView("room" / "house") flies the camera in an arc to another view pose; looking around works around that pose.
+// SetView("room" / "house") fades to black, jumps to another view pose and fades back in; looking around works
+// around that pose.
 [RequireComponent(typeof(Camera))]
 public class CameraController : MonoBehaviour
 {
@@ -37,13 +39,9 @@ public class CameraController : MonoBehaviour
     [SerializeField]
     private Transform housePose;
 
-    [Tooltip("How long a move between view poses takes, in seconds.")]
+    [Tooltip("How long fading to black, and fading back in, each take when switching views, in seconds.")]
     [SerializeField]
-    private float moveDuration = 2f;
-
-    [Tooltip("How far the arc between view poses rises above the higher of the two poses, in meters.")]
-    [SerializeField]
-    private float arcHeight = 2f;
+    private float fadeDuration = 0.4f;
 
 
     private Camera cam;
@@ -52,13 +50,14 @@ public class CameraController : MonoBehaviour
     private Quaternion baseRotation;
     private bool hasBasePose;
 
-    // Move between view poses: a cubic Bezier from moveFrom to moveTo, rising arcHeight above both
-    private bool moving;
-    // The view SetView last flew to ("room" at the start)
+    // View switch: fade to black, jump to switchTarget, fade back in. switchTarget is null once the jump is done.
+    private Transform switchTarget;
+    // The view SetView last switched to ("room" at the start)
     private string currentView = "room";
-    private float moveTime;
-    private Vector3 moveFrom, moveControl1, moveControl2, moveTo;
-    private Quaternion moveFromRotation, moveToRotation;
+    // 0 = clear, 1 = black
+    private float fade;
+    private GameObject fadeCanvas;
+    private Image fadeImage;
 
     // Offsets from the starting pose, in degrees. Positive pitch looks up.
     private float yaw;
@@ -67,6 +66,30 @@ public class CameraController : MonoBehaviour
     private void Awake()
     {
         cam = GetComponent<Camera>();
+        CreateFadeOverlay();
+    }
+
+    // A full-screen black image on top of everything (including post-processing), created at runtime
+    private void CreateFadeOverlay()
+    {
+        fadeCanvas = new GameObject("View Fade", typeof(Canvas));
+        fadeCanvas.transform.SetParent(transform, false);
+        var canvas = fadeCanvas.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = short.MaxValue;
+
+        var imageObject = new GameObject("Black", typeof(RectTransform), typeof(Image));
+        imageObject.transform.SetParent(fadeCanvas.transform, false);
+        var rect = (RectTransform)imageObject.transform;
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.offsetMin = Vector2.zero;
+        rect.offsetMax = Vector2.zero;
+        fadeImage = imageObject.GetComponent<Image>();
+        fadeImage.color = Color.black;
+        fadeImage.raycastTarget = false;
+
+        fadeCanvas.SetActive(false);
     }
 
     private void OnEnable()
@@ -82,7 +105,7 @@ public class CameraController : MonoBehaviour
         }
     }
 
-    // "room" or "house" (as sent by the web page through WebBridge.SetView): fly to that view pose
+    // "room" or "house" (as sent by the web page through WebBridge.SetView): fade over to that view pose
     public void SetView(string view)
     {
         Transform target = view?.Trim().ToLowerInvariant() switch
@@ -97,20 +120,14 @@ public class CameraController : MonoBehaviour
             return;
         }
 
-        moveFrom = basePosition;
-        moveTo = target.position;
-        moveFromRotation = baseRotation;
-        moveToRotation = target.rotation;
+        // Already there (and not on the way elsewhere): nothing to do
+        if (switchTarget == null && basePosition == target.position && baseRotation == target.rotation)
+        {
+            return;
+        }
 
-        // Control points straight above both ends, high enough that the curve's top is arcHeight above the higher end.
-        // A cubic Bezier with both control points at height h peaks at 0.75 h + 0.25 * (average end height).
-        float apex = Mathf.Max(moveFrom.y, moveTo.y) + arcHeight;
-        float controlHeight = (apex - 0.25f * 0.5f * (moveFrom.y + moveTo.y)) / 0.75f;
-        moveControl1 = new Vector3(moveFrom.x, controlHeight, moveFrom.z);
-        moveControl2 = new Vector3(moveTo.x, controlHeight, moveTo.z);
-
-        moveTime = 0f;
-        moving = true;
+        // A switch during a fade simply changes where it ends up; a fade-in in progress turns back to black
+        switchTarget = target;
         currentView = target == housePose ? "house" : "room";
     }
 
@@ -124,18 +141,10 @@ public class CameraController : MonoBehaviour
         }
 #endif
 
-        if (moving)
-        {
-            moveTime += Time.unscaledDeltaTime;
-            float t = moveDuration > 0f ? Mathf.Clamp01(moveTime / moveDuration) : 1f;
-            float eased = Mathf.SmoothStep(0f, 1f, t);
-            basePosition = Bezier(moveFrom, moveControl1, moveControl2, moveTo, eased);
-            baseRotation = Quaternion.Slerp(moveFromRotation, moveToRotation, eased);
-            moving = t < 1f;
-        }
+        UpdateFade();
 
-        // No looking around during a move; the offsets ease back so the camera arrives looking straight ahead
-        if (LookEnabled() && !moving)
+        // No looking around until the jump; it starts again from straight ahead at the new pose
+        if (LookEnabled() && switchTarget == null)
         {
             Vector2 look = ReadLook();
             yaw = Mathf.DeltaAngle(0f, yaw + look.x);
@@ -158,10 +167,29 @@ public class CameraController : MonoBehaviour
             Quaternion.AngleAxis(yaw, Vector3.up) * baseRotation * Quaternion.AngleAxis(-pitch, Vector3.right));
     }
 
-    private static Vector3 Bezier(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float t)
+    // Fade towards black while a switch is pending; once black, jump to the target pose and fade back in
+    private void UpdateFade()
     {
-        float u = 1f - t;
-        return u * u * u * a + 3f * u * u * t * b + 3f * u * t * t * c + t * t * t * d;
+        float step = fadeDuration > 0f ? Time.unscaledDeltaTime / fadeDuration : 1f;
+        if (switchTarget != null)
+        {
+            fade = Mathf.MoveTowards(fade, 1f, step);
+            if (fade >= 1f)
+            {
+                basePosition = switchTarget.position;
+                baseRotation = switchTarget.rotation;
+                yaw = 0f;
+                pitch = 0f;
+                switchTarget = null;
+            }
+        }
+        else
+        {
+            fade = Mathf.MoveTowards(fade, 0f, step);
+        }
+
+        fadeCanvas.SetActive(fade > 0f);
+        fadeImage.color = new Color(0f, 0f, 0f, Mathf.SmoothStep(0f, 1f, fade));
     }
 
     private bool LookEnabled()

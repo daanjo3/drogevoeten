@@ -8,6 +8,7 @@ import { SvgSymbols } from "../components/Icons";
 import { TooltipLayer } from "../components/Tip";
 import { HuiskamerPanel } from "../components/HuiskamerPanel";
 import { InfoPanel } from "../components/InfoPanel";
+import type { RoomView } from "../components/UnityRoom";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
 import { GemaalPanel } from "../components/GemaalPanel";
@@ -232,6 +233,8 @@ export default function Home() {
   const [about, setAbout] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<Mode>("info");
+  /* TEMPORARY: camera view in the 3D room, switched in the risk panel */
+  const [view, setView] = useState<RoomView>("room");
   const [scenario, setScenario] = useState<Scenario>({ outside: "flood", liwoMap: 5 });
   /* the tour after a search: run is the key (a restart remounts it), step lights up a menu button */
   const [tour, setTour] = useState<{ run: number; step: number } | null>(null);
@@ -412,6 +415,7 @@ export default function Home() {
           scenario={scenario}
           onScenario={setScenario}
           loadRoom={phase !== "idle"}
+          view={view}
         />
         <InfoPanel
           place={place}
@@ -421,6 +425,8 @@ export default function Home() {
           scenario={scenario}
           onScenario={setScenario}
           onClose={() => setMode("info")}
+          view={view}
+          onView={setView}
         />
         <NlMap centroide={locatie?.centroide_ll} nap={height.data?.ground?.value} />
         <TijdreisPanel place={place} />

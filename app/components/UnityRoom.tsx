@@ -26,9 +26,22 @@ interface UnityEmbed {
 
 type State = "idle" | "loading" | "ready" | "failed";
 
+export type RoomView = "room" | "house";
+
 /* waterLevel: water in the room in meters above the floor, 0 is dry.
+   view: camera view in Unity (temporary, for testing the house view).
    overlay: shown on top of the room in fullscreen (the scenario panel). */
-export function UnityRoom({ active, waterLevel, overlay }: { active: boolean; waterLevel: number; overlay?: ReactNode }) {
+export function UnityRoom({
+  active,
+  waterLevel,
+  view,
+  overlay,
+}: {
+  active: boolean;
+  waterLevel: number;
+  view: RoomView;
+  overlay?: ReactNode;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   /* wrapper that goes fullscreen, so our own exit button can sit on top of the room */
   const wrap = useRef<HTMLDivElement>(null);
@@ -67,6 +80,14 @@ export function UnityRoom({ active, waterLevel, overlay }: { active: boolean; wa
   useEffect(() => {
     if (state === "ready") player.current?.send("SetWaterHeight", waterLevel);
   }, [state, waterLevel]);
+
+  /* Unity starts in the room view; only send changes, because SetView always flies (room -> room arcs up and back) */
+  const sentView = useRef<RoomView>("room");
+  useEffect(() => {
+    if (state !== "ready" || view === sentView.current) return;
+    player.current?.send("SetView", view);
+    sentView.current = view;
+  }, [state, view]);
 
   useEffect(() => {
     const onChange = () => setFull(document.fullscreenElement === wrap.current);

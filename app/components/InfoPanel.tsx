@@ -10,8 +10,9 @@ import { locationOf } from "../lib/rijksmuseum";
 import { drainedQueryOptions } from "../lib/timeline";
 import { nl, nlSigned, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
-import { ScenarioControls } from "./ScenarioControls";
+import { ScenarioControls, Segment } from "./ScenarioControls";
 import { Tip } from "./Tip";
+import type { RoomView } from "./UnityRoom";
 
 /* Panel next to the living room. Mode "info" tells the story of the address,
    mode "risk" shows the scenario buttons. The css crossfades between them. */
@@ -23,6 +24,8 @@ export function InfoPanel({
   scenario,
   onScenario,
   onClose,
+  view,
+  onView,
 }: {
   place: PlaceData;
   /* the chosen address; its height comes from the AHN */
@@ -34,6 +37,9 @@ export function InfoPanel({
   onScenario: (s: Scenario) => void;
   /* the cross on the scenario panel: back to info mode */
   onClose: () => void;
+  /* TEMPORARY: camera view in the 3D room, to test the house view */
+  view: RoomView;
+  onView: (v: RoomView) => void;
 }) {
   const height = useAddressHeight(locatie);
   const ground = height.data?.ground;
@@ -174,6 +180,16 @@ export function InfoPanel({
         </h2>
         <p className="lead">Kies een overstroming of kijk wat er zonder dijken gebeurt. Je ziet dan hoe hoog het water in je huiskamer kan komen.</p>
         <ScenarioControls scenario={scenario} onChange={onScenario} />
+        {/* TEMPORARY: switch the 3D room's camera between the room and the house, for testing */}
+        <Segment
+          label="Camera"
+          options={[
+            { label: "Kamer", value: "room" },
+            { label: "Huis", value: "house" },
+          ]}
+          value={view}
+          onPick={onView}
+        />
       </div>
     </section>
   );
