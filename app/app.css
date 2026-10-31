@@ -59,7 +59,6 @@ body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box
 .bron{display:inline-block;border:1px solid currentColor;border-radius:999px;padding:1px 9px;font:500 var(--fs-label)/1.6 var(--font);text-transform:uppercase;letter-spacing:.06em;opacity:.65;cursor:help;vertical-align:middle}
 .src{margin:8px 0 0!important;line-height:1;opacity:1}
 .src .bron{opacity:.75}
-.bron:before{content:"i ";font-weight:700}
 .bron:hover,.bron:focus{opacity:1}
 .tip:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px}
 button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--sun);outline-offset:2px}
