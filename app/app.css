@@ -438,4 +438,25 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #nav button.pulse{animation:tourpulse 1.8s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){#tour .body{transition:none}#nav button.pulse{animation:none}}
 #about .card .tour-start{margin:4px 0 6px;border:0;border-radius:999px;padding:10px 18px;background:var(--dark);color:#fff;font:700 var(--fs-p) var(--font);cursor:pointer}
+@media (max-width:600px){
+  /* a bar fixed to the bottom; the menu is hidden while the tour runs, so the buttons show as labels in the text */
+  #nav.touring{display:none}
+  #tour{left:0;right:0;bottom:0;transform:none;width:auto;border:0;border-top:1.5px solid var(--ink);box-shadow:none;padding:14px 16px calc(10px + env(safe-area-inset-bottom))}
+  #tour .count{display:none}
+  #tour .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+  #tour .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);border-radius:0;padding:2px 8px;font:700 12px/1.4 var(--font)}
+  #tour .chip svg{width:16px;height:16px}
+  #tour p{margin-bottom:12px}
+  /* one row: arrow back, four dots, arrow on (or Zelf proberen on the last step) */
+  #tour .acts{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:10px}
+  #tour .acts:has(.try){grid-template-columns:44px 1fr auto}
+  #tour .acts button{padding:0;width:44px;height:44px;min-height:44px}
+  #tour .acts button span{display:none}
+  #tour .acts button svg{width:20px;height:20px}
+  #tour .next.try{width:auto;padding:0 18px;border-radius:999px}
+  #tour .dots{display:flex;justify-content:center;gap:8px}
+  #tour .dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink);box-sizing:border-box}
+  #tour .dots i.on{background:var(--ink)}
+  #tour .skiplink{margin-top:8px}
+}
 }
