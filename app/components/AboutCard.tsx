@@ -1,29 +1,93 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, type ReactNode } from "react";
 import { Icon } from "./Icons";
 
 /* Card with the story behind the app and the list of sources. Opens from
    the Over button. Links open in a new tab. */
 
-const SOURCES: { label: string; name: string; href: string }[] = [
-  { label: "Hoogte", name: "Actueel Hoogtebestand Nederland (AHN), Rijkswaterstaat", href: "https://www.ahn.nl" },
-  { label: "Adressen en kaart", name: "Locatieserver, BAG en Basisregistratie Topografie, Kadaster via PDOK", href: "https://www.pdok.nl" },
-  { label: "Gemalen, peilgebieden en waterschappen", name: "waterschapsregister (IMWA), Het Waterschapshuis", href: "https://www.pdok.nl" },
+/* Each dataset links to its own description: the PDOK page, or the record in
+   the Nationaal Georegister */
+const PDOK = "https://www.pdok.nl/introductie/-/article/";
+const NGR = "https://nationaalgeoregister.nl/geonetwork/srv/dut/catalog.search#/metadata/";
+
+const SOURCES: { label: string; datasets: { name: string; href: string }[]; by: string }[] = [
+  { label: "Adressen", datasets: [{ name: "Locatieserver", href: `${PDOK}pdok-locatieserver-1` }], by: "Kadaster via PDOK" },
   {
-    label: "Gemalen door de tijd en verdwenen molens",
-    name: "Landschapsatlas, Rijksdienst voor het Cultureel Erfgoed, met de Nederlandse Gemalenstichting",
-    href: "https://services.rce.geovoorziening.nl/landschapsatlas/wfs?request=GetCapabilities",
+    label: "Kaart",
+    datasets: [{ name: "BRT-achtergrondkaart", href: `${PDOK}basisregistratie-topografie-achtergrondkaarten-brt-a-` }],
+    by: "Kadaster via PDOK",
   },
-  { label: "Monumenten", name: "Rijksmonumenten, Rijksdienst voor het Cultureel Erfgoed", href: "https://linkeddata.cultureelerfgoed.nl" },
-  { label: "Molens", name: "Nederlandse Molendatabase", href: "https://www.molendatabase.nl" },
-  { label: "Dijken, polders en oude kaarten", name: "Provincie Zeeland", href: "https://opengeodata.zeeland.nl" },
+  {
+    label: "Hoogte",
+    datasets: [{ name: "Actueel Hoogtebestand Nederland (AHN)", href: `${PDOK}actueel-hoogtebestand-nederland-ahn` }],
+    by: "Rijkswaterstaat en waterschappen via PDOK",
+  },
+  {
+    label: "Gemalen, peilgebieden en waterschappen nu",
+    datasets: [
+      { name: "Kunstwerken (IMWA)", href: `${PDOK}waterschappen-kunstwerken-imwa` },
+      { name: "Waterbeheergebieden (IMWA): peil- en afvoergebieden", href: `${PDOK}waterschappen-waterbeheergebieden-imwa` },
+    ],
+    by: "Het Waterschapshuis via PDOK",
+  },
+  {
+    label: "Gemalen door de tijd",
+    datasets: [{ name: "Gemalen", href: `${NGR}c81e0dd2-3e91-44af-aaeb-4dcfed4b8b56` }],
+    by: "Rijksdienst voor het Cultureel Erfgoed, met de Nederlandse Gemalenstichting",
+  },
+  {
+    label: "Molens",
+    datasets: [
+      { name: "Molens", href: `${NGR}291afe4b-4f4b-497c-8026-fb437c4e9c7e` },
+      { name: "Verdwenen molens", href: `${NGR}7e41f6fa-936d-4fbe-b3b7-fb40dfe1283d` },
+    ],
+    by: "Rijksdienst voor het Cultureel Erfgoed, verdwenen molens uit de Molendatabase",
+  },
+  {
+    label: "Landschap",
+    datasets: [
+      { name: "Droogmakerijen", href: `${NGR}cd53d540-f499-4850-8053-e1172c97372e` },
+      { name: "Landinrichting in Nederland (1924–2015)", href: `${NGR}ceb8c100-6ce8-4bb1-8084-2b5b215064e9` },
+      { name: "Wielen", href: `${NGR}a1f41210-4f4b-4821-abe3-fd74efc580d4` },
+    ],
+    by: "Rijksdienst voor het Cultureel Erfgoed",
+  },
+  {
+    label: "Polders in Zeeland",
+    datasets: [
+      { name: "vóór 1300", href: `${NGR}6c6f9ceb-e273-4cb5-b6dc-10020ca0d93f` },
+      { name: "1300–1421", href: `${NGR}263b3270-30a2-4e3a-b200-9fb22485a6c6` },
+      { name: "1422–1532", href: `${NGR}2dd16541-d8bd-46ef-a56d-b83ded9149d7` },
+      { name: "1533–1648", href: `${NGR}f184ad12-78bc-4525-9abd-febc03a82857` },
+      { name: "1649–1808", href: `${NGR}66b91518-bf55-4103-8b79-8e0feb4a5975` },
+      { name: "1809–1953", href: `${NGR}bfcfbdbf-0c42-4333-93eb-742ab69b9a75` },
+      { name: "na 1953", href: `${NGR}dab8ef56-9013-4cb8-96ee-32a2cbe2dc48` },
+    ],
+    by: "Provincie Zeeland",
+  },
+  {
+    label: "Dijken en dorpen in Zeeland",
+    datasets: [
+      { name: "Bestaande en verdwenen dijken", href: `${NGR}e5c91c39-8cff-435f-a45d-3218e4584d5c` },
+      { name: "Verdronken dorpen", href: `${NGR}6eb9a0b2-b751-40a3-9a7d-5f3ed9d78a8b` },
+      { name: "Geschenkwoningen watersnoodramp 1953", href: `${NGR}a04a860d-296d-45c2-8fc0-2e34750c5c90` },
+    ],
+    by: "Provincie Zeeland",
+  },
   {
     label: "Overstromingen",
-    name: "LIWO (Rijkswaterstaat, Deltares), waterstanden 1953 (Rijkswaterstaat), inundatiekaart 1953 (Provincie Noord-Brabant)",
-    href: "https://basisinformatie-overstromingen.nl",
+    datasets: [{ name: "LIWO", href: "https://basisinformatie-overstromingen.nl" }],
+    by: "Rijkswaterstaat en Deltares",
   },
-  { label: "Regen", name: "KNMI daggegevens en Klimaateffectatlas", href: "https://www.daggegevens.knmi.nl" },
-  { label: "Beelden", name: "Rijksmuseum", href: "https://www.rijksmuseum.nl" },
-  { label: "Koppelingen", name: "Wikidata", href: "https://www.wikidata.org" },
+  {
+    label: "Watersnood 1953",
+    datasets: [{ name: "Historische Inundatie Ramp 1953", href: `${NGR}dc382a09-6677-48fd-975e-dee283cea4ad` }],
+    by: "Provincie Noord-Brabant",
+  },
+  {
+    label: "Beelden",
+    datasets: [{ name: "Collectie Rijksmuseum", href: "https://data.rijksmuseum.nl" }],
+    by: "Rijksmuseum",
+  },
 ];
 
 const TEAM: { role: string; name: string }[] = [
@@ -105,7 +169,15 @@ export function AboutCard({ onClose, onTour }: { onClose: () => void; onTour: ()
           {SOURCES.map((s) => (
             <li key={s.label}>
               <span className="label">{s.label}</span>
-              <Ext href={s.href}>{s.name}</Ext>
+              <span>
+                {s.datasets.map((d, i) => (
+                  <Fragment key={d.href}>
+                    {i > 0 && ", "}
+                    <Ext href={d.href}>{d.name}</Ext>
+                  </Fragment>
+                ))}
+                . {s.by}
+              </span>
             </li>
           ))}
         </ul>
