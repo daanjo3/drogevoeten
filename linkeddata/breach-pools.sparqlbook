@@ -1,0 +1,68 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Wielen (doorbraakkolken) als linked data\n\nDeze notebook bevraagt de wielen uit de RCE Landschapsatlas: diepe plassen die bij een dijkdoorbraak zijn ontstaan. De rivier waarlangs het wiel ligt en de woonplaats zijn gedeelde knopen (zonder provincie, want de bron noemt die niet).\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/breach-pools.ttl` bestaan. Elke query laadt de bestanden lokaal (Oxigraph); bij grote bestanden duurt dat even. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- Elk object is een record (`schema:CreativeWork` voor gebouwde objecten, `schema:Place` voor gebieden) met IRI `urn:drogevoeten:id:<soort>:<sleutel>`. Wat alleen bij dat record hoort, heeft een IRI eronder (`#location`, `#image`, `#…-id`, en gebeurtenissen als `#construction` of `#disappearance`).\n- Wat ook bij andere records voorkomt, is een gedeelde knoop: termen `urn:drogevoeten:term:<veld>:<waarde>` (in een termenset `termset:<veld>`), plaatsen `urn:drogevoeten:place:<veld>:…` en organisaties `urn:drogevoeten:org:…`. Termensets gelden voor alle datasets, dus dezelfde term in twee datasets is dezelfde knoop.\n- Gebeurtenissen (`schema:Event`) wijzen met `schema:about` naar hun record en bewaren de jaartekst uit de bron (`dv:dateText`) en de zekerheid (`dv:datePrecision`).\n- Inhoud is Nederlands (`@nl`); eigen termen en termensets hebben ook een Engelse naam. Kies in een query daarom één taal.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Langs welke rivier?",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?rivier (COUNT(?w) AS ?wielen) WHERE {\n  ?w dv:alongRiver/schema:name ?rivier .\n}\nGROUP BY ?rivier\nORDER BY DESC(?wielen)\nLIMIT 20",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Wielen met een naam\n\nMet hun alternatieve naam als die er is.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?andereNaam ?woonplaats WHERE {\n  ?w schema:additionalType <urn:drogevoeten:term:object-type:breach-pool> ;\n     schema:name ?naam .\n  FILTER(!CONTAINS(?naam, \"(naam onbekend)\"))\n  OPTIONAL { ?w schema:alternateName ?andereNaam }\n  OPTIONAL { ?w schema:containedInPlace/schema:name ?woonplaats }\n}\nORDER BY ?naam\nLIMIT 30",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Dijkdoorbraken met een jaartal\n\nDe bron noemt maar bij enkele wielen het jaar van ontstaan.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?wiel ?naam ?jaar ?beschrijving WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:dike-breach> ;\n     schema:about ?w ;\n     schema:startDate ?jaar .\n  ?w schema:name ?naam .\n  BIND(STRAFTER(STR(?w), \"breach-pool:\") AS ?wiel)\n  OPTIONAL { ?w schema:description ?beschrijving }\n}\nORDER BY ?jaar",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Woonplaatsen met de meeste wielen",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?woonplaats (COUNT(?w) AS ?wielen) WHERE {\n  ?w schema:additionalType <urn:drogevoeten:term:object-type:breach-pool> ;\n     schema:containedInPlace/schema:name ?woonplaats .\n}\nGROUP BY ?woonplaats\nORDER BY DESC(?wielen)\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Wielen met foto\n\nDe foto's worden gelinkt, niet gekopieerd; de licentie is niet beoordeeld.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?foto ?fotograaf WHERE {\n  ?w schema:name ?naam ;\n     schema:associatedMedia ?m .\n  ?m schema:thumbnailUrl ?foto .\n  OPTIONAL { ?m schema:copyrightNotice ?fotograaf }\n  FILTER(!CONTAINS(?naam, \"(naam onbekend)\"))\n}\nORDER BY ?naam\nLIMIT 20",
+    "metadata": {}
+  }
+]

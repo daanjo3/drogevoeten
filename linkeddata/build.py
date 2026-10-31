@@ -23,7 +23,9 @@ from lib.rdf import IRI, RDF, SCHEMA, XSD, Graph, Lit, to_jsonld, to_ntriples, t
 from lib.terms import Terms  # noqa: E402
 
 # Phase 1 datasets (module names in datasets/), in build order. Each has META and convert(g, terms, dataset) -> stats.
-DATASETS = ["pumping_stations"]
+DATASETS = ["pumping_stations", "windmills", "lost_windmills", "drained_lakes", "land_consolidation", "breach_pools",
+            "zeeland_dikes", "zeeland_polders", "gift_houses", "drowned_villages", "delta_works",
+            "imwa_pumping_stations", "imwa_locks", "imwa_weirs"]
 
 RECORD_TYPES = {IRI(SCHEMA + "CreativeWork"), IRI(SCHEMA + "Place")}
 

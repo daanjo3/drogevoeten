@@ -139,6 +139,17 @@ class Terms:
                 out.append(p)
         return out
 
+    def organization(self, g, field, text):
+        """Shared Organization for a named organisation, e.g. a water board (urn:drogevoeten:org:<field>:<slug>).
+        Closed sets get sameAs through the review table like terms and places (DECISIONS.md 26)."""
+        self.kinds[field] = "organization"
+        out = []
+        for part in self._expand(text):
+            o = self._node(g, field, part, None, iri(f"{config.BASE}org:{field}:{slug(part)}"), ["Organization"])
+            if o is not None:
+                out.append(o)
+        return out
+
     def link(self, g, subject, predicate, field, text, url_cotype=False):
         """subject predicate <term> for every concept in the source value (none for a null flavour)."""
         out = self.terms(g, field, text, url_cotype)

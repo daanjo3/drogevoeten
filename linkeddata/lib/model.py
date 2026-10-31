@@ -127,34 +127,69 @@ def geometry(g, owner, geom):
     return n
 
 
-def place(g, subject, name=None, lon=None, lat=None, locality=None, region=None, country=None):
+def place(g, subject, name=None, lon=None, lat=None, locality=None, region=None, country=None, street=None,
+          postal_code=None):
     g.add(subject, A, s("Place"))
     g.add(subject, s("name"), nl(name))
     g.add(subject, s("geo"), geo_point(g, subject, lon, lat))
-    if locality or region or country:
-        a = part(subject, "address")
-        g.add(a, A, s("PostalAddress"))
-        g.add(a, s("addressLocality"), plain(locality))
-        g.add(a, s("addressRegion"), plain(region))
-        g.add(a, s("addressCountry"), plain(country))
-        g.add(subject, s("address"), a)
+    address(g, subject, street, postal_code, locality, region, country)
     return subject
 
 
-def position(g, terms, record, name, lon=None, lat=None, locality=None, province=None):
-    """Where a built object stands (DECISIONS.md section 7): the record's own '#location' Place with its coordinates
-    and address (per record, because only this object stands there), contained in the shared locality, which is
-    contained in the shared province (shared, because many records use them; sameAs after review)."""
+def address(g, owner, street=None, postal_code=None, locality=None, region=None, country=None):
+    """Address text as given by the source (R10): schema:address -> PostalAddress '<owner>#address'."""
+    if not (street or postal_code or locality or region or country):
+        return None
+    a = part(owner, "address")
+    g.add(a, A, s("PostalAddress"))
+    g.add(a, s("streetAddress"), plain(street))
+    g.add(a, s("postalCode"), plain(postal_code))
+    g.add(a, s("addressLocality"), plain(locality))
+    g.add(a, s("addressRegion"), plain(region))
+    g.add(a, s("addressCountry"), plain(country))
+    g.add(owner, s("address"), a)
+    return a
+
+
+def position(g, terms, record, name, lon=None, lat=None, locality=None, province=None, municipality=None,
+             street=None, postal_code=None, geom=None, address_locality=None):
+    """Where a built object stands (DECISIONS.md section 7, R7): the record's own '#location' Place with its
+    coordinates and address (per record, because only this object stands there), contained in the shared locality,
+    which is contained in the shared municipality and/or province (shared, because many records use them).
+    Only links the source gives; nothing is derived from the coordinates.
+    geom: a line or polygon (dikes, Delta Works) goes on '#location' as GeoSPARQL WKT.
+    address_locality: a place name that is only address text, not a shared locality (Zeeland CHS layers, R10)."""
     loc = part(record, "location")
-    place(g, loc, name=f"Locatie van {name}", lon=lon, lat=lat, locality=locality, region=province, country="NL")
+    town_text = locality or address_locality
+    place(g, loc, name=f"Locatie van {name}", lon=lon, lat=lat, locality=town_text, region=province,
+          country="NL" if (town_text or province or street) else None, street=street, postal_code=postal_code)
+    if geom and geom["type"] != "Point":
+        geometry(g, loc, geom)
+    elif geom and lon is None:
+        g.add(loc, s("geo"), geo_point(g, loc, *geom["coordinates"][:2]))
     provs = terms.places(g, "province", province, scoped=False)
+    munis = terms.places(g, "municipality", municipality, scoped=False)
     towns = terms.places(g, "locality", locality, province)
-    for p in towns or provs:
+    for p in towns or munis or provs:
         g.add(loc, s("containedInPlace"), p)
     for t in towns:
-        for p in provs:
+        for p in munis or provs:
             g.add(t, s("containedInPlace"), p)
+    for mu in munis:
+        for p in provs:
+            g.add(mu, s("containedInPlace"), p)
     return loc
+
+
+def point_on_record(g, record, geom):
+    """Geometry of an area record (R8): schema:geo for a point, GeoSPARQL WKT for lines and polygons."""
+    if not geom:
+        return
+    if geom["type"] == "Point":
+        lon, lat = geom["coordinates"][:2]
+        g.add(record, s("geo"), geo_point(g, record, lon, lat))
+    else:
+        geometry(g, record, geom)
 
 
 def identifier(g, owner, local, property_id, value):
@@ -169,19 +204,138 @@ def identifier(g, owner, local, property_id, value):
     return n
 
 
-def image(g, owner, content_url, thumbnail_url=None, notice=None):
-    """Linked photo, not copied. The licence is unknown, so 'Copyright Not Evaluated' (profile 4.7.1)."""
+def image(g, owner, content_url, thumbnail_url=None, notice=None, local="image"):
+    """Linked photo, not copied (R20). The licence is unknown, so 'Copyright Not Evaluated' (profile 4.7.1).
+    Several photos: local='image-1', 'image-2', ... Without a separate thumbnail in the source, the image itself is
+    the thumbnail (the profile requires thumbnailUrl next to contentUrl)."""
     cu = url(content_url)
     if cu is None:
         return None
-    n = part(owner, "image")
+    n = part(owner, local)
     g.add(n, A, s("ImageObject"))
     g.add(n, s("contentUrl"), cu)
-    g.add(n, s("thumbnailUrl"), url(thumbnail_url))
+    g.add(n, s("thumbnailUrl"), url(thumbnail_url) or cu)
     g.add(n, s("license"), iri(config.RIGHTS_NOT_EVALUATED))
     g.add(n, s("copyrightNotice"), nl(notice))
     g.add(owner, s("associatedMedia"), n)
     return n
+
+
+def describe(g, owner, parts):
+    """One schema:description@nl from several source text fields, each with its label (R19, DECISIONS.md 24).
+    parts: [(label or None, text), ...]; empty texts are skipped."""
+    pieces = []
+    for label, text in parts:
+        text = re.sub(r"\s+", " ", str(text)).strip() if text is not None else ""
+        if text:
+            text = text if text.endswith((".", "!", "?")) else text + "."
+            pieces.append(f"{label}: {text}" if label else text)
+    g.add(owner, s("description"), nl(" ".join(pieces)) if pieces else None)
+
+
+def report_document(g, owner, report_url, name):
+    """A document that describes the object (R17): schema:subjectOf -> DigitalDocument '<owner>#report'.
+    Not typed CreativeWork: it is not a record, so the profile's record rules do not apply to it."""
+    u = url(report_url)
+    if u is None:
+        return None
+    n = part(owner, "report")
+    g.add(n, A, s("DigitalDocument"))
+    g.add(n, s("name"), nl(name))
+    g.add(n, s("url"), u)
+    g.add(owner, s("subjectOf"), n)
+    return n
+
+
+# Our own term sets (DECISIONS.md sections 4, 10, 22): English slug -> (Dutch name, English name).
+OBJECT_TYPES = {
+    "pumping-station": ("gemaal", "pumping station"),
+    "windmill": ("molen", "windmill"),
+    "drained-lake": ("droogmakerij", "drained lake"),
+    "drained-lake-structure": ("maalinrichting van een droogmakerij", "drainage installation of a drained lake"),
+    "land-consolidation-project": ("landinrichtingsproject", "land consolidation project"),
+    "breach-pool": ("wiel", "dike breach pool"),
+    "dike": ("dijk", "dike"),
+    "polder": ("polder", "polder"),
+    "gift-house": ("geschenkwoning", "gift house"),
+    "drowned-village": ("verdronken dorp", "drowned village"),
+    "delta-work": ("Deltawerk", "Delta Works structure"),
+    "lock": ("sluis", "lock"),
+    "weir": ("stuw", "weir"),
+}
+EVENT_TYPES = {
+    "construction": ("aanleg of bouw", "construction"),
+    "disappearance": ("verdwijning", "disappearance"),
+    "embankment": ("indijking", "embankment"),
+    "reclamation": ("droogmaking", "land reclamation"),
+    "dike-breach": ("dijkdoorbraak", "dike breach"),
+    "drowning": ("verdrinking", "drowning"),
+    "preparation": ("voorbereiding", "preparation"),
+    "approval": ("goedkeuring", "approval"),
+    "execution": ("uitvoering", "execution"),
+    "deed": ("akte", "deed"),
+    "completion": ("afsluiting", "completion"),
+}
+
+
+def object_type(g, terms, record, slug):
+    """additionalType -> our own term object-type:<slug> (R3)."""
+    nl_name, en_name = OBJECT_TYPES[slug]
+    g.add(record, s("additionalType"), terms.own_term(g, "object-type", slug, nl_name, en_name))
+
+
+def dating(text):
+    """Source dating text -> (start, end, precision, text), using the prototype's parse_period (never invents a
+    year). end is set when the text names a second year ('1953-1954', '1965 – 1972') or a later century; for
+    'voor'/'vóór' the year is the end (latest possible year) and there is no start."""
+    from lib.source import parse_period
+    if text is None or not str(text).strip():
+        return None, None, None, None
+    text = re.sub(r"\s+", " ", str(text)).strip()
+    p = parse_period(text)
+    if p["year"] is None:
+        return None, None, "onbekend", text
+    end = None
+    if p["precision"] == "voor":  # 'Vóór 1200': 1200 is the latest possible year, not the start
+        return None, p["year"], "voor", text
+    if p["precision"] == "eeuw":  # first century named = start, last one = end ('15e tot 17e eeuw': 1400-1700)
+        cs = [int(c) for c in re.findall(r"(\d{1,2})e\b", text)]
+        if cs:
+            start = (cs[0] - 1) * 100 + (50 if re.search(r"tweede helft", text, re.I) and len(cs) == 1 else 0)
+            return start, (cs[-1] * 100 if len(cs) > 1 else None), "eeuw", text
+    m = re.fullmatch(r"(?:ca\.?\s*)?(\d{3,4})\s*[-–/]\s*(\d{2,4})", text, re.I)
+    if m:
+        a, b = m.group(1), m.group(2)
+        end = int(a[: len(a) - len(b)] + b) if len(b) < len(a) else int(b)  # '1530/32' -> 1532
+        if end < int(a):
+            end = None
+    return p["year"], end, p["precision"], text
+
+
+def add_event(g, terms, record, kind, record_name, start=None, end=None, text=None, precision=None,
+              derived_from=None, description=None):
+    """A dated event of one record (R6, DECISIONS.md 10): IRI '<record>#<kind>', type event-type:<kind>.
+    Nothing is written without a year or a text."""
+    if start is None and end is None and not text:
+        return None
+    nl_name, en_name = EVENT_TYPES[kind]
+    kind_term = terms.own_term(g, "event-type", kind, nl_name, en_name)
+    e = event(g, part(record, kind), kind_term, record, f"{nl_name[:1].upper()}{nl_name[1:]}: {record_name}",
+              start=start, end=end, text=text, precision=precision, derived_from=derived_from)
+    g.add(e, s("description"), nl(description))
+    return e
+
+
+def dated(g, terms, record, kind, record_name, text, derived_from=None):
+    """R5/R6: one certain year -> dateCreated (only for kind 'construction'); anything else -> an event."""
+    start, end, precision, text = dating(text)
+    if start is None and not text:
+        return None
+    if kind == "construction" and precision == "jaar" and end is None:
+        g.add(record, s("dateCreated"), gyear(start))
+        return start
+    add_event(g, terms, record, kind, record_name, start, end, text, precision, derived_from)
+    return start
 
 
 def event(g, subject, kind_term, about, name, start=None, end=None, text=None, precision=None, derived_from=None,
@@ -230,10 +384,11 @@ def source_dataset(g, src):
     g.add(d, s("creator"), iri(org_iri))
     g.add(d, s("license"), iri(src["license"]))
     g.add(d, s("url"), url(src.get("service")))
-    if src.get("download"):
-        dl = part(d, "wfs")
+    downloads = src.get("downloads") or ([src["download"]] if src.get("download") else [])
+    for n, link in enumerate(downloads, 1):
+        dl = part(d, "download" if n == 1 else f"download-{n}")
         g.add(dl, A, s("DataDownload"))
-        g.add(dl, s("contentUrl"), url(src["download"]))
+        g.add(dl, s("contentUrl"), url(link))
         g.add(dl, s("encodingFormat"), plain("application/json"))
         g.add(d, s("distribution"), dl)
     return d
@@ -253,7 +408,8 @@ def dataset(g, meta, stats):
     g.add(d, s("dateModified"), xdate(config.TODAY))
     g.add(d, s("version"), plain(config.VERSION))
     g.add(d, s("inLanguage"), plain("nl"))
-    g.add(d, s("spatialCoverage"), iri(meta["spatial"]))
+    for sp in meta["spatial"] if isinstance(meta["spatial"], list) else [meta["spatial"]]:
+        g.add(d, s("spatialCoverage"), iri(sp))
     if stats.get("years"):
         g.add(d, s("temporalCoverage"), plain(f"{min(stats['years']):04d}/{max(stats['years']):04d}"))
     for a in meta.get("about", []):

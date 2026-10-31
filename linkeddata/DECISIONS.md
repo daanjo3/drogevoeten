@@ -43,7 +43,8 @@ Normen waarop alles rust:
 | Term | `term:<veld>:<waarde>` | `term:drive-type:stoom` |
 | Termenset | `termset:<veld>` | `termset:drive-type` |
 | Gedeelde plaats | `place:<veld>:<context>:<waarde>` | `place:drained-area:friesland:friese-boezem`, `place:locality:friesland:lemmer` |
-| Gedeelde plaats uit een gesloten set | `place:<veld>:<waarde>` | `place:province:friesland` |
+| Gedeelde plaats uit een gesloten set | `place:<veld>:<waarde>` | `place:province:friesland`, `place:municipality:veere`, `place:country:zweden` |
+| Gedeelde organisatie | `org:<veld>:<waarde>` | `org:water-board:wetterskip-fryslan` |
 | Dataset | `dataset:<slug>` | `dataset:pumping-stations` |
 | Catalogus / team / omzetting | `catalog`, `org:<naam>`, `activity:<slug>-<datum>` | `activity:pumping-stations-2026-10-30` |
 | Eigen vocabulaire | `def:<predicaat>` (prefix `dv:`) | `dv:drainsArea` |
@@ -180,9 +181,13 @@ Duidelijke spelfouten in gecodeerde velden worden gecorrigeerd met een expliciet
 | RCE molens | Public Domain Mark | CC0 |
 | Zeeland dijken, polders, verdronken dorpen | Public Domain Mark | CC0 |
 | Zeeland geschenkwoningen | CC0 | CC0 |
-| IMWA (OGC API) | CC BY-SA 4.0 | CC BY-SA 4.0 |
+| RCE landinrichting (NGR `ceb8c100-…`), wielen (`a1f41210-…`) | CC0 | CC0 |
+| RCE molens en gemalen in droogmakerijen | valt onder het NGR-record "Droogmakerijen" ("Bij deze dataset hoort de dataset Molens en Gemalen") | CC0 |
+| Zeeland Deltawerken (NGR `2b81ed49-…`) | Public Domain Mark | CC0 |
+| Zeeland poldernamen | **geen metadata of licentie gevonden** (NGR en dataportaal Zeeland, 31-10-2026) | **niet gebouwd** (§28) |
+| IMWA kunstwerken (OGC API, licentielink in de API) | CC BY-SA 4.0 | CC BY-SA 4.0 |
 
-Gebruik canonieke Creative Commons-IRI's met `http://` en een `/` aan het eind (zoals het Datasetregister ze opslaat). Nog niet nagekeken: RCE landinrichting en wielen, Zeeuwse Deltawerken en poldernamen. Doe dat vóór die omzetting (NGR-record, zie `LICENSE_NOTE` in `build_v3.py`).
+Gebruik canonieke Creative Commons-IRI's met `http://` en een `/` aan het eind (zoals het Datasetregister ze opslaat). Zoek een nieuwe bron op in het NGR (`/geonetwork/srv/api/search/records/_search`) en lees de licentie uit het record (`/api/records/<uuid>/formatters/xml`).
 
 ## 15. Beeldmateriaal (30-10-2026)
 
@@ -268,7 +273,8 @@ Sommige concepten vormen een vaste, bekende set: provincies, landen, waterschapp
 - een reviewtabel die gevuld wordt uit **Wikidata-SPARQL op klasse**, niet uit de zoekdienst (§9):
   - provincies: `wdt:P31 wd:Q134390`;
   - landen: `wdt:P31 wd:Q6256` (een land) of `wd:Q3624078` (een soevereine staat);
-  - waterschappen: de bestaande tabel `waterBoardLabelToQid` in het prototype.
+  - gemeenten: `wdt:P31 wd:Q2039348` (gemeente van Nederland). Gemeentenamen zijn in Nederland uniek, dus de gemeente is een gesloten set zonder context (`place:municipality:<naam>`). *Waarom geen provincie als context:* de Zeeuwse laag verdronken dorpen noemt ook Bergen op Zoom en Woensdrecht, die in Noord-Brabant liggen. Bij twee kandidaten kiezen we het item met een GeoNames-ID (Middelburg, Sluis: het andere is een oude gemeente). Zonder eenduidig GeoNames-ID (Papendrecht) nemen we alleen Wikidata;
+  - waterschappen: gedeelde `Organization` (`org:water-board:<naam>`, via `terms.organization()`), met Wikidata uit de bestaande tabel `waterBoardLabelToQid` in het prototype.
 
   De query en de datum staan in `opmerking`.
 
@@ -311,4 +317,12 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
 - **Velden waarvan de betekenis onduidelijk is** (`rce_zone`, `klassiek`, `modulair`, `zaa`, `is_gelijk`, `selectieli`, `polygoon`, ...): niet overnemen (R15), tenzij de bron of het NGR-record de betekenis noemt.
 
 **Niet aangenomen, want dat zou verzinnen zijn:** een e-mailadres voor het contactpunt (§2). De waarschuwing van het Datasetregister blijft staan tot er een adres is.
+
+**Bij de uitvoering van alle datasets (31-10-2026):**
+- **Termvoorstellen beoordelen met regels:** `assume_terms.py` (`make assume`) neemt een CHT-voorstel alleen aan als een bredere term (tot 3 niveaus) in het domein van het veld ligt (bijv. "molens" voor `windmill-type`). AAT- en Wikidata-kandidaten voor termen worden altijd verwijderd, omdat exacte labels daar homoniemen bleken. Statussen, IMWA-functies en eigen gebeurtenissoorten worden niet gekoppeld. Eigen objectsoorten zijn met de hand gekoppeld (CHT, gecontroleerd op `scopeNote` en `broader`; tabel `OBJECT_TYPES`).
+- **Poldernamen (Zeeland) niet gebouwd:** geen open licentie te vinden (§14).
+- **IMWA:** `capaciteit` niet overgenomen, omdat het API-schema geen eenheid noemt. Naamwaarden "NVT" en "<Null>" zijn geen namen (R2): opgebouwde naam. Uitgever Het Waterschapshuis staat niet als organisatie in Wikidata (Q2582955 is een gebouw in Wierum): eigen IRI `org:het-waterschapshuis`. Drie datasets (gemalen, sluizen, stuwen) in plaats van één: de stuwen zijn alleen al 53.137 records.
+- **Verzameljaren** bij de verdwenen molens (bouwjaar 1832 en 1560, verdwenen 1850 en 1929) krijgen nooit `dateCreated`. Ze worden een gebeurtenis met precisie `onzeker` en de telling uit de bron in `dv:dateText`.
+- **Kwalificaties bij jaartallen** ("voor", "ca.", "of eerder; 1674 verwoest…"): de tekst gaat letterlijk in `dv:dateText`; alleen het begin bepaalt de precisie. "Voor <jaar>" maakt van het jaar een `endDate` (uiterlijk), niet een `startDate`.
+- **Steekproef** (`spot_check.py`, `make check`): 3 records per dataset live vergeleken met de bron. Eén verschil: een IMWA-sluis heet in de oogst van 28-10 "Sluis 1 (Oudehorne)" en nu "Willem Loresluis". De bron is dus gewijzigd. De datasets zijn een momentopname van de oogst; een nieuwe `make harvest` in het prototype werkt ze bij.
 

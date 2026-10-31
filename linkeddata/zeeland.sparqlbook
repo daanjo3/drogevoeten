@@ -1,0 +1,140 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Zeeuwse cultuurhistorie als linked data\n\nDeze notebook bevraagt vijf datasets van de Provincie Zeeland: dijken, dammen en wallen; polders per bedijkingsperiode; geschenkwoningen na 1953; verdronken dorpen; en de Deltawerken. Gemeenten zijn gedeelde knopen (een gesloten set, zonder provincie), zodat polders, dorpen en woningen in dezelfde gemeente bij elkaar komen.\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/zeeland-dikes.ttl`, `build/zeeland-polders.ttl`, `build/gift-houses-1953.ttl`, `build/drowned-villages.ttl`, `build/delta-works.ttl` bestaan. Elke query laadt de bestanden lokaal (Oxigraph); bij grote bestanden duurt dat even. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- Elk object is een record (`schema:CreativeWork` voor gebouwde objecten, `schema:Place` voor gebieden) met IRI `urn:drogevoeten:id:<soort>:<sleutel>`. Wat alleen bij dat record hoort, heeft een IRI eronder (`#location`, `#image`, `#…-id`, en gebeurtenissen als `#construction` of `#disappearance`).\n- Wat ook bij andere records voorkomt, is een gedeelde knoop: termen `urn:drogevoeten:term:<veld>:<waarde>` (in een termenset `termset:<veld>`), plaatsen `urn:drogevoeten:place:<veld>:…` en organisaties `urn:drogevoeten:org:…`. Termensets gelden voor alle datasets, dus dezelfde term in twee datasets is dezelfde knoop.\n- Gebeurtenissen (`schema:Event`) wijzen met `schema:about` naar hun record en bewaren de jaartekst uit de bron (`dv:dateText`) en de zekerheid (`dv:datePrecision`).\n- Inhoud is Nederlands (`@nl`); eigen termen en termensets hebben ook een Engelse naam. Kies in een query daarom één taal.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Dijken naar oorspronkelijke functie",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?functie (COUNT(?d) AS ?dijken) WHERE {\n  ?d schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:dike-original-function> ; schema:name ?functie .\n}\nGROUP BY ?functie\nORDER BY DESC(?dijken)\nLIMIT 20",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Dijken naar status",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?status (COUNT(?d) AS ?dijken) WHERE {\n  ?d schema:isPartOf <urn:drogevoeten:dataset:zeeland-dikes> ; schema:creativeWorkStatus/schema:name ?status .\n}\nGROUP BY ?status\nORDER BY DESC(?dijken)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. De oudste dijken\n\nDe aanleg is meestal een periode (begin, eind en indicatiejaar); de tekst staat in `dv:dateText`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?aanleg ?polder WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:construction> ;\n     schema:about ?d ;\n     schema:startDate ?begin ;\n     dv:dateText ?aanleg .\n  ?d schema:isPartOf <urn:drogevoeten:dataset:zeeland-dikes> ; schema:name ?naam .\n  OPTIONAL { ?d dv:inPolder/schema:name ?polder }\n}\nORDER BY ?begin\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Polders met de meeste dijken\n\nDe polder bij een dijk is een gedeelde plaats (`place:polder:zeeland:…`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?polder (COUNT(?d) AS ?dijken) WHERE {\n  ?d dv:inPolder/schema:name ?polder .\n}\nGROUP BY ?polder\nORDER BY DESC(?dijken)\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Indijkingen per eeuw\n\nPolders zonder eigen datering krijgen de periode van hun kaartlaag; dat staat in de jaartekst.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-polders.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?eeuw (COUNT(?e) AS ?polders) (SUM(?vanLaag) AS ?alleenPeriodeVanLaag) WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:embankment> ; dv:dateText ?tekst .\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n  BIND(xsd:integer(SUBSTR(STR(COALESCE(?s, ?eind)), 1, 4)) AS ?jaar)\n  BIND(xsd:integer(FLOOR(?jaar / 100)) + 1 AS ?eeuw)\n  BIND(IF(CONTAINS(?tekst, \"periode van de kaartlaag\"), 1, 0) AS ?vanLaag)\n}\nGROUP BY ?eeuw\nORDER BY ?eeuw",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Polders met hun rapport\n\nElk rapport is een `schema:DigitalDocument` waarnaar de polder wijst met `schema:subjectOf`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-polders.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?polder ?indijking ?gemeente ?rapport WHERE {\n  ?p schema:isPartOf <urn:drogevoeten:dataset:zeeland-polders> ; schema:name ?polder ; schema:subjectOf/schema:url ?rapport .\n  OPTIONAL { ?p schema:containedInPlace/schema:name ?gemeente }\n  OPTIONAL { ?e schema:about ?p ; dv:dateText ?indijking }\n}\nORDER BY ?polder\nLIMIT 20",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. Geschenkwoningen per land van herkomst\n\nHet land is een gedeelde plaats uit een gesloten set (`place:country:…`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/gift-houses-1953.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?land (COUNT(?w) AS ?woningen) WHERE {\n  ?w dv:donatedBy/schema:name ?land .\n}\nGROUP BY ?land\nORDER BY DESC(?woningen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 8. Geschenkwoningen: bouwvorm en gevelmateriaal\n\n\"Vrijstaand. Zomerwoning\" is bij de omzetting gesplitst in twee bouwvormen.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/gift-houses-1953.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?land ?bouwvorm (COUNT(?w) AS ?woningen) WHERE {\n  ?w dv:donatedBy/schema:name ?land ;\n     dv:houseForm/schema:name ?bouwvorm .\n}\nGROUP BY ?land ?bouwvorm\nORDER BY ?land DESC(?woningen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 9. Verdronken dorpen: wanneer?\n\nDe periode van verdrinken zoals in de bron, met de zekerheid.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drowned-villages.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dorp ?periode ?zekerheid ?gemeente WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:drowning> ;\n     schema:about ?d ;\n     dv:dateText ?periode ;\n     dv:datePrecision ?zekerheid .\n  ?d schema:name ?dorp .\n  OPTIONAL { ?d schema:containedInPlace/schema:name ?gemeente }\n  OPTIONAL { ?e schema:startDate ?s }\n}\nORDER BY ?s\nLIMIT 25",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 10. De Deltawerken",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/delta-works.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?gebouwd ?aanleg ?gemeente WHERE {\n  ?d schema:isPartOf <urn:drogevoeten:dataset:delta-works> ; schema:name ?naam .\n  OPTIONAL { ?d schema:dateCreated ?gebouwd }\n  OPTIONAL { ?e schema:about ?d ; dv:dateText ?aanleg }\n  OPTIONAL { ?d schema:locationCreated/schema:containedInPlace/schema:name ?gemeente }\n}\nORDER BY COALESCE(STR(?gebouwd), ?aanleg)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 11. Eén gemeente, vier datasets\n\nPer gemeente: polders, verdronken dorpen, geschenkwoningen en Deltawerken. Dit werkt omdat de gemeente in alle datasets dezelfde gedeelde knoop is.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n# [endpoint=./build/zeeland-polders.ttl]\n# [endpoint=./build/gift-houses-1953.ttl]\n# [endpoint=./build/drowned-villages.ttl]\n# [endpoint=./build/delta-works.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?gemeente (COUNT(DISTINCT ?polder) AS ?polders) (COUNT(DISTINCT ?dorp) AS ?verdronkenDorpen) (COUNT(DISTINCT ?woning) AS ?geschenkwoningen) (COUNT(DISTINCT ?werk) AS ?deltawerken) WHERE {\n  ?g schema:name ?gemeente .\n  FILTER(STRSTARTS(STR(?g), \"urn:drogevoeten:place:municipality:\"))\n  OPTIONAL { ?polder schema:isPartOf <urn:drogevoeten:dataset:zeeland-polders> ; schema:containedInPlace ?g }\n  OPTIONAL { ?dorp schema:isPartOf <urn:drogevoeten:dataset:drowned-villages> ; schema:containedInPlace ?g }\n  OPTIONAL { ?woning schema:isPartOf <urn:drogevoeten:dataset:gift-houses-1953> ; schema:locationCreated/schema:containedInPlace/schema:containedInPlace ?g }\n  OPTIONAL { ?werk schema:isPartOf <urn:drogevoeten:dataset:delta-works> ; schema:locationCreated/schema:containedInPlace ?g }\n}\nGROUP BY ?gemeente\nORDER BY DESC(?polders)",
+    "metadata": {}
+  }
+]

@@ -1,0 +1,116 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Molens en verdwenen molens als linked data\n\nDeze notebook bevraagt twee datasets samen: de bestaande molens en de verdwenen molens uit de RCE Landschapsatlas. Ze delen hun termensets (type, functie, hoofdcategorie, aandrijving, staat), omdat beide uit de molendatabase komen.\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/windmills.ttl`, `build/lost-windmills.ttl` bestaan. Elke query laadt de bestanden lokaal (Oxigraph); bij grote bestanden duurt dat even. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- Elk object is een record (`schema:CreativeWork` voor gebouwde objecten, `schema:Place` voor gebieden) met IRI `urn:drogevoeten:id:<soort>:<sleutel>`. Wat alleen bij dat record hoort, heeft een IRI eronder (`#location`, `#image`, `#…-id`, en gebeurtenissen als `#construction` of `#disappearance`).\n- Wat ook bij andere records voorkomt, is een gedeelde knoop: termen `urn:drogevoeten:term:<veld>:<waarde>` (in een termenset `termset:<veld>`), plaatsen `urn:drogevoeten:place:<veld>:…` en organisaties `urn:drogevoeten:org:…`. Termensets gelden voor alle datasets, dus dezelfde term in twee datasets is dezelfde knoop.\n- Gebeurtenissen (`schema:Event`) wijzen met `schema:about` naar hun record en bewaren de jaartekst uit de bron (`dv:dateText`) en de zekerheid (`dv:datePrecision`).\n- Inhoud is Nederlands (`@nl`); eigen termen en termensets hebben ook een Engelse naam. Kies in een query daarom één taal.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Twee datasets, één soort object\n\nAantal molens per dataset. Beide gebruiken onze eigen objectsoort `object-type:windmill`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:additionalType <urn:drogevoeten:term:object-type:windmill> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?dataset",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Molentypen in beide datasets\n\nDe termenset `windmill-type` is gedeeld: een wipmolen in de ene dataset is dezelfde knoop als een wipmolen in de andere.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?type (COUNT(DISTINCT ?bestaand) AS ?bestaand_) (COUNT(DISTINCT ?verdwenen) AS ?verdwenen_) WHERE {\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:windmill-type> ;\n     schema:name ?type .\n  ?m schema:additionalType ?t .\n  OPTIONAL { ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> . BIND(?m AS ?bestaand) }\n  OPTIONAL { ?m schema:isPartOf <urn:drogevoeten:dataset:lost-windmills> . BIND(?m AS ?verdwenen) }\n}\nGROUP BY ?type\nORDER BY DESC(?verdwenen_)\nLIMIT 20",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Bestaande molens naar staat",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?staat (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:creativeWorkStatus/schema:name ?staat .\n}\nGROUP BY ?staat\nORDER BY DESC(?molens)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. De oudste bestaande molens\n\nMet een zeker bouwjaar (`schema:dateCreated`) en hun woonplaats (gedeelde knoop).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?bouwjaar ?woonplaats ?type WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:name ?naam ;\n     schema:dateCreated ?bouwjaar ;\n     schema:locationCreated/schema:containedInPlace/schema:name ?woonplaats .\n  OPTIONAL { ?m schema:additionalType ?t . ?t schema:inDefinedTermSet <urn:drogevoeten:termset:windmill-type> ; schema:name ?type }\n}\nORDER BY ?bouwjaar\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Wanneer verdwenen de molens?\n\nVerdwijningen per decennium. Let op de pieken rond 1850 en 1929: daar staan verzameljaren in de bron, die als `onzeker` zijn gemarkeerd (zie query 6).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?decennium (COUNT(?e) AS ?verdwenen) WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:disappearance> ;\n     schema:startDate ?d .\n  BIND(xsd:integer(FLOOR(xsd:integer(SUBSTR(STR(?d), 1, 4)) / 10) * 10) AS ?decennium)\n}\nGROUP BY ?decennium\nORDER BY ?decennium",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Hoe zeker zijn de jaartallen?\n\nAantal gebeurtenissen per soort en zekerheid. `onzeker` = een verzameljaar (bijv. bouwjaar 1832, dat 3.955 keer voorkomt); `voor` = het jaar is een uiterste grens.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?soort ?zekerheid (COUNT(?e) AS ?gebeurtenissen) (SAMPLE(?tekst) AS ?voorbeeld) WHERE {\n  ?e a schema:Event ;\n     schema:additionalType/schema:name ?soort ;\n     dv:datePrecision ?zekerheid .\n  FILTER(LANG(?soort) = \"nl\")\n  OPTIONAL { ?e dv:dateText ?tekst }\n}\nGROUP BY ?soort ?zekerheid\nORDER BY ?soort DESC(?gebeurtenissen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. Eén verdwenen molen met zijn gebeurtenissen\n\nDe Mijndensche Molen (molendatabase-nummer 1053) en alles wat ernaar wijst of eronder hangt.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT { ?s ?p ?o . } WHERE {\n  ?s ?p ?o .\n  FILTER(STRSTARTS(STR(?s), \"urn:drogevoeten:id:lost-windmill:1053\"))\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 8. Waar staan de meeste bestaande molens?\n\nWoonplaatsen zijn gedeelde knopen. De molenlaag noemt geen provincie, dus de woonplaatsen hebben de context `no-context`.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?woonplaats (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:locationCreated/schema:containedInPlace ?w .\n  ?w schema:name ?woonplaats .\n}\nGROUP BY ?woonplaats\nORDER BY DESC(?molens)\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 9. Vooruitblik op fase 2: hetzelfde Ten Bruggencate-nummer\n\nMolens die in beide datasets met hetzelfde Ten Bruggencate-nummer voorkomen. Zo'n gedeeld nummer is de basis voor een linkset in fase 2; nu zijn het nog twee losse records.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?nummer ?bestaand ?verdwenen WHERE {\n  ?a schema:isPartOf <urn:drogevoeten:dataset:windmills> ; schema:name ?bestaand ; schema:identifier ?ia .\n  ?ia schema:propertyID \"Ten Bruggencate-nummer\" ; schema:value ?nummer .\n  ?b schema:isPartOf <urn:drogevoeten:dataset:lost-windmills> ; schema:name ?verdwenen ; schema:identifier ?ib .\n  ?ib schema:propertyID \"Ten Bruggencate-nummer\" ; schema:value ?nummer .\n}\nORDER BY ?nummer\nLIMIT 20",
+    "metadata": {}
+  }
+]

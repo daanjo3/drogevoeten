@@ -31,7 +31,7 @@ WD_ALL = "https://www.wikidata.org#entities-all"
 WD_PLACES = "https://www.wikidata.org#entities-places"
 GEONAMES = "https://www.geonames.org#nl-be-de"
 COLUMN_OF = {CHT: "cht", AAT: "aat", WD_ALL: "wikidata", WD_PLACES: "wikidata", GEONAMES: "geonames"}
-SOURCES_BY_KIND = {"term": [CHT, AAT], "place": [WD_PLACES, GEONAMES]}
+SOURCES_BY_KIND = {"term": [CHT, AAT], "place": [WD_PLACES, GEONAMES], "organization": [WD_ALL]}
 SOURCES_FOR = {"country": [WD_ALL]}  # per-field override, e.g. country of origin of a gift house
 # GeoNames returns several features per name (e.g. 'Zeeland (NL)' as town and as province); prefer this kind.
 PREFER_SCOPE = {"province": "Bestuurlijke eenheid", "locality": "Plaats"}

@@ -1,0 +1,80 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Kunstwerken van de waterschappen (IMWA) als linked data\n\nDeze notebook bevraagt het open register van de waterschappen (IMWA, via PDOK), omgezet in drie datasets: gemalen, sluizen en stuwen. De waterbeheerder is een gedeelde organisatie (`org:water-board:…`). De stuwen zijn groot (53.137 records); alleen query 3 gebruikt ze.\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/water-board-pumping-stations.ttl`, `build/water-board-locks.ttl`, `build/water-board-weirs.ttl` bestaan. Elke query laadt de bestanden lokaal (Oxigraph); bij grote bestanden duurt dat even. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- Elk object is een record (`schema:CreativeWork` voor gebouwde objecten, `schema:Place` voor gebieden) met IRI `urn:drogevoeten:id:<soort>:<sleutel>`. Wat alleen bij dat record hoort, heeft een IRI eronder (`#location`, `#image`, `#…-id`, en gebeurtenissen als `#construction` of `#disappearance`).\n- Wat ook bij andere records voorkomt, is een gedeelde knoop: termen `urn:drogevoeten:term:<veld>:<waarde>` (in een termenset `termset:<veld>`), plaatsen `urn:drogevoeten:place:<veld>:…` en organisaties `urn:drogevoeten:org:…`. Termensets gelden voor alle datasets, dus dezelfde term in twee datasets is dezelfde knoop.\n- Gebeurtenissen (`schema:Event`) wijzen met `schema:about` naar hun record en bewaren de jaartekst uit de bron (`dv:dateText`) en de zekerheid (`dv:datePrecision`).\n- Inhoud is Nederlands (`@nl`); eigen termen en termensets hebben ook een Engelse naam. Kies in een query daarom één taal.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Gemalen en sluizen per waterschap",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/water-board-locks.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?waterschap (COUNT(DISTINCT ?g) AS ?gemalen) (COUNT(DISTINCT ?s) AS ?sluizen) WHERE {\n  ?k schema:maintainer ?w .\n  ?w schema:name ?waterschap .\n  OPTIONAL { ?k schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> . BIND(?k AS ?g) }\n  OPTIONAL { ?k schema:additionalType <urn:drogevoeten:term:object-type:lock> . BIND(?k AS ?s) }\n}\nGROUP BY ?waterschap\nORDER BY DESC(?gemalen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Gemalen naar functie",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?functie (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:imwa-function> ; schema:name ?functie .\n}\nGROUP BY ?functie\nORDER BY DESC(?gemalen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Stuwen per waterschap",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/water-board-weirs.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?waterschap (COUNT(?s) AS ?stuwen) WHERE {\n  ?s schema:maintainer/schema:name ?waterschap .\n}\nGROUP BY ?waterschap\nORDER BY DESC(?stuwen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Hoeveel kunstwerken hebben een naam?\n\nIMWA laat de naam vaak leeg of vult \"NVT\" in; die records hebben een opgebouwde naam met \"(naam onbekend)\".",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/water-board-locks.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset (COUNT(?k) AS ?totaal) (SUM(?onbekend) AS ?zonderNaam) WHERE {\n  ?k schema:isPartOf/schema:name ?dataset ; schema:name ?naam .\n  FILTER(LANG(?naam) = \"nl\")\n  BIND(IF(CONTAINS(?naam, \"(naam onbekend)\"), 1, 0) AS ?onbekend)\n}\nGROUP BY ?dataset",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Eén objectsoort in twee bronnen\n\nDe historische gemalen (RCE, Gemalen Stichting) en de gemalen van nu (IMWA) delen onze objectsoort `object-type:pumping-station`. Het zijn nog losse records; de koppeling (naam + afstand) volgt in fase 2.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?dataset",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Gemalen van nu in de buurt van de Abdij in Middelburg\n\nDe tien dichtstbijzijnde, gesorteerd op afstand (een benadering in km²).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?waterschap ?lat ?lon WHERE {\n  ?g schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> ;\n     schema:name ?naam ;\n     schema:maintainer/schema:name ?waterschap ;\n     schema:locationCreated/schema:geo ?geo .\n  ?geo schema:latitude ?lat ; schema:longitude ?lon .\n  BIND((?lat - 51.4988) * 111.2 AS ?dy)\n  BIND((?lon - 3.6136) * 69.3 AS ?dx)\n  BIND(?dx * ?dx + ?dy * ?dy AS ?km2)\n}\nORDER BY ?km2\nLIMIT 10",
+    "metadata": {}
+  }
+]

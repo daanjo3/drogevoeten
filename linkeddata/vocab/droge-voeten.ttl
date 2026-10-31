@@ -44,3 +44,38 @@ dv:datePrecision a rdf:Property ;
     rdfs:label "date precision"@en, "nauwkeurigheid"@nl ;
     rdfs:comment "How certain the year is: jaar (year), circa, periode (period), eeuw (century), voor (before), onbekend (unknown)."@en ;
     schema:domainIncludes schema:Event .
+
+dv:status a rdf:Property ;
+    rdfs:label "status"@en, "status"@nl ;
+    rdfs:comment "Status of a place record (e.g. a land consolidation project: completed, ongoing), according to the source. For creative works schema:creativeWorkStatus is used instead."@en ;
+    schema:domainIncludes schema:Place ; schema:rangeIncludes schema:DefinedTerm .
+
+dv:waterLevel a rdf:Property ;
+    rdfs:label "water level"@en, "polderpeil"@nl ;
+    rdfs:comment "The managed water level of a polder or drained lake, as text exactly as in the source (e.g. '-4 / -3', metres relative to NAP)."@en ;
+    schema:domainIncludes schema:Place .
+
+dv:alongRiver a rdf:Property ;
+    rdfs:label "along river"@en, "langs rivier"@nl ;
+    rdfs:comment "The river or sea along which a dike breach pool lies, as named in the source."@en ;
+    schema:domainIncludes schema:Place ; schema:rangeIncludes schema:Place .
+
+dv:laterFunction a rdf:Property ;
+    rdfs:label "later function"@en, "latere functie"@nl ;
+    rdfs:comment "The function of a dike after its original function, according to the source (field 'naspfunc')."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:DefinedTerm .
+
+dv:inPolder a rdf:Property ;
+    rdfs:label "in polder"@en, "in polder"@nl ;
+    rdfs:comment "The polder a dike belongs to, as named in the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:Place .
+
+dv:houseForm a rdf:Property ;
+    rdfs:label "house form"@en, "hoofdvorm"@nl ;
+    rdfs:comment "The building form of a house (detached, semi-detached, summer house), according to the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:DefinedTerm .
+
+dv:donatedBy a rdf:Property ;
+    rdfs:label "donated by"@en, "geschonken door"@nl ;
+    rdfs:comment "The country that donated a house after the 1953 flood, according to the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:Place .

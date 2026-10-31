@@ -84,8 +84,25 @@ De context is de **provincie die de bron bij het record noemt**. Voor de Zeeuwse
 
 ## Status
 
-| # | Dataset (slug) | Recordsoort | Bron in `prototype/data/raw/` | Status |
-|---|---|---|---|---|
+Stand op 31-10-2026: fase 1 is uitgevoerd voor alle lagen, behalve de poldernamen (geen licentie). Elke dataset bouwt zonder fouten in de zelfcontrole; de validatie en de steekproef staan in README.md.
+
+| # | Dataset (slug) | Module | Recordsoort | Records | Status |
+|---|---|---|---|---|---|
+| 1 | `pumping-stations` | `pumping_stations.py` | `pumping-station` | 2.663 | klaar |
+| 2 | `windmills` | `windmills.py` | `windmill` | 1.872 | klaar |
+| 3 | `lost-windmills` | `lost_windmills.py` | `lost-windmill` | 17.119 | klaar |
+| 4 | `drained-lakes` | `drained_lakes.py` | `drained-lake`, `drained-lake-structure` | 245 + 561 | klaar |
+| 5 | `land-consolidation` | `land_consolidation.py` | `land-consolidation-project` | 604 | klaar |
+| 6 | `breach-pools` | `breach_pools.py` | `breach-pool` | 1.266 | klaar |
+| 7 | `zeeland-dikes` | `zeeland_dikes.py` | `dike` | 2.486 | klaar |
+| 8 | `zeeland-polders` | `zeeland_polders.py` | `polder` | 560 (uit 596 delen) | klaar |
+| 8b | `zeeland-polder-names` | — | — | — | **niet gebouwd**: geen licentie gevonden (DECISIONS §14, §28) |
+| 9 | `gift-houses-1953` | `gift_houses.py` | `gift-house` | 538 (2 dubbele records samengevoegd) | klaar |
+| 10 | `drowned-villages` | `drowned_villages.py` | `drowned-village` | 201 | klaar |
+| 10b | `delta-works` | `delta_works.py` | `delta-work` | 9 | klaar |
+| 11 | `water-board-pumping-stations`, `water-board-locks`, `water-board-weirs` | `imwa_*.py` (gedeeld: `water_board.py`) | `water-board-structure` | 8.565 + 890 + 53.137 | klaar (gesplitst per soort) |
+
+---|---|---|---|---|
 | 1 | `pumping-stations` | `pumping-station` | `v3/rce_gemalen.json` (2.663) | **klaar** (pilot); termen beoordeeld als aanname (§28) |
 | 2 | `windmills` | `windmill` | `v3/rce_Molens.json` (1.872) | te doen |
 | 3 | `lost-windmills` | `lost-windmill` | `v3/rce_verdwenenmolens.json` (17.119) | te doen |
@@ -127,6 +144,12 @@ Bron: RCE Landschapsatlas "Gemalen" (gegevens van de Nederlandse Gemalen Stichti
 
 ### 2. Molens, bestaand: `windmills`
 
+**Uitvoering (31-10-2026), afwijkingen van de tabel hieronder:**
+- `CATEGORIE` (windmolen, rosmolen, watermolen) heeft dezelfde waarden als `aandrijvin` bij de verdwenen molens. Daarom één set `windmill-drive` (niet `windmill-category`).
+- `HFDFUNCTIE` en `hoofdcat` (verdwenen molens) delen `windmill-main-category`; `FUNCTIE` en `functie` delen `windmill-function`.
+- Een `RMONNUMMER` "geen" is geen nummer en wordt geen identifier. `BOUWJAAR` "41" is onleesbaar en gemeld.
+
+
 Bron: RCE Landschapsatlas "Molens", NGR `291afe4b-4f4b-497c-8026-fb437c4e9c7e`, PDM → CC0. `CreativeWork`.
 
 **Sleutel (aanname, §28):** `TBGCNUMMER` (Ten Bruggencate); bij de 4 dubbelen (00706, 01244, 08814, "01110 kk") `<TBGCNUMMER>-<gid>`, gemeld in `report.json`.
@@ -145,6 +168,12 @@ Bron: RCE Landschapsatlas "Molens", NGR `291afe4b-4f4b-497c-8026-fb437c4e9c7e`, 
 
 ### 3. Verdwenen molens: `lost-windmills`
 
+**Uitvoering (31-10-2026):**
+- `bouwjaar_2` en `verdwenen2` zijn geen tweede jaartal, maar een kwalificatie ("voor", "ca.", "of eerder") of een oorzaak/geschiedenis ("gesloopt", "; 1940 hersteld"). Ze gaan letterlijk in `dv:dateText`; alleen het begin bepaalt de precisie (`datasets/common.year_with_qualifier`). "Voor <jaar>" wordt `endDate`.
+- De verzameljaren (gebouwd 1832/1560, verdwenen 1850/1929) zijn altijd een gebeurtenis met precisie `onzeker` en de telling in de jaartekst.
+- De laag heeft geen plaatsveld: `#location` heeft alleen coördinaten.
+
+
 Bron: RCE Landschapsatlas "Verdwenen molens" (uit molendatabase.org), NGR `7e41f6fa-936d-4fbe-b3b7-fb40dfe1283d`, CC0. Sleutel `molen_dbnr` (uniek). `CreativeWork`.
 
 | Bronveld | Regel | Modellering |
@@ -161,6 +190,9 @@ Bron: RCE Landschapsatlas "Verdwenen molens" (uit molendatabase.org), NGR `7e41f
 | Niet overnemen | R15 | `ogc_fid` |
 
 ### 4. Droogmakerijen: `drained-lakes`
+
+**Uitvoering (31-10-2026):** licentie via het NGR-record "Droogmakerijen" (de laag molens en gemalen hoort erbij; CC0). De maalinrichting wijst via `#location` `containedInPlace` naar haar droogmakerij. `bron_geo` is ook een `citation`. `dv:waterLevel` is toegevoegd aan het vocabulaire.
+
 
 Bron: RCE Landschapsatlas "Droogmakerijen", NGR `cd53d540-f499-4850-8053-e1172c97372e`, CC0, en de laag "molens en gemalen in droogmakerijen" (licentie nakijken).
 
@@ -189,6 +221,12 @@ Bron: RCE Landschapsatlas "Droogmakerijen", NGR `cd53d540-f499-4850-8053-e1172c9
 
 ### 5. Landinrichting: `land-consolidation`
 
+**Uitvoering (31-10-2026):** licentie CC0 (NGR `ceb8c100-6ce8-4bb1-8084-2b5b215064e9`). Sleutel `objectid`.
+- `Place` heeft geen `size`; de oppervlakte is `additionalProperty` → `PropertyValue` (`value`, `unitCode` "HAR", `unitText` "ha").
+- "Brabant" → "Noord-Brabant" (normalisatie).
+- `dv:status` is toegevoegd aan het vocabulaire.
+
+
 Bron: RCE Landschapsatlas "Landinrichting"; licentie nakijken. `Place` (projectgebied).
 
 **Sleutel (aanname, §28):** `objectid` (uniek, maar een database-ID; gemeld als instabiel). `proj_num` is niet uniek (0 en 5276 meerdere keren) en is bij 12 projecten leeg.
@@ -207,6 +245,12 @@ Bron: RCE Landschapsatlas "Landinrichting"; licentie nakijken. `Place` (projectg
 
 ### 6. Wielen: `breach-pools`
 
+**Uitvoering (31-10-2026):** licentie CC0 (NGR `a1f41210-4f4b-4821-abe3-fd74efc580d4`). Sleutel `id`.
+- `foto` is de naam van de fotograaf (`copyrightNotice`).
+- `hoofdstr` → `dv:alongRiver` → `place:river:no-context:<naam>`; `plaats` → `place:locality:no-context:<naam>`.
+- `hfdstrgeb` (stroomgebied) staat in de `description`.
+
+
 Bron: RCE Landschapsatlas "Wielen"; licentie nakijken. `Place`.
 
 **Sleutel (aanname, §28):** `id` (uniek). `uniekeid` is maar 27× gevuld.
@@ -224,6 +268,13 @@ Bron: RCE Landschapsatlas "Wielen"; licentie nakijken. `Place`.
 | Niet overnemen | R15 | `hfdstrgeb`, `id_hfdstr`, `id_dwarsd`, `volgorde` (hulpnummers), `datbezoek` (datum van inventarisatie), `foto` (dubbel), `ontstwijze` (leeg) |
 
 ### 7. Zeeuwse dijken: `zeeland-dikes`
+
+**Uitvoering (31-10-2026):**
+- `oorsprfunc` en `naspfunc` hebben verschillende codelijsten: twee sets, `dike-original-function` en `dike-later-function` (`dv:laterFunction`).
+- De lijngeometrie staat op `#location` (net als bij andere gebouwde objecten), niet op het record.
+- Geen provincie bij `#location`: de laag noemt die niet. Alleen de gedeelde polder heeft de context Zeeland.
+- De aanlegtekst is opgebouwd uit de drie velden ("aanleg: begin 1150, eind 1200, indicatiejaar 1175").
+
 
 Bron: Provincie Zeeland, dijken, dammen en wallen, NGR `e5c91c39-8cff-435f-a45d-3218e4584d5c`, PDM → CC0. Sleutel `bron_id` (uniek). `CreativeWork`. Context van gedeelde plaatsen: Zeeland. `spatialCoverage` Zeeland.
 
@@ -244,6 +295,12 @@ Bron: Provincie Zeeland, dijken, dammen en wallen, NGR `e5c91c39-8cff-435f-a45d-
 | Niet overnemen | R15 | `fid`, `objectid`, `rce_zone` (eerst nakijken), `waternaam` (leeg), `gdb_geomattr_data` |
 
 ### 8. Zeeuwse polders: `zeeland-polders` en `zeeland-polder-names`
+
+**Uitvoering (31-10-2026):**
+- Zonder `periodevan` wordt de periode van de kaartlaag gebruikt, en dat staat in de jaartekst ("1300-1421 (periode van de kaartlaag; geen eigen datering)").
+- De gemeentenamen zijn genormaliseerd ("SLUIS Z" → "Sluis"; "LEEG" en "-" zijn geen gemeente).
+- De poldernamen zijn **niet gebouwd** (geen licentie).
+
 
 **Polders per bedijkingsperiode** (7 lagen, NGR `bfcfbdbf-0c42-4333-93eb-742ab69b9a75`, PDM → CC0). Sleutel `code` (GEO-…, stabiel); een meerdelige polder is één record. `Place`. Bron-URI via `zld_code_uri`.
 
@@ -269,6 +326,13 @@ Bron: Provincie Zeeland, dijken, dammen en wallen, NGR `e5c91c39-8cff-435f-a45d-
 
 ### 9. Geschenkwoningen: `gift-houses-1953`
 
+**Uitvoering (31-10-2026):**
+- `status` is een monumentstatus met een eigen codelijst: set `gift-house-protection` (niet `protection-status`).
+- Splitstabellen (R24): "Vrijstaand. Zomerwoning" → twee; "Kunststof en stuc", "Stuc en hout" → twee. Spelfout "Versteeld geheel" → "Versteend geheel".
+- Land van herkomst → `place:country:<land>` (gesloten set).
+- De bron-URI selecteert op `objectnummer` (de GeoServer-ID's van de CHS-laag zijn instabiel).
+
+
 Bron: Provincie Zeeland, geschenkwoningen, NGR `a04a860d-296d-45c2-8fc0-2e34750c5c90`, CC0. `CreativeWork`.
 
 **Sleutel (aanname, §28):** `objectnummer`; de 2 dubbelen (EG006, ZH237, telkens hetzelfde adres) worden samengevoegd tot één record en gemeld.
@@ -293,6 +357,14 @@ De koppeling met de BAG is fase 2.
 
 ### 10. Verdronken dorpen en Deltawerken: `drowned-villages`, `delta-works`
 
+**Uitvoering (31-10-2026):**
+- De oogst heeft al een WGS84-punt; `nieuwe_x/y` zijn niet nodig.
+- Meerdere Archis-nummers in één veld worden meerdere identifiers. Een ZAA-nummer zonder cijfers ("ZAA-") is geen nummer.
+- `referentie`/`refid` zijn literatuurnummers zonder lijst: niet overgenomen.
+- De bron-URI van de dorpen selecteert op `id`.
+- Deltawerken: de licentie is PDM (NGR `2b81ed49-78b2-4fe1-a221-c70e8b6ac55b`); de geometrie staat op `#location`, en `plaats` is alleen adrestekst.
+
+
 **Verdronken dorpen** (NGR `6eb9a0b2-b751-40a3-9a7d-5f3ed9d78a8b`, PDM → CC0). Sleutel `id` (uniek). `Place`.
 
 | Bronveld | Regel | Modellering |
@@ -309,6 +381,13 @@ De koppeling met de BAG is fase 2.
 **Deltawerken** (licentie nakijken). Sleutel `code`. `CreativeWork`. Zelfde opbouw als de polders (8): `periodevan` → `dateCreated` (R5) als het een jaartal is, anders event `#construction`; `gemeente` R9; `plaats`/`straat` R10; `reportlink` R17; lijn als WKT. `object-type:delta-work`; de soort (dam, kering) alleen als de bron het zegt.
 
 ### 11. IMWA-kunstwerken: `water-board-structures`
+
+**Uitvoering (31-10-2026):**
+- Drie datasets (`water-board-pumping-stations`, `-locks`, `-weirs`), één recordsoort `water-board-structure`.
+- `capaciteit` is niet overgenomen (geen eenheid in het API-schema). Namen "NVT" en "<Null>" worden een opgebouwde naam.
+- De waterbeheerder is een gedeelde `Organization` (`org:water-board:<naam>`), met Wikidata uit de tabel van het prototype (`terms/water-board.csv`, `aangenomen`).
+- Uitgever: Het Waterschapshuis, met eigen IRI (staat niet als organisatie in Wikidata).
+
 
 Bron: Het Waterschapshuis, IMWA kunstwerken (PDOK, OGC API), **CC BY-SA 4.0**. Sleutel `id` (NL.WBHCODE…). `CreativeWork`. Groot (62.592 records); kijk of één dataset per soort (gemaal, sluis, stuw) handiger is.
 
@@ -348,6 +427,6 @@ Elke soort link wordt een **eigen linkset-dataset**: VoID, met per link de metho
 
 Bijna alles is beslist met aannames (DECISIONS §28): sleutels, provincie zonder provincieveld (niet afleiden), onduidelijke velden (niet overnemen), termreview. Wat overblijft:
 - **E-mailadres voor het contactpunt** van het team (§2). Dat kan alleen Jari geven.
-- **Licenties** van landinrichting, wielen, molens/gemalen in droogmakerijen, poldernamen en Deltawerken: nakijken bij de bouw. Geen open licentie gevonden: niet bouwen.
+- **Poldernamen (Zeeland):** bouwen zodra de provincie een licentie publiceert (nu geen metadata in het NGR of het dataportaal).
 - Bij hosting: `BASE` naar HTTPS, URI's laten resolven (HTML + RDF), registreren in het Datasetregister, de lagen aanbieden aan RCE en Provincie Zeeland.
 - Eventueel een DCAT-AP-NL-versie van de catalogus naast de schema.org-versie (§17).

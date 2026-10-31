@@ -40,11 +40,14 @@ ORGS = {
     "rce": ("http://www.wikidata.org/entity/Q1766396", "Rijksdienst voor het Cultureel Erfgoed"),
     "zld": ("http://www.wikidata.org/entity/Q705", "Provincie Zeeland"),
     "gemalenstichting": ("http://www.wikidata.org/entity/Q27188363", "Nederlandse Gemalen Stichting"),
+    # Not in Wikidata as an organisation (Q2582955 is a building in Wierum); our own IRI identifies it.
+    "hwh": (BASE + "org:het-waterschapshuis", "Het Waterschapshuis"),
 }
 
 # spatialCoverage: most specific GeoNames IRI (as returned by the Termennetwerk).
 GEONAMES_NL = "https://sws.geonames.org/2750405/"
 GEONAMES_ZEELAND = "https://sws.geonames.org/2744011/"
+GEONAMES_ZUID_HOLLAND = "https://sws.geonames.org/2743698/"
 
 NGR = "https://nationaalgeoregister.nl/geonetwork/srv/api/records/"  # resolvable metadata record per source layer
 RCE_WFS = "https://services.rce.geovoorziening.nl/landschapsatlas/wfs"

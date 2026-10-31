@@ -1,0 +1,80 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Droogmakerijen en hun maalinrichtingen als linked data\n\nDeze notebook bevraagt de droogmakerijen uit de RCE Landschapsatlas en de molens en gemalen waarmee ze zijn drooggemaakt (`drained-lake-structure`). Een maalinrichting wijst via haar `#location` met `schema:containedInPlace` naar haar droogmakerij.\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/drained-lakes.ttl` bestaan. Elke query laadt de bestanden lokaal (Oxigraph); bij grote bestanden duurt dat even. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- Elk object is een record (`schema:CreativeWork` voor gebouwde objecten, `schema:Place` voor gebieden) met IRI `urn:drogevoeten:id:<soort>:<sleutel>`. Wat alleen bij dat record hoort, heeft een IRI eronder (`#location`, `#image`, `#…-id`, en gebeurtenissen als `#construction` of `#disappearance`).\n- Wat ook bij andere records voorkomt, is een gedeelde knoop: termen `urn:drogevoeten:term:<veld>:<waarde>` (in een termenset `termset:<veld>`), plaatsen `urn:drogevoeten:place:<veld>:…` en organisaties `urn:drogevoeten:org:…`. Termensets gelden voor alle datasets, dus dezelfde term in twee datasets is dezelfde knoop.\n- Gebeurtenissen (`schema:Event`) wijzen met `schema:about` naar hun record en bewaren de jaartekst uit de bron (`dv:dateText`) en de zekerheid (`dv:datePrecision`).\n- Inhoud is Nederlands (`@nl`); eigen termen en termensets hebben ook een Engelse naam. Kies in een query daarom één taal.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Droogmakerijen per poldertype\n\nMet het vroegste en laatste jaar van droogmaking. Bij \"1550 en eerder\" is 1550 een uiterste grens (`endDate`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?poldertype (COUNT(DISTINCT ?d) AS ?droogmakerijen) (MIN(?jaar) AS ?vroegst) (MAX(?jaar) AS ?laatst) WHERE {\n  ?d schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-type> ; schema:name ?poldertype .\n  ?e schema:about ?d ; schema:additionalType <urn:drogevoeten:term:event-type:reclamation> .\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n  BIND(xsd:integer(SUBSTR(STR(COALESCE(?s, ?eind)), 1, 4)) AS ?jaar)\n}\nGROUP BY ?poldertype\nORDER BY ?vroegst",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. De oudste droogmakerijen",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?jaartekst ?zekerheid ?polderpeil WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:reclamation> ;\n     schema:about ?d ;\n     dv:dateText ?jaartekst ;\n     dv:datePrecision ?zekerheid .\n  ?d schema:name ?naam .\n  OPTIONAL { ?d dv:waterLevel ?polderpeil }\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n}\nORDER BY COALESCE(?s, ?eind)\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Waarmee werd drooggemalen?\n\nMaalinrichtingen per soort.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?soort (COUNT(?m) AS ?aantal) WHERE {\n  ?m schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-structure-type> ; schema:name ?soort .\n}\nGROUP BY ?soort\nORDER BY DESC(?aantal)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Droogmakerijen met de meeste maalinrichtingen",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?droogmakerij (COUNT(?m) AS ?maalinrichtingen) (GROUP_CONCAT(DISTINCT ?soort; separator=\", \") AS ?soorten) WHERE {\n  ?m schema:locationCreated/schema:containedInPlace ?d ;\n     schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-structure-type> ; schema:name ?soort .\n  ?d schema:additionalType <urn:drogevoeten:term:object-type:drained-lake> ; schema:name ?droogmakerij .\n}\nGROUP BY ?droogmakerij\nORDER BY DESC(?maalinrichtingen)\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Polderpeil\n\nHet peil staat als tekst zoals in de bron (meters ten opzichte van NAP).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?polderpeil (COUNT(?d) AS ?droogmakerijen) WHERE {\n  ?d dv:waterLevel ?polderpeil .\n}\nGROUP BY ?polderpeil\nORDER BY DESC(?droogmakerijen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Vooruitblik op fase 2: gemalen in twee datasets\n\nEen maalinrichting met een gem_id van de Nederlandse Gemalen Stichting staat ook in de gemalendataset onder hetzelfde nummer. Deze query legt dat verband via het gedeelde nummer; in fase 2 wordt het een linkset.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?droogmakerij ?maalinrichting ?gemaal ?stichtingsjaar WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:drained-lakes> ;\n     schema:identifier ?i ; schema:name ?maalinrichting ; schema:locationCreated/schema:containedInPlace/schema:name ?droogmakerij .\n  ?i schema:propertyID \"Nederlandse Gemalen Stichting gem_id\" ; schema:value ?nummer .\n  ?g schema:isPartOf <urn:drogevoeten:dataset:pumping-stations> ; schema:name ?gemaal ; schema:identifier ?j .\n  ?j schema:propertyID \"Nederlandse Gemalen Stichting gem_id\" ; schema:value ?nummer .\n  OPTIONAL { ?g schema:dateCreated ?stichtingsjaar }\n}\nORDER BY ?droogmakerij\nLIMIT 20",
+    "metadata": {}
+  }
+]

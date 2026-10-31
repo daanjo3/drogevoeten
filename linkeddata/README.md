@@ -22,7 +22,9 @@ make                      # build/: datasets, catalogus, rapport (offline, secon
 make terms                # review-tabellen terms/*.csv aanvullen met voorstellen uit het Termennetwerk (netwerk)
 make terms ARGS=--offline # alleen ontbrekende rijen toevoegen, zonder voorstellen
 make validate             # SHACL-controle tegen de NDE-shapes (pyshacl via uv)
-make notebook             # pumping-stations.sparqlbook opnieuw maken, elke query getest (pyoxigraph via uv)
+make notebook             # alle .sparqlbook-notebooks opnieuw maken, elke query getest (pyoxigraph via uv)
+make assume               # termvoorstellen beoordelen met domeinregels (netwerk; DECISIONS §28)
+make check                # steekproef: 3 records per dataset live vergelijken met de bron (netwerk)
 ```
 
 Vereisten: Python 3 (alleen standaardbibliotheek, altijd `python3 -I`). Voor `validate` en `notebook` ook [uv](https://docs.astral.sh/uv/); voor `validate` ook `curl`.
@@ -37,15 +39,40 @@ Vereisten: Python 3 (alleen standaardbibliotheek, altijd `python3 -I`). Voor `va
 | `term-values.json` | Alle bronwaarden per veld (invoer voor `terms_lookup.py`) |
 | `validation.txt` | Uitkomst van `make validate` |
 
-`pumping-stations.sparqlbook` bevat voorbeeldqueries op `build/pumping-stations.ttl`, voor de VS Code-extensie *SPARQL Notebook* (Zazuko).
+Voorbeeldqueries voor de VS Code-extensie *SPARQL Notebook* (Zazuko), op de bestanden in `build/`:
+
+| Notebook | Datasets |
+|---|---|
+| `pumping-stations.sparqlbook` | gemalen |
+| `windmills.sparqlbook` | molens en verdwenen molens (gedeelde termensets, gedeelde Ten Bruggencate-nummers) |
+| `drained-lakes.sparqlbook` | droogmakerijen en hun maalinrichtingen (met de gemalen via het gem_id) |
+| `land-consolidation.sparqlbook` | landinrichting |
+| `breach-pools.sparqlbook` | wielen |
+| `zeeland.sparqlbook` | dijken, polders, geschenkwoningen, verdronken dorpen en Deltawerken (via de gedeelde gemeenten) |
+| `water-boards.sparqlbook` | IMWA-gemalen, -sluizen en -stuwen (en de historische gemalen via de gedeelde objectsoort) |
+
+`make notebook` maakt ze opnieuw en test elke query; de queries staan in `make_sparqlbook.py` (gemalen) en `notebook_cells.py` (de rest).
 
 ## Datasets
 
-| Dataset | Bron | Records | Licentie | Status |
-|---|---|---|---|---|
-| `pumping-stations` (gemalen) | RCE Landschapsatlas "Gemalen" (Nederlandse Gemalen Stichting) | 2.663 / 2.663 | CC0 | klaar (pilot); SHACL zonder overtredingen; termen beoordeeld als aanname |
+Stand op 31-10-2026. Alle datasets komen uit de oogst van het prototype van 28-10-2026; details per dataset staan in [`PLAN.md`](PLAN.md).
 
-De andere tien lagen en hun mapping staan in [`PLAN.md`](PLAN.md).
+| Dataset | Bron | Records | Licentie |
+|---|---|---|---|
+| `pumping-stations` (gemalen) | RCE Landschapsatlas, Nederlandse Gemalen Stichting | 2.663 | CC0 |
+| `windmills` (molens) | RCE Landschapsatlas | 1.872 | CC0 |
+| `lost-windmills` (verdwenen molens) | RCE Landschapsatlas, molendatabase.org | 17.119 | CC0 |
+| `drained-lakes` (droogmakerijen en hun maalinrichtingen) | RCE Landschapsatlas | 245 + 561 | CC0 |
+| `land-consolidation` (landinrichting 1924-2015) | RCE Landschapsatlas | 604 | CC0 |
+| `breach-pools` (wielen) | RCE Landschapsatlas | 1.266 | CC0 |
+| `zeeland-dikes` (dijken, dammen, wallen) | Provincie Zeeland | 2.486 | CC0 |
+| `zeeland-polders` (polders per bedijkingsperiode) | Provincie Zeeland | 560 | CC0 |
+| `gift-houses-1953` (geschenkwoningen) | Provincie Zeeland | 538 | CC0 |
+| `drowned-villages` (verdronken dorpen) | Provincie Zeeland | 201 | CC0 |
+| `delta-works` (Deltawerken) | Provincie Zeeland | 9 | CC0 |
+| `water-board-pumping-stations`, `water-board-locks`, `water-board-weirs` | Het Waterschapshuis, IMWA (PDOK) | 8.565 + 890 + 53.137 | CC BY-SA 4.0 |
+
+Niet gebouwd: de Zeeuwse **poldernamen**, omdat er geen licentie te vinden is.
 
 ## Review van termen en plaatsen
 

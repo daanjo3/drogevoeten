@@ -1,2 +1,14 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
 pumping-station,,gemaal,https://data.cultureelerfgoed.nl/term/id/cht/63e3cea6-22d0-4d8a-b79b-2b8c3d049587,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT 'gemalen' klopt. AAT 300386271 'gemalen' betekent huwelijkspartners (prins-gemaal): verwijderd
+weir,,weir,,,,,twijfel,aat? waterkeringen (dammen) <http://vocab.getty.edu/aat/300006101>
+windmill,,windmill,,,,,twijfel,cht? achtkante bovenkruier <https://data.cultureelerfgoed.nl/term/id/cht/f6d4c2ad-7bf6-431a-a33a-464bb80967d1>; aat? Windmill Hill <http://vocab.getty.edu/aat/300019349>
+dike,,dike,,,,,twijfel,cht? dijkhuizen <https://data.cultureelerfgoed.nl/term/id/cht/7de491a3-798b-4b24-832b-e4d177f09cba>; aat? defensive dikes <http://vocab.getty.edu/aat/300456652>
+breach-pool,,breach-pool,,,,,twijfel,aat? badhuizen <http://vocab.getty.edu/aat/300007347>
+lock,,lock,,,,,twijfel,cht? katrollen <https://data.cultureelerfgoed.nl/term/id/cht/97c5763d-1e8f-45ba-a80c-16f6b520af8a>
+land-consolidation-project,,land-consolidation-project,,,,,twijfel,aat? platteland <http://vocab.getty.edu/aat/300008631>
+drained-lake-structure,,drained-lake-structure,,,,,,
+polder,,polder,https://data.cultureelerfgoed.nl/term/id/cht/57fc851e-b0b1-45c5-8226-5e9cd60537a5,http://vocab.getty.edu/aat/300006163,,,voorstel,cht: polders; aat: polders
+gift-house,,gift-house,,,,,twijfel,aat? schepenhuizen <http://vocab.getty.edu/aat/300449032>
+drained-lake,,drained-lake,,,,,twijfel,aat? alizarien meekraprood <http://vocab.getty.edu/aat/300013658>
+drowned-village,,drowned-village,,,,,twijfel,aat? Alaska Native village statistical areas <http://vocab.getty.edu/aat/300456762>
+delta-work,,delta-work,,,,,twijfel,aat? aggetti <http://vocab.getty.edu/aat/300219638>

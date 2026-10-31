@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Generate pumping-stations.sparqlbook (VS Code extension 'SPARQL Notebook' by Zazuko) and test every query first
+"""Generate the .sparqlbook notebooks (VS Code extension 'SPARQL Notebook' by Zazuko) and test every query first
 with pyoxigraph, the engine the extension uses for local files. The notebook is only written if every query runs
 and returns rows without duplicates (e.g. a label in two languages). Development step (needs pyoxigraph):
 
-  uv run --no-project --with pyoxigraph python -I linkeddata/make_sparqlbook.py      (or: make notebook)
+  uv run --no-project --with pyoxigraph python -I linkeddata/make_sparqlbook.py [notebook ...]   (or: make notebook)
+
+The pumping-stations notebook is defined below; the others are in notebook_cells.py.
 """
 import json
 import os
@@ -12,9 +14,6 @@ import sys
 import pyoxigraph as ox
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "pumping-stations.sparqlbook")
-DATA = os.path.join(HERE, "build", "pumping-stations.ttl")
-EP = "# [endpoint=./build/pumping-stations.ttl]\n"
 PFX = """PREFIX schema: <https://schema.org/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -22,7 +21,7 @@ PREFIX dv: <urn:drogevoeten:def:>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 """
 
-cells = [
+PUMPING_STATIONS = [
     ("md", """# Gemalen als linked data
 
 Deze notebook bevraagt `build/pumping-stations.ttl`: de gemalen uit de RCE Landschapsatlas (Nederlandse Gemalen Stichting), omgezet volgens het NDE-Schema.org-toepassingsprofiel.
@@ -226,34 +225,59 @@ LIMIT 5"""),
 }"""),
 ]
 
-store = ox.Store()
-store.bulk_load(path=DATA, format=ox.RdfFormat.TURTLE)
-nb, ok = [], True
-for kind, text in cells:
-    if kind == "md":
-        nb.append({"kind": 1, "language": "markdown", "value": text, "metadata": {}})
-        continue
-    q = PFX + "\n" + text
-    try:
-        res = store.query(q)
-        rows = list(res)
-        print(f"OK {len(rows):5} rij(en): {text.splitlines()[0][:70]}")
-        if not rows:
-            ok = False
-            print("   LEEG")
-        elif text.lstrip().startswith("SELECT"):
-            seen = [tuple(str(v) for v in r) for r in rows]
-            if len(seen) != len(set(seen)):
-                ok = False
-                print("   DUBBELE RIJEN")
-        else:
-            print("   ", str(rows[0])[:200])
-    except Exception as e:
-        ok = False
-        print("FOUT", text.splitlines()[0][:70], e)
-    nb.append({"kind": 2, "language": "sparql", "value": EP + "\n" + q, "metadata": {}})
+_stores = {}
 
-if not ok:
-    sys.exit("niet geschreven: een query faalt of is leeg")
-json.dump(nb, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-print("geschreven:", OUT)
+
+def store_for(files):
+    """One in-memory store per set of files (as the extension loads every file of a cell's endpoint lines)."""
+    key = tuple(sorted(files))
+    if key not in _stores:
+        st = ox.Store()
+        for f in key:
+            st.bulk_load(path=os.path.join(HERE, "build", f), format=ox.RdfFormat.TURTLE)
+        _stores[key] = st
+    return _stores[key]
+
+
+def run(out, files, cells):
+    """Test every query (must return rows, SELECTs without duplicate rows) and write the notebook."""
+    print(f"== {out}")
+    nb, ok = [], True
+    for cell in cells:
+        kind, text = cell[0], cell[1]
+        if kind == "md":
+            nb.append({"kind": 1, "language": "markdown", "value": text, "metadata": {}})
+            continue
+        cell_files = cell[2] if len(cell) > 2 else files
+        q = PFX + "\n" + text
+        try:
+            rows = list(store_for(cell_files).query(q))
+            print(f"OK {len(rows):5} rij(en): {text.splitlines()[0][:70]}")
+            if not rows:
+                ok = False
+                print("   LEEG")
+            elif text.lstrip().startswith("SELECT"):
+                seen = [tuple(str(v) for v in r) for r in rows]
+                if len(seen) != len(set(seen)):
+                    ok = False
+                    print("   DUBBELE RIJEN")
+        except Exception as e:  # noqa: BLE001
+            ok = False
+            print("FOUT", text.splitlines()[0][:70], e)
+        endpoint = "".join(f"# [endpoint=./build/{f}]\n" for f in cell_files)
+        nb.append({"kind": 2, "language": "sparql", "value": endpoint + "\n" + q, "metadata": {}})
+    if not ok:
+        print(f"   niet geschreven: {out} (een query faalt, is leeg of geeft dubbele rijen)")
+        return False
+    json.dump(nb, open(os.path.join(HERE, out), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    print("   geschreven:", out)
+    return True
+
+
+if __name__ == "__main__":
+    sys.path.insert(0, HERE)
+    from notebook_cells import NOTEBOOKS  # noqa: E402
+    all_books = [("pumping-stations.sparqlbook", ["pumping-stations.ttl"], PUMPING_STATIONS)] + NOTEBOOKS
+    only = set(sys.argv[1:])
+    results = [run(out, files, cells) for out, files, cells in all_books if not only or out in only]
+    sys.exit(0 if all(results) else 1)

@@ -3,6 +3,7 @@ import collections
 import re
 
 import config
+from datasets import common as c
 from lib import model as m
 from lib.source import feature_uri, load_layer, value
 from lib.terms import FIELDS
@@ -42,8 +43,6 @@ FIELDS.update({  # term-set IRI segment -> (English name, Dutch name)
     "protection-status": ("Heritage protection status", "Beschermingsstatus (monument)"),
 })
 
-# Spelling variants in the 'provincie' field (normalisation, NDE 'Van data naar dienst' step 3).
-PROVINCES = {"Groninger": "Groningen", "Drente": "Drenthe", "Noord-Braband": "Noord-Brabant"}
 
 # Values of 'functie' that clearly name two functions that also occur on their own (DECISIONS.md section 27).
 FUNCTION_SPLITS = {"Boezem- en Poldergemaal": ["Boezemgemaal", "Poldergemaal"]}
@@ -65,7 +64,7 @@ def convert(g, terms, dataset):
             name = f"{value(p['functie']) or 'Gemaal'} in {value(p['plaats']) or 'onbekende plaats'} (naam onbekend)"
             stats["overgeslagen"]["naam onbekend, naam opgebouwd uit functie en plaats"] += 1
         m.record(g, r, ["CreativeWork"], dataset, feature_uri(config.RCE_WFS, LAYER, f["id"]), name)
-        g.add(r, m.s("additionalType"), terms.own_term(g, "object-type", "pumping-station", "gemaal", "pumping station"))
+        m.object_type(g, terms, r, "pumping-station")
         function = value(p["functie"])
         if function in FUNCTION_SPLITS:
             stats["overgeslagen"][f"functie gesplitst: {function}"] += 1
@@ -89,8 +88,7 @@ def convert(g, terms, dataset):
 
         # Where it stands: own position (coordinates, address) in the shared locality and province.
         lon, lat = (f["geometry"] or {}).get("coordinates", (None, None))[:2]
-        prov = value(p["provincie"])
-        region = PROVINCES.get(prov, prov)
+        region = c.province(p["provincie"])
         g.add(r, m.s("locationCreated"), m.position(g, terms, r, name, lon, lat, value(p["plaats"]), region))
 
         # Area it drains and water it discharges into: shared local Places per name + province (DECISIONS.md
