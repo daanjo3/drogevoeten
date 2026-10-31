@@ -22,6 +22,7 @@ import type { SearchBarHandle } from "../components/SearchBar";
 import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 import { endpointImagesQueryOptions, locationOf, type RijksImage, type Theme } from "../lib/rijksmuseum";
+import { timelineQueryOptions } from "../lib/timeline";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
    with a place show only when the address lies there; works without a
@@ -185,8 +186,14 @@ export default function Home() {
   const lookup = useLookup({ id });
   const locatie = lookup.data?.response.docs[0];
   
-  /* TODO: fetch the rest of the place from the data layer; only the address is real now */
-  const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address) };
+  /* The time line from the linked data at the endpoint. Empty while it
+     answers; when it fails (or is not running), the hardcoded example. */
+  const timeline = useQuery(timelineQueryOptions(locationOf(locatie)));
+  const steps =
+    timeline.data ?? (timeline.fetchStatus === "fetching" ? [] : MIDDELBURG.timeline);
+
+  /* TODO: fetch the rest of the place from the data layer; only the address and the time line are real now */
+  const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address), timeline: steps };
   /* ground level at the address (AHN); the panels read the same cached query */
   const height = useAddressHeight(locatie);
 

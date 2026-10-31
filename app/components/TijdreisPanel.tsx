@@ -7,9 +7,11 @@ import { RichText, Tip } from "./Tip";
 /* The steps slide in one by one (css, keyed on the index) once the canvas
    marks the block as seen. */
 export function TijdreisPanel({ place }: { place: PlaceData }) {
+  // the first year in the line, e.g. "840" from "840–900" or "1300" from "Vóór 1300"
+  const first = place.timeline[0]?.year.match(/\d{3,4}/)?.[0];
   return (
     <section className="panel" id="p-tijd">
-      <span className="meta">1200 → nu</span>
+      <span className="meta">{first ? `${first} → nu` : "tot nu"}</span>
       <h2>
         <Icon name="tijd" />
         Tijdreis
@@ -19,7 +21,8 @@ export function TijdreisPanel({ place }: { place: PlaceData }) {
         <div className="axis" />
         <ol>
           {place.timeline.map((step, i) => (
-            <li key={step.year} style={{ "--i": i } as CSSProperties}>
+            // years can repeat (two pumping stations in one year), so the key includes the text
+            <li key={`${step.year} ${step.text}`} style={{ "--i": i } as CSSProperties}>
               <h3>{step.year}</h3>
               <p>
                 <RichText text={step.text} />

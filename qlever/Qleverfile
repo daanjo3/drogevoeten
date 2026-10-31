@@ -1,29 +1,36 @@
 # Qleverfile for the Rijksmuseum water subset, use with docker-compose.yml in
 # this folder (or with https://github.com/ad-freiburg/qlever-control).
 #
-# Two named graphs; QLever's default graph is their union, so queries don't
+# Three named graphs; QLever's default graph is their union, so queries don't
 # need GRAPH clauses:
 #   - linked-art: the harvest in the Rijksmuseum's own model (CIDOC-CRM /
 #     Linked Art), written by rijksmuseum/harvest.py. Used by the notebook
 #     exploration/notebooks/rijksmuseum-water.sparqlbook.
 #   - app: a small schema.org view of the same objects, written by
 #     rijksmuseum/slim.py. Used by app/lib/rijksmuseum.ts.
+#   - droge-voeten: all datasets of linkeddata/ in one file (its combined
+#     build/droge-voeten.nt, with the catalog), gzipped by compose.sh.
+#     Used by app/lib/timeline.ts. Its IRIs (urn:drogevoeten:...) and its
+#     dv: namespace differ from the Rijksmuseum graphs, so nothing collides.
 #
-# The `data` service in docker-compose.yml makes the input files. Without
-# Docker (from the repo root; both skip work that is already done):
+# The `data` service in docker-compose.yml makes the Rijksmuseum files.
+# Without Docker (from the repo root; both skip work that is already done):
 #   python3 -I qlever/rijksmuseum/harvest.py   # ~10 min, network
 #   python3 -I qlever/rijksmuseum/slim.py      # seconds
+# The linked data is built locally (`make` in linkeddata/, needs the
+# prototype's harvest), never on the VPS: deploy.sh uploads the .nt.gz.
 
 [data]
 NAME         = rijksmuseum-water
-DESCRIPTION  = Rijksmuseum: objects about floods and water infrastructure, harvested from data.rijksmuseum.nl (Search API + Linked Art), with depicted places, events and Iconclass
+DESCRIPTION  = Rijksmuseum: objects about floods and water infrastructure, harvested from data.rijksmuseum.nl (Search API + Linked Art), with depicted places, events and Iconclass; plus the Droge Voeten linked data (linkeddata/)
 FORMAT       = nt
 
 [index]
 # Required by `qlever index` (it checks the files exist); MULTI_INPUT_JSON reads them
-INPUT_FILES      = data/rijksmuseum-linked-art.nt data/rijksmuseum-app.nt
+INPUT_FILES      = data/rijksmuseum-linked-art.nt data/rijksmuseum-app.nt data/droge-voeten.nt.gz
 MULTI_INPUT_JSON = [{ "cmd": "cat data/rijksmuseum-linked-art.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-linked-art" },
-                    { "cmd": "cat data/rijksmuseum-app.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-app" }]
+                    { "cmd": "cat data/rijksmuseum-app.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-app" },
+                    { "cmd": "zcat data/droge-voeten.nt.gz", "graph": "https://w3id.org/drogevoeten/graph/droge-voeten" }]
 SETTINGS_JSON    = { "num-triples-per-batch": 1000000 }
 
 [server]

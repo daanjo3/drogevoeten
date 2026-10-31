@@ -6,6 +6,8 @@
 # Every step is idempotent, so `up` is safe to repeat:
 #   - data: harvests only if data/rijksmuseum-linked-art.nt is missing (~10 min,
 #     network), and slims only if data/rijksmuseum-app.nt is older than that.
+#   - linked data: compose.sh gzips ../linkeddata/build/droge-voeten.nt into
+#     data/droge-voeten.nt.gz when that is newer (locally; deploy.sh uploads it).
 #   - qlever: indexes only if there is no index yet or the data is newer.
 # To harvest again, delete data/rijksmuseum-linked-art.nt (or run
 # `qlever/compose.sh run --rm data python3 -I rijksmuseum/harvest.py --force`)
@@ -42,5 +44,5 @@ services:
         condition: service_completed_successfully
     # Index if there is no index yet or the data is newer, then serve in the
     # foreground. A failed index stops here, instead of starting without one.
-    command: ["for f in data/*.nt; do [ $$f -nt rijksmuseum-water.meta-data.json ] && rm -f rijksmuseum-water.meta-data.json; done; { test -f rijksmuseum-water.meta-data.json || qlever index --overwrite-existing; } && exec qlever start --run-in-foreground"]
+    command: ["for f in data/*.nt data/*.nt.gz; do [ $$f -nt rijksmuseum-water.meta-data.json ] && rm -f rijksmuseum-water.meta-data.json; done; { test -f rijksmuseum-water.meta-data.json || qlever index --overwrite-existing; } && exec qlever start --run-in-foreground"]
     restart: unless-stopped

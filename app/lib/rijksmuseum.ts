@@ -8,14 +8,9 @@ import { QueryEngine } from "@comunica/query-sparql-rdfjs-lite";
 import { queryOptions } from "@tanstack/react-query";
 import { Parser, Store } from "n3";
 import { wktPoint, type LocatieserverDoc } from "./locatieserver";
+import { select } from "./sparql";
 
 export const DATA_URL = `${import.meta.env?.BASE_URL ?? "/"}data/rijksmuseum-water.nt`;
-
-/* QLever from qlever/docker-compose.yml; set VITE_RIJKSMUSEUM_SPARQL for another one */
-export const SPARQL_URL: string = import.meta.env?.VITE_RIJKSMUSEUM_SPARQL || "http://localhost:7001";
-
-/* Give up on the endpoint after this long, so callers can fall back */
-const ENDPOINT_TIMEOUT_MS = 8000;
 
 /* Themes are Iconclass subtrees. Iconclass codes are hierarchical by prefix,
    so "25H199" also covers 25H1991 (dike-break) and 25H1992 (rescue work). */
@@ -239,10 +234,6 @@ export async function findImages(loc: Location, options?: ImagesOptions): Promis
   return rows.map((b) => toImage((name) => b.get(name)?.value));
 }
 
-interface SparqlResults {
-  results: { bindings: Record<string, { value: string } | undefined>[] };
-}
-
 /* The same query at the SPARQL endpoint. Throws when the endpoint is down,
    slow or answers with an error, so callers can fall back. */
 export async function findImagesAtEndpoint(
@@ -250,19 +241,8 @@ export async function findImagesAtEndpoint(
   options?: ImagesOptions,
   signal?: AbortSignal,
 ): Promise<RijksImage[]> {
-  const timeout = AbortSignal.timeout(ENDPOINT_TIMEOUT_MS);
-  // form-encoded POST: a "simple" CORS request, so no preflight
-  const res = await fetch(SPARQL_URL, {
-    method: "POST",
-    headers: { Accept: "application/sparql-results+json" },
-    body: new URLSearchParams({ query: imagesQuery(loc, options) }),
-    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
-  });
-  if (!res.ok) {
-    throw new Error(`Rijksmuseum SPARQL failed: ${res.status} ${res.statusText}`);
-  }
-  const json = (await res.json()) as SparqlResults;
-  return json.results.bindings.map((b) => toImage((name) => b[name]?.value));
+  const rows = await select(imagesQuery(loc, options), signal);
+  return rows.map((r) => toImage((name) => r[name]));
 }
 
 export function endpointImagesQueryOptions(loc: Location | undefined, options?: ImagesOptions) {

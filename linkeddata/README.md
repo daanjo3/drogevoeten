@@ -55,6 +55,8 @@ Voorbeeldqueries voor de VS Code-extensie *SPARQL Notebook* (Zazuko), op de best
 
 **Tijdlijn per adres:** `queries/timeline-polder.rq`, `timeline-gemalen.rq` en `timeline-dijken.rq` geven de indijking of droogmaking van de polder waarin een adres ligt, de stichting van de gemalen in de buurt (ca. 3 km) en de aanleg van de dijken in de buurt (ca. 250 m, alleen Zeeland). Vervang de `VALUES`-regel door de coördinaten van het adres. Elke query draait op een paar kleine datasets, in minder dan een tiende seconde (DECISIONS §30).
 
+**In de app:** het gecombineerde `build/droge-voeten.nt` staat ook in de QLever-store van `qlever/` (`./compose.sh` lokaal, `./deploy.sh` naar de VPS). De app vult de tijdlijn met QLever-versies van deze drie queries (`app/lib/timeline.ts`): QLever kent `geof:distance` wel, maar `geof:sfContains` alleen in eenvoudige vorm (DECISIONS §31).
+
 `make notebook` maakt ze opnieuw en test elke query; de queries staan in `make_sparqlbook.py` (gemalen) en `notebook_cells.py` (de rest).
 
 ## Datasets

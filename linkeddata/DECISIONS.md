@@ -369,3 +369,23 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
   - "Polder Vierbannen en Duiveland" (met "en") wordt niet gekoppeld aan "…van Duiveland": we zoeken niet bij benadering;
   - de 1953-laag en de Waterstaatskaart uit de tijdlijn van het prototype zijn (nog) geen linked data.
 
+
+## 31. De linked data in de QLever-store, en de tijdlijn in de app (31-10-2026)
+
+**Vraag van Jari:** zet de datasets uit `linkeddata/` in de triple store op de VPS (QLever, `qlever/`, waar ook de Rijksmuseum-subset staat) en vul daarmee de tijdlijn in de app.
+
+- **Wat erin gaat:** het gecombineerde `build/droge-voeten.nt` (alle datasets, `concept-merges` en de catalogus; 2,4 miljoen triples), gezipt tot `qlever/data/droge-voeten.nt.gz` (~21 MB), als named graph `https://w3id.org/drogevoeten/graph/droge-voeten`. Eén graph en niet een per dataset: termknopen staan in meerdere bestanden, en binnen één graph ontdubbelt QLever die triples. Niet ook de losse datasets laden, anders staat alles dubbel. Indexeren kost ca. 15 s.
+- **Geen botsingen met het Rijksmuseum:** onze IRI's zijn `urn:drogevoeten:…`, de Rijksmuseum-view gebruikt `https://w3id.org/drogevoeten/def#` als `dv:`. De Rijksmuseum-query geeft met beide graphs dezelfde soort uitkomst in ca. 0,5 s.
+- **Bouwen gebeurt lokaal:** de VPS heeft de oogst van het prototype niet. `qlever/compose.sh` zipt het bestand als het nieuwer is; `qlever/deploy.sh` stuurt het mee. QLever indexeert opnieuw als een `data/*.nt(.gz)` nieuwer is dan de index.
+- **QLever is anders dan Oxigraph (§30):**
+  - `geof:distance` werkt wel (km, of meter met `<http://qudt.org/vocab/unit/M>`), ook van een punt tot een dijklijn;
+  - `geof:sfContains`/`sfIntersects` werken alleen in een eenvoudige vorm: punt-in-vlak op het hoogste niveau wel, maar niet binnen een `OPTIONAL` en niet met een vlak dat in de query wordt opgebouwd ("only implemented for a subset of all possible queries").
+- **Daarom eigen QLever-versies van de drie queries,** in `app/lib/timeline.ts` (de `.rq`-bestanden in `queries/` blijven voor Oxigraph en de notebooks):
+  - polder of droogmakerij: zoals §30, met `sfContains`;
+  - gemalen: echte afstand ≤ 3 km in plaats van een vak en afstandsklassen;
+  - dijken: afstand tot de lijn ≤ 250 m in plaats van een vierkant;
+  - "bemaalt jouw polder" en "hoort bij jouw polder" vergelijkt de app zelf met de polder uit de eerste query, zodat er geen `sfContains` in een `OPTIONAL` nodig is.
+  - De bronnaam komt uit de catalogus (`schema:isBasedOn/schema:name`).
+- **Wat de app toont:** de indijking of droogmaking, hooguit 3 gemalen met een stichtingsjaar (eerst die volgens de bron jouw polder bemalen, dan de dichtstbijzijnde) en hooguit 3 dijken met een aanlegjaar, op jaar gesorteerd. Jaartekst en precisie uit de bron staan in de bron-tip. Niets gevonden: één stap "Onbekend". Endpoint onbereikbaar: het oude voorbeeld blijft staan, net als bij de Rijksmuseum-werken.
+- **De oorspronkelijke functie van een dijk staat niet in de tijdlijn:** bij de Ringwalburg geeft de bron "Straten" als oorspronkelijke en "ringwalburg" als latere functie (`oorsprfunc`/`naspfunc` lijken omgewisseld).
+- **Bekend:** de punt-in-vlakquery kost ca. 0,6 s (alle vlakken). De 1953-laag en de Waterstaatskaart zitten er nog niet in (§30).
