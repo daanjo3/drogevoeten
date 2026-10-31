@@ -288,6 +288,7 @@ Plus uit ronde 1/2: RCE ↔ Wikidata (856/856), RCE ↔ IMWA (191, waarvan 88 me
   - `wikidata_P5817_suggestions.qs` (384×) en `wikidata_P137_suggestions.qs` (88×) uit eerdere rondes.
 - `proofs/v3_wikidata_date_conflicts.tsv`: 21 jaartalconflicten tussen Wikidata en de RCE-laag.
 - `dataset-description.jsonld`: schema.org + DCAT-beschrijving van 6 datasets, klaar voor het NDE Datasetregister.
+- **Nieuw (30-10-2026):** in `linkeddata/` (root van de repo) worden de bronlagen zelf omgezet naar losse linked datasets volgens het NDE-Schema.org-toepassingsprofiel, met Team De Band (HackaLOD 2026) als uitgever. Eerste dataset: de gemalen (2.663, SHACL zonder overtredingen). Zie `linkeddata/README.md`.
 - De bevinding dat er geen open 1953-inundatiekaart van Zeeland is, en dat Scheldestromen op Wikidata maar 3 voorgangers heeft.
 
 **Stabiele URI's:** RCE- en Zeeuwse lagen gebruiken `GetFeature&featureID=…`. De Zeeuwse CHS-polderlagen hebben alleen instabiele GeoServer-ID's; daar selecteert de URI op het vaste veld `code` (`CQL_FILTER=code='GEO-2049'`).

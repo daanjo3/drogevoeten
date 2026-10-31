@@ -1,0 +1,46 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <https://schema.org/> .
+@prefix dv: <urn:drogevoeten:def:> .
+
+# Small extension to schema.org for source fields without a fitting schema.org property.
+# Kept as small as possible; the namespace becomes an HTTPS IRI once the datasets are hosted.
+
+<urn:drogevoeten:def:> a rdfs:Resource ;
+    rdfs:label "Droge Voeten vocabulary"@en, "Droge Voeten-vocabulaire"@nl ;
+    rdfs:comment "Properties defined by Team De Band (HackaLOD 2026), used next to the NDE Schema.org application profile."@en .
+
+dv:originalDrive a rdf:Property ;
+    rdfs:label "original drive"@en, "oorspronkelijke aandrijving"@nl ;
+    rdfs:comment "What powered the pumping station when it was built (steam, diesel, electric, ...), according to the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:DefinedTerm .
+
+dv:currentDrive a rdf:Property ;
+    rdfs:label "current drive"@en, "huidige aandrijving"@nl ;
+    rdfs:comment "What powers the pumping station now, according to the source. 'Geen' (none) can mean it no longer works."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:DefinedTerm .
+
+dv:drainsArea a rdf:Property ;
+    rdfs:label "drains area"@en, "bemaalt gebied"@nl ;
+    rdfs:comment "The area (polder, district) the pumping station pumps water out of, as named in the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:Place .
+
+dv:dischargesInto a rdf:Property ;
+    rdfs:label "discharges into"@en, "loost op"@nl ;
+    rdfs:comment "The water body the pumping station discharges into, as named in the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:Place .
+
+dv:protectionStatus a rdf:Property ;
+    rdfs:label "protection status"@en, "beschermingsstatus"@nl ;
+    rdfs:comment "Whether the object is protected as a national, provincial or municipal monument, according to the source."@en ;
+    schema:domainIncludes schema:CreativeWork ; schema:rangeIncludes schema:DefinedTerm .
+
+dv:dateText a rdf:Property ;
+    rdfs:label "date as written in the source"@en, "jaartekst"@nl ;
+    rdfs:comment "The dating exactly as it appears in the source (e.g. 'Ca. 1280', '11e/12e eeuw')."@en ;
+    schema:domainIncludes schema:Event .
+
+dv:datePrecision a rdf:Property ;
+    rdfs:label "date precision"@en, "nauwkeurigheid"@nl ;
+    rdfs:comment "How certain the year is: jaar (year), circa, periode (period), eeuw (century), voor (before), onbekend (unknown)."@en ;
+    schema:domainIncludes schema:Event .

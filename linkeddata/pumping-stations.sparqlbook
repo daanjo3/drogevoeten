@@ -1,0 +1,212 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Gemalen als linked data\n\nDeze notebook bevraagt `build/pumping-stations.ttl`: de gemalen uit de RCE Landschapsatlas (Nederlandse Gemalen Stichting), omgezet volgens het NDE-Schema.org-toepassingsprofiel.\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/pumping-stations.ttl` bestaat. Elke query laadt het bestand lokaal (Oxigraph), dus de eerste keer duurt het een paar seconden. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- **Elk gemaal** is een `schema:CreativeWork` met IRI `urn:drogevoeten:id:pumping-station:<id>`.\n- **Wat alleen bij dat gemaal hoort**, heeft een IRI onder het record: de eigen positie `#location` (met `#location-geo` en `#location-address`), de foto `#image` en de nummers `#…-id`.\n- **Wat ook bij andere gemalen voorkomt**, is een gedeelde knoop:\n  - termen: `urn:drogevoeten:term:<veld>:<waarde>`, elk in een termenset `urn:drogevoeten:termset:<veld>`;\n  - plaatsen: woonplaats `place:locality:<provincie>:<naam>`, provincie `place:province:<naam>`, bemalingsgebied `place:drained-area:…`, water `place:receiving-water:…`.\n- **De keten van de locatie:** gemaal `schema:locationCreated` → `#location` `schema:containedInPlace` → woonplaats `schema:containedInPlace` → provincie.\n- **`schema:sameAs`** naar de Cultuurhistorische Thesaurus, Wikidata of GeoNames staat alleen bij knopen die beoordeeld zijn (status `aangenomen` of `gecontroleerd` in `terms/*.csv`).\n- **Talen:** de inhoud is Nederlands (`@nl`). Termen en termensets die wij zelf bedenken (de objectsoort, de namen van de termensets) hebben ook een Engelse naam (`@en`). Het is dan één knoop met twee namen, geen twee termen. Kies daarom in een query altijd één taal: `FILTER(LANG(?naam) = \"nl\")`.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. De datasetbeschrijving\n\nWat zegt de dataset over zichzelf: naam, licentie, maker, periode, gebied en de bronlaag.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?licentie ?maker ?periode ?gebied ?bron ?bronLicentie ?bronhouder WHERE {\n  ?d a schema:Dataset ;\n     schema:includedInDataCatalog ?catalogus ;\n     schema:name ?naam ;\n     schema:license ?licentie ;\n     schema:creator/schema:name ?maker ;\n     schema:temporalCoverage ?periode ;\n     schema:spatialCoverage ?gebied ;\n     schema:isBasedOn ?bron .\n  ?bron schema:license ?bronLicentie ;\n        schema:publisher/schema:name ?bronhouder .\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Hoeveel van wat?\n\nAantal knopen per type. Een `DefinedTerm` met co-type `URL` telt bij beide types mee (het profiel vraagt dat bij `additionalType`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?type (COUNT(?s) AS ?aantal) WHERE {\n  ?s a ?type .\n}\nGROUP BY ?type\nORDER BY DESC(?aantal)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Eén gemaal helemaal: het Woudagemaal\n\nAlle eigenschappen van het record, met de Nederlandse naam van de knoop waarnaar ze wijzen.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?eigenschap ?waarde ?naamVanWaarde WHERE {\n  <urn:drogevoeten:id:pumping-station:369> ?eigenschap ?waarde .\n  OPTIONAL { ?waarde schema:name ?naamVanWaarde FILTER(LANG(?naamVanWaarde) = \"nl\") }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Hetzelfde gemaal als Turtle: het record met zijn eigen delen, plus de gedeelde termen en plaatsen waarnaar het wijst (met hun `sameAs`), tot en met de provincie.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT {\n  ?s ?p ?o .\n} WHERE {\n  {\n    ?s ?p ?o .\n    FILTER(STRSTARTS(STR(?s), \"urn:drogevoeten:id:pumping-station:369\"))\n  } UNION {\n    ?r ?x ?gedeeld .\n    ?gedeeld schema:containedInPlace* ?s .\n    ?s ?p ?o .\n    FILTER(STRSTARTS(STR(?r), \"urn:drogevoeten:id:pumping-station:369\"))\n    FILTER(STRSTARTS(STR(?s), \"urn:drogevoeten:term:\") || STRSTARTS(STR(?s), \"urn:drogevoeten:place:\"))\n    FILTER(?p != schema:inDefinedTermSet)\n  }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Gemalen per functie\n\nDe functie is een term in de termenset `pumping-station-function`. De eigen objectsoort \"gemaal\" zit in een andere termenset (`object-type`) en telt hier dus niet mee. \"Boezem- en Poldergemaal\" (4×) is in de omzetting gesplitst in een boezemgemaal én een poldergemaal.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?functie (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:pumping-station-function> ;\n     schema:name ?functie .\n  FILTER(LANG(?functie) = \"nl\")\n}\nGROUP BY ?functie\nORDER BY DESC(?gemalen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Van stoom naar elektro\n\nOorspronkelijke tegenover huidige aandrijving, zoals de bron ze noemt. \"Geen\" is een gewone waarde: het kan bijvoorbeeld betekenen dat het gemaal niet meer werkt.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?oorspronkelijk ?huidig (COUNT(?g) AS ?gemalen) WHERE {\n  ?g dv:originalDrive/schema:name ?oorspronkelijk ;\n     dv:currentDrive/schema:name ?huidig .\n}\nGROUP BY ?oorspronkelijk ?huidig\nORDER BY DESC(?gemalen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. De oudste gemalen die nog in bedrijf zijn",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?jaar ?woonplaats ?aandrijving WHERE {\n  ?g schema:name ?naam ;\n     schema:dateCreated ?jaar ;\n     schema:creativeWorkStatus/schema:name \"In bedrijf\"@nl ;\n     schema:locationCreated/schema:containedInPlace ?w .\n  ?w schema:name ?woonplaats .\n  FILTER(STRSTARTS(STR(?w), \"urn:drogevoeten:place:locality:\"))\n  OPTIONAL { ?g dv:currentDrive/schema:name ?aandrijving }\n}\nORDER BY ?jaar\nLIMIT 15",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. Per provincie\n\nVia de gedeelde knopen: gemaal → `#location` → woonplaats → provincie. Met het aantal woonplaatsen en gemalen, hoeveel daarvan in bedrijf zijn, en de koppelingen naar Wikidata en GeoNames (aangenomen, zie `terms/province.csv`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?provincie ?wikidata ?geonames (COUNT(DISTINCT ?w) AS ?woonplaatsen) (COUNT(DISTINCT ?g) AS ?gemalen) (COUNT(DISTINCT ?werkt) AS ?inBedrijf) WHERE {\n  ?g schema:locationCreated/schema:containedInPlace+ ?prov .\n  ?prov schema:name ?provincie .\n  FILTER(STRSTARTS(STR(?prov), \"urn:drogevoeten:place:province:\"))\n  OPTIONAL { ?g schema:locationCreated/schema:containedInPlace ?w . ?w schema:containedInPlace ?prov }\n  OPTIONAL { ?g schema:creativeWorkStatus/schema:name \"In bedrijf\"@nl . BIND(?g AS ?werkt) }\n  OPTIONAL { ?prov schema:sameAs ?wikidata FILTER(STRSTARTS(STR(?wikidata), \"http://www.wikidata.org/\")) }\n  OPTIONAL { ?prov schema:sameAs ?geonames FILTER(STRSTARTS(STR(?geonames), \"https://sws.geonames.org/\")) }\n}\nGROUP BY ?provincie ?wikidata ?geonames\nORDER BY DESC(?gemalen)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 8. Gestichte gemalen per decennium\n\nAlleen gemalen met een stichtingsjaar in de bron (2.227 van de 2.663).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?decennium (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:dateCreated ?d .\n  BIND(xsd:integer(SUBSTR(STR(?d), 1, 4)) AS ?jaar)\n  BIND(xsd:integer(FLOOR(?jaar / 10) * 10) AS ?decennium)\n}\nGROUP BY ?decennium\nORDER BY ?decennium",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 9. Rijksmonumenten met foto\n\nGemalen met een rijksmonumentnummer, met de link naar gemalen.nl en de foto (gelinkt, niet gekopieerd; licentie niet beoordeeld).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?monumentnummer ?jaar ?gemalenNl ?foto ?fotograaf WHERE {\n  ?g schema:name ?naam ;\n     schema:identifier ?id ;\n     schema:url ?gemalenNl ;\n     schema:associatedMedia ?m .\n  ?id schema:propertyID \"rijksmonumentnummer\" ;\n      schema:value ?monumentnummer .\n  ?m schema:thumbnailUrl ?foto ;\n     schema:copyrightNotice ?fotograaf .\n  OPTIONAL { ?g schema:dateCreated ?jaar }\n}\nORDER BY ?jaar",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 10. Gemalen in de buurt van de Abdij in Middelburg\n\nDe tien dichtstbijzijnde, gesorteerd op afstand (een benadering in km²; SPARQL heeft geen wortel).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?woonplaats ?status ?lat ?lon WHERE {\n  ?g schema:name ?naam ;\n     schema:locationCreated ?loc .\n  ?loc schema:geo ?geo .\n  ?geo schema:latitude ?lat ;\n       schema:longitude ?lon .\n  OPTIONAL { ?loc schema:containedInPlace/schema:name ?woonplaats }\n  OPTIONAL { ?g schema:creativeWorkStatus/schema:name ?status }\n  BIND((?lat - 51.4988) * 111.2 AS ?dy)\n  BIND((?lon - 3.6136) * 69.3 AS ?dx)\n  BIND(?dx * ?dx + ?dy * ?dy AS ?km2)\n}\nORDER BY ?km2\nLIMIT 10",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 11. Waar pompen de meeste gemalen?\n\nElk bemalingsgebied is één gedeelde `Place` per naam en provincie, zodat alle gemalen van hetzelfde gebied naar dezelfde knoop wijzen. Koppelen aan echte gebieden (IMWA, polders, Wikidata) volgt in fase 2.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?gebied ?knoop (COUNT(?g) AS ?gemalen) WHERE {\n  ?g dv:drainsArea ?knoop .\n  ?knoop schema:name ?gebied .\n}\nGROUP BY ?gebied ?knoop\nHAVING (COUNT(?g) > 2)\nORDER BY DESC(?gemalen)\nLIMIT 20",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 12. De termen en hun koppelingen\n\nAlle termen per termenset, met hoe vaak ze gebruikt worden en hun `sameAs`. In de tabellen `terms/*.csv` staat per term de status (`aangenomen` of `afgewezen`) en de reden. Termen die wij zelf bedenken, hebben ook een Engelse naam (kolom `termEn`).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?termenset ?term ?termEn (COUNT(DISTINCT ?g) AS ?gebruikt) (GROUP_CONCAT(DISTINCT STR(?same); separator=\" \") AS ?sameAs) WHERE {\n  ?t a schema:DefinedTerm ;\n     schema:name ?term ;\n     schema:inDefinedTermSet ?set .\n  ?set schema:name ?termenset .\n  FILTER(LANG(?term) = \"nl\" && LANG(?termenset) = \"nl\")\n  ?g ?p ?t .\n  OPTIONAL { ?t schema:name ?termEn FILTER(LANG(?termEn) = \"en\") }\n  OPTIONAL { ?t schema:sameAs ?same }\n}\nGROUP BY ?termenset ?term ?termEn\nORDER BY ?termenset DESC(?gebruikt)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "Eén termenset, twee namen: zo ziet een termenset eruit in het Nederlands en het Engels.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?termenset ?naamNl ?naamEn WHERE {\n  ?termenset a schema:DefinedTermSet ;\n             schema:name ?naamNl , ?naamEn .\n  FILTER(LANG(?naamNl) = \"nl\" && LANG(?naamEn) = \"en\")\n}\nORDER BY ?naamNl",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 13. Alle koppelingen naar buiten\n\nElke knoop met een `sameAs`: dat is wat deze dataset verbindt met de Cultuurhistorische Thesaurus, Wikidata en GeoNames.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?knoop ?naam ?extern WHERE {\n  ?knoop schema:sameAs ?extern ;\n         schema:name ?naam .\n  FILTER(LANG(?naam) = \"nl\")\n}\nORDER BY ?knoop ?extern",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 14. Herkomst: terug naar de bron\n\nElk record verwijst met `prov:wasDerivedFrom` naar het WFS-object van de RCE. Open zo'n URL in de browser om te vergelijken.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?bronobject WHERE {\n  ?g a schema:CreativeWork ;\n     schema:name ?naam ;\n     prov:wasDerivedFrom ?bronobject .\n}\nLIMIT 5",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "En de omzetting zelf als `prov:Activity`: wie, wanneer, uit welke bron.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?activiteit ?uitgevoerdDoor ?klaar ?gebruikt ?toelichting WHERE {\n  ?d prov:wasGeneratedBy ?act .\n  ?act rdfs:label ?activiteit ;\n       prov:wasAssociatedWith/schema:name ?uitgevoerdDoor ;\n       prov:endedAtTime ?klaar ;\n       prov:used/schema:name ?gebruikt ;\n       rdfs:comment ?toelichting .\n}",
+    "metadata": {}
+  }
+]

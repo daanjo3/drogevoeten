@@ -9,3 +9,8 @@ node_modules/
 
 # Unity WebGL-build van de huiskamer, te groot voor git (bron staat in unity/)
 app/public/woonkamer/
+
+# Linked-data-omzetting: gegenereerde uitvoer en opgehaalde SHACL-shapes
+linkeddata/build/
+linkeddata/shapes/*.ttl
+__pycache__/
