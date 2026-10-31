@@ -17,14 +17,14 @@ import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
-import { Rondleiding, TOUR_BUTTONS } from "../components/Rondleiding";
+import { Rondleiding, TOUR_BUTTONS, TOUR_PULSE } from "../components/Rondleiding";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
 import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 import { endpointImagesQueryOptions, locationOf, type RijksImage, type Theme } from "../lib/rijksmuseum";
-import { addressOf, drainedQueryOptions, timelineQueryOptions } from "../lib/timeline";
+import { addressOf, timelineQueryOptions } from "../lib/timeline";
 import { useDrainage } from "../lib/drainage";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
@@ -202,8 +202,6 @@ export default function Home() {
   /* the drainage area and the 1-2 pumps that drain it (IMWA) */
   const here = locationOf(locatie);
   const drainage = useDrainage(here?.lat, here?.lon);
-  /* when this land was reclaimed; the tour tells it (same cached query as the info panel) */
-  const drained = useQuery(drainedQueryOptions(here)).data;
 
   /* Rijksmuseum works: the local ones for this woonplaats, and the featured
      spots from the endpoint. While it answers the featured spots stay empty;
@@ -260,8 +258,8 @@ export default function Home() {
     setTour((t) => (t && t.step !== step ? { ...t, step } : t));
     setMode("info");
     if (step === 0) canvas.goPanel("p-map");
-    else if (step === 2) canvas.go("tijd");
-    else if (step === 3) canvas.go("buurt");
+    else if (step === 1) canvas.go("tijd");
+    else if (step === 2) canvas.go("buurt");
     else canvas.go("huis");
   }
 
@@ -404,6 +402,7 @@ export default function Home() {
         onBack={onBack}
         touring={!!tour}
         tourButton={tour ? TOUR_BUTTONS[tour.step] : undefined}
+        tourPulse={tour ? TOUR_PULSE[tour.step] : undefined}
       />
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
@@ -438,7 +437,6 @@ export default function Home() {
       {tour && (
         <Rondleiding
           key={tour.run}
-          data={{ nap: height.data?.ground?.value, drained: drained ?? undefined }}
           paused={about}
           onChange={onTourStep}
           onEnd={onTourEnd}

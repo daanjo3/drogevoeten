@@ -97,7 +97,7 @@ export function AboutCard({ onClose, onTour }: { onClose: () => void; onTour: ()
         </p>
         <p>Wat we zelf aan elkaar knoopten, geven we open terug. Zo bouwt de volgende verder waar wij stopten.</p>
         <button type="button" className="tour-start" onClick={onTour}>
-          Rondleiding
+          Rondleiding opnieuw
         </button>
 
         <h3>Bronnen</h3>

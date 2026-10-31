@@ -13,7 +13,8 @@ export type IconName =
   | "info"
   | "share"
   | "close"
-  | "fullscreen";
+  | "fullscreen"
+  | "verder";
 
 export function SvgSymbols() {
   return (
@@ -44,6 +45,10 @@ export function SvgSymbols() {
       <symbol id="i-terug" viewBox="0 0 24 24">
         <path d="M19 12H6" />
         <path d="m11 6-6 6 6 6" />
+      </symbol>
+      <symbol id="i-verder" viewBox="0 0 24 24">
+        <path d="M5 12h13" />
+        <path d="m13 6 6 6-6 6" />
       </symbol>
       <symbol id="i-pin" viewBox="0 0 24 24">
         <path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10z" />

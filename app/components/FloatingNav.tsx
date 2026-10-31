@@ -16,6 +16,7 @@ export function FloatingNav({
   onBack,
   touring = false,
   tourButton,
+  tourPulse,
 }: {
   active: SectionKey;
   mode: Mode;
@@ -25,13 +26,15 @@ export function FloatingNav({
   touring?: boolean;
   /* the button the current tour step lights up */
   tourButton?: "huis" | "tijd" | "buurt" | "risk";
+  /* the button that pulses softly during the tour (Als het misgaat on the last step) */
+  tourPulse?: "huis" | "tijd" | "buurt" | "risk";
 }) {
   const isCurrent = (t: NavTarget) => active === t.key && (!t.mode || t.mode === mode);
 
   const Btn = ({ t, id, icon, title, label, className }: { t: NavTarget; id: "huis" | "tijd" | "buurt" | "risk"; icon: Parameters<typeof Icon>[0]["name"]; title: string; label: string; className?: string }) => (
     <button
       type="button"
-      className={[className, tourButton === id ? "tour" : ""].filter(Boolean).join(" ") || undefined}
+      className={[className, tourButton === id ? "tour" : "", tourPulse === id ? "pulse" : ""].filter(Boolean).join(" ") || undefined}
       aria-current={isCurrent(t)}
       onClick={() => onGo(t)}
     >

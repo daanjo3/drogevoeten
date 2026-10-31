@@ -1,72 +1,46 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Icon } from "./Icons";
-import { nl } from "../lib/scenario";
 
 /* The tour after a search: one story card floating over the grid. Every
    step scrolls the grid to a block (the page does that, see onChange) and
-   lights up the menu button that belongs to it. */
-
-export interface TourData {
-  /* ground level at the address in m NAP (AHN); undefined while unknown */
-  nap?: number;
-  /* when and how this land came to be (linked data); undefined when unknown */
-  drained?: { when: string; kind: string };
-}
+   lights up the menu button that belongs to it. The texts explain what you
+   look at and what you can do; they never repeat the facts on the block. */
 
 type NavButton = "huis" | "tijd" | "buurt" | "risk";
 type IconName = Parameters<typeof Icon>[0]["name"];
 
-export const TOUR_STEPS = 5;
+export const TOUR_STEPS = 4;
 
-/* the menu button each step lights up; step 1 has none */
-export const TOUR_BUTTONS: (NavButton | undefined)[] = [undefined, "huis", "tijd", "buurt", "risk"];
+/* the menu button each step lights up; step 1 has none, step 4 also pulses Als het misgaat */
+export const TOUR_BUTTONS: (NavButton | undefined)[] = [undefined, "tijd", "buurt", "huis"];
+export const TOUR_PULSE: (NavButton | undefined)[] = [undefined, undefined, undefined, "risk"];
 
-/* on phones the menu is hidden during the tour, so the button shows in the text */
+const TEXTS = [
+  "Zeeniveau is de hoogte van de zee. Woon je eronder, dan houdt iets het water voor je tegen. In deze rondleiding ontdek je wat.",
+  "Hier zie je hoe deze plek droog werd. Lees van boven naar beneden, van de eerste dijk tot vandaag.",
+  "Sommige gemalen pompen nog elke dag, andere zijn museum geworden. Klik op een stip om te zien welke.",
+  "Dit is jouw huiskamer. Wat als de dijk breekt, het gemaal stopt of het heel hard regent? Druk op Als het misgaat en kijk hoe hoog het water hier komt.",
+];
+
+/* on phones the menu is hidden during the tour, so the buttons show as labels in the text */
 const CHIPS: Record<NavButton, { icon: IconName; label: string }> = {
   huis: { icon: "huis", label: "Huiskamer" },
   tijd: { icon: "tijd", label: "Tijdreis" },
   buurt: { icon: "buurt", label: "Gemalen" },
   risk: { icon: "drop", label: "Als het misgaat" },
 };
-
-/* Only what the data says: a missing height or year leaves its sentence out. */
-function textFor(step: number, d: TourData): string {
-  switch (step) {
-    case 0: {
-      const out: string[] = [];
-      if (d.nap !== undefined) {
-        const m = Math.round(Math.abs(d.nap) * 10) / 10;
-        out.push(m === 0 ? "Je woont precies op zeeniveau." : `Je woont ${nl(m)} meter ${d.nap >= 0 ? "boven" : "onder"} zeeniveau.`);
-      }
-      out.push("Een kwart van Nederland ligt onder zeeniveau.");
-      return out.join(" ");
-    }
-    case 1:
-      return "Dit is jouw huiskamer. Met de knop Huiskamer kom je hier altijd terug.";
-    case 2:
-      return (
-        "Dat je hier droog zit, gaat niet vanzelf. Al eeuwen houden dijken, molens en gemalen het water buiten." +
-        (d.drained ? ` Hier werd het land ${d.drained.when} ${d.drained.kind === "indijking" ? "ingedijkt" : "droog gemaakt"}.` : "")
-      );
-    case 3:
-      return "Dit zijn de gemalen bij jou in de buurt. Ze pompen elke dag het water weg, zodat jij droge voeten houdt.";
-    default:
-      return "Wat als de dijk breekt, het gemaal stopt of het heel hard regent? Druk op Als het misgaat en kijk hoe hoog het water in je huiskamer komt.";
-  }
-}
+const STEP_CHIPS: NavButton[][] = [[], ["tijd"], ["buurt"], ["huis", "risk"]];
 
 export function Rondleiding({
-  data,
   paused,
   onChange,
   onEnd,
 }: {
-  data: TourData;
   /* true while another dialog (Over) is open: the keys are left alone */
   paused: boolean;
   /* a step is on screen; inset is the height the card covers at the bottom */
   onChange: (step: number, inset: number) => void;
-  /* "skip" for Overslaan, "try" for the last button (Zelf proberen) */
+  /* "skip" for Rondleiding overslaan, "try" for the last button (Zelf proberen) */
   onEnd: (how: "skip" | "try") => void;
 }) {
   const [step, setStep] = useState(0);
@@ -75,7 +49,7 @@ export function Rondleiding({
   const nextBtn = useRef<HTMLButtonElement>(null);
   const timer = useRef(0);
   const last = step === TOUR_STEPS - 1;
-  const button = TOUR_BUTTONS[step];
+  const first = step === 0;
 
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -87,34 +61,46 @@ export function Rondleiding({
     nextBtn.current?.focus({ preventScroll: true });
   }, [step]);
 
-  function advance() {
-    if (last) {
-      onEnd("try");
-      return;
-    }
+  /* text and card fade out, then the other step fades in */
+  function goTo(next: number) {
+    if (next < 0 || next >= TOUR_STEPS || fading) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setStep((s) => s + 1);
+      setStep(next);
       return;
     }
-    if (fading) return;
-    /* text and card fade out, then the next step fades in */
     setFading(true);
     timer.current = window.setTimeout(() => {
-      setStep((s) => s + 1);
+      setStep(next);
       setFading(false);
     }, 300);
   }
+  function advance() {
+    if (last) onEnd("try");
+    else goTo(step + 1);
+  }
+  function back() {
+    goTo(step - 1);
+  }
   const advanceRef = useRef(advance);
   advanceRef.current = advance;
+  const backRef = useRef(back);
+  backRef.current = back;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  /* Escape skips; Enter goes on unless a button or link has focus (it then does its own thing) */
+  /* keys: right arrow and Enter go on, left arrow goes back, Escape skips.
+     Enter is left alone when a button or link has focus (it does its own thing). */
   useEffect(() => {
     if (paused) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onEnd("skip");
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        advanceRef.current();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        backRef.current();
       } else if (e.key === "Enter") {
         const el = document.activeElement;
         if (!el || el === document.body) advanceRef.current();
@@ -130,28 +116,43 @@ export function Rondleiding({
         <span className="count">
           Stap {step + 1} van {TOUR_STEPS}
         </span>
-        <div className="dots" aria-hidden="true">
-          {Array.from({ length: TOUR_STEPS }, (_, i) => (
-            <span key={i} className={i === step ? "on" : undefined} />
-          ))}
-        </div>
-        {button && (
-          <span className="chip">
-            <Icon name={CHIPS[button].icon} />
-            {CHIPS[button].label}
+        {STEP_CHIPS[step].length > 0 && (
+          <span className="chips">
+            {STEP_CHIPS[step].map((b) => (
+              <span className="chip" key={b}>
+                <Icon name={CHIPS[b].icon} />
+                {CHIPS[b].label}
+              </span>
+            ))}
           </span>
         )}
-        <p>{textFor(step, data)}</p>
+        <p>{TEXTS[step]}</p>
       </div>
       <div className="acts">
-        <button type="button" className="skip" onClick={() => onEnd("skip")}>
-          <Icon name="close" />
-          <span>Overslaan</span>
+        {/* Terug keeps its place on step 1 so the dots do not jump */}
+        <button type="button" className="back" aria-label="Terug" onClick={back} style={{ visibility: first ? "hidden" : "visible" }} tabIndex={first ? -1 : 0}>
+          <Icon name="terug" />
+          <span>Terug</span>
         </button>
-        <button type="button" className="next" ref={nextBtn} onClick={advance}>
-          {last ? "Zelf proberen" : "Verder"}
+        <span className="dots" aria-hidden="true">
+          {Array.from({ length: TOUR_STEPS }, (_, i) => (
+            <i key={i} className={i === step ? "on" : undefined} />
+          ))}
+        </span>
+        <button type="button" className={last ? "next try" : "next"} aria-label={last ? undefined : "Verder"} ref={nextBtn} onClick={advance}>
+          {last ? (
+            "Zelf proberen"
+          ) : (
+            <>
+              <span>Verder</span>
+              <Icon name="verder" />
+            </>
+          )}
         </button>
       </div>
+      <button type="button" className="skiplink" onClick={() => onEnd("skip")}>
+        Rondleiding overslaan
+      </button>
     </div>
   );
 }
