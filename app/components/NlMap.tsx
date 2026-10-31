@@ -34,13 +34,7 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
   const [x, y] = pinFor(centroide);
   return (
     <section className="panel" id="p-map">
-      <h2>
-        {nap === undefined
-          ? "Hoe hoog woon je?"
-          : Math.round(Math.abs(nap) * 10) === 0
-            ? "Je woont precies op zeeniveau"
-            : `Je woont ${nl(Math.abs(nap))} meter ${nap >= 0 ? "boven" : "onder"} zeeniveau`}
-      </h2>
+      <h2>Een kwart van Nederland ligt onder zeeniveau, op het laagste punt bijna 7 meter.</h2>
       <div className="kaartrij">
         <svg className="nl" viewBox={`0 0 ${IMG_W} ${IMG_H}`} aria-label="Hoogtekaart van Nederland met jouw locatie" role="img">
           <image href={`${import.meta.env.BASE_URL}img/nederland-hoogte.png`} width={IMG_W} height={IMG_H} />
@@ -51,11 +45,19 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
         </svg>
       </div>
       <p className="kaartcap">
-        Een kwart van Nederland ligt onder{" "}
-        <Tip kind="term" tip={TERMS.zeeniveau}>
-          zeeniveau
-        </Tip>
-        , op het laagste punt bijna 7 meter.
+        {nap === undefined ? (
+          "Hoe hoog woon je?"
+        ) : (
+          <>
+            {Math.round(Math.abs(nap) * 10) === 0
+              ? "Je woont precies op "
+              : `Je woont ${nl(Math.abs(nap))} meter ${nap >= 0 ? "boven" : "onder"} `}
+            <Tip kind="term" tip={TERMS.zeeniveau}>
+              zeeniveau
+            </Tip>
+            .
+          </>
+        )}
       </p>
       <p className="src">
         <Tip kind="bron" tip="Planbureau voor de Leefomgeving (2010): 26 procent van Nederland ligt onder zeeniveau, 59 procent kan overstromen. Laagste punt: Rijkswaterstaat, 6,76 meter onder NAP.">
