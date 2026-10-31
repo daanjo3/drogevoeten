@@ -34,7 +34,7 @@ export function NlMap({ centroide, nap }: { centroide?: string; nap?: number }) 
   const [x, y] = pinFor(centroide);
   return (
     <section className="panel" id="p-map">
-      <h2>Een kwart van Nederland ligt onder zeeniveau, op het laagste punt bijna 7 meter.</h2>
+      <h2>Een kwart van Nederland ligt tot bijna 7 meter onder zeeniveau.</h2>
       <div className="kaartrij">
         <svg className="nl" viewBox={`0 0 ${IMG_W} ${IMG_H}`} aria-label="Hoogtekaart van Nederland met jouw locatie" role="img">
           <image href={`${import.meta.env.BASE_URL}img/nederland-hoogte.png`} width={IMG_W} height={IMG_H} />
