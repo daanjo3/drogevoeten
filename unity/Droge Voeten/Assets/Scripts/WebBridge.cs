@@ -34,14 +34,24 @@ public class WebBridge : MonoBehaviour
         Emit("pong", message);
     }
 
-    // unity.send("SetWaterHeight", meters): water level in the room, in meters above the floor (0 = dry)
+    // unity.send("SetWaterHeight", meters): water level in meters above the floor (0 = dry). Applies to every
+    // WaterHeight in the scene (e.g. the room's and the house view's), each measured from its own floorHeight.
     public void SetWaterHeight(float meters)
     {
-        WaterHeight waterHeight = FindAnyObjectByType<WaterHeight>();
-
-        if(waterHeight != null)
+        foreach (WaterHeight waterHeight in FindObjectsByType<WaterHeight>())
         {
             waterHeight.SetLevel(meters);
+        }
+    }
+
+    // unity.send("SetView", "room" | "house"): fly the camera to that view
+    public void SetView(string view)
+    {
+        CameraController cameraController = FindAnyObjectByType<CameraController>();
+
+        if(cameraController != null)
+        {
+            cameraController.SetView(view);
         }
     }
 
