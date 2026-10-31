@@ -9,7 +9,7 @@ import { locationOf } from "../lib/rijksmuseum";
 import { liwoClass, useLiwo } from "../lib/liwo";
 import { Icon } from "./Icons";
 import { FullscreenSheet } from "./FullscreenSheet";
-import { ScenarioControls } from "./ScenarioControls";
+import { ScenarioControls, Segment } from "./ScenarioControls";
 import { Tip } from "./Tip";
 import { UnityRoom, type RoomView } from "./UnityRoom";
 import { TERMS } from "../data/place";
@@ -24,6 +24,7 @@ export function HuiskamerPanel({
   onScenario,
   loadRoom,
   view,
+  onView,
 }: {
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
@@ -35,8 +36,9 @@ export function HuiskamerPanel({
   onScenario: (s: Scenario) => void;
   /* start loading the 3D room (only after an address was chosen) */
   loadRoom: boolean;
-  /* camera view in the 3D room (temporary switch in the risk panel) */
+  /* camera view in the 3D room (temporary switch in the risk panel and the fullscreen room) */
   view: RoomView;
+  onView: (v: RoomView) => void;
 }) {
   const risk = mode === "risk";
   const here = locationOf(locatie);
@@ -111,10 +113,20 @@ export function HuiskamerPanel({
       );
   }
 
-  /* the scenario choices and the water depth, in the fullscreen room */
+  /* the scenario choices, the camera switch and the water depth, in the fullscreen room */
   const fsBody = (
     <>
       <ScenarioControls scenario={scenario} onChange={onScenario} />
+      {/* TEMPORARY: same camera switch as in the risk panel */}
+      <Segment
+        label="Camera"
+        options={[
+          { label: "Kamer", value: "room" },
+          { label: "Huis", value: "house" },
+        ]}
+        value={view}
+        onPick={onView}
+      />
       <p className="fs-out" aria-live="polite">
         {scenario.outside === "flood" && liwo.isPending ? (
           "We kijken hoe hoog het water komt…"

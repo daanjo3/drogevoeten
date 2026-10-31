@@ -1305,7 +1305,7 @@ MonoBehaviour:
   floorHeight: 0.1
   minHeight: 0.3
   maxHeight: 2
-  minRate: 0.05
+  minRate: 0.1
   maxRate: 1
   maxFish: 15
   margin: 0.1

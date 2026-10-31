@@ -417,6 +417,7 @@ export default function Home() {
           onScenario={setScenario}
           loadRoom={phase !== "idle"}
           view={view}
+          onView={setView}
         />
         <InfoPanel
           place={place}
