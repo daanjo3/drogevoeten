@@ -433,7 +433,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #tour .next{background:var(--dark);color:#fff;border:1.5px solid var(--dark)}
 #tour .next:hover{background:#333}
 #tour .mid{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 14px;min-width:0}
-#tour .acts button.skiplink{min-height:0;border-radius:0;padding:4px 6px;background:none;border:0;color:var(--mute);font:500 var(--fs-label)/1.4 var(--font);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#tour .acts button.skiplink{display:block;min-height:0;border-radius:0;padding:4px 6px;background:none;border:0;color:var(--mute);font:500 var(--fs-label)/1.4 var(--font);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 #tour .skiplink:hover{color:var(--ink)}
 /* the menu button of the current step lights up; Als het misgaat pulses softly on the last step */
 @keyframes tourpulse{50%{box-shadow:0 0 0 6px rgba(255,166,84,.45)}}
