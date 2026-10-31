@@ -3,6 +3,7 @@ import type { Mode, PlaceData } from "../data/place";
 import { TERMS } from "../data/place";
 import { useAddressHeight } from "../lib/ahn";
 import type { LocatieserverDoc } from "../lib/locatieserver";
+import type { Drainage } from "../lib/drainage";
 import { nl, nlSigned, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
 import { ScenarioControls } from "./ScenarioControls";
@@ -13,6 +14,7 @@ import { Tip } from "./Tip";
 export function InfoPanel({
   place,
   locatie,
+  drainage,
   mode,
   scenario,
   onScenario,
@@ -21,6 +23,8 @@ export function InfoPanel({
   place: PlaceData;
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
+  /* the drainage area and its 1-2 pumps (IMWA) */
+  drainage: Drainage;
   mode: Mode;
   scenario: Scenario;
   onScenario: (s: Scenario) => void;
@@ -53,26 +57,58 @@ export function InfoPanel({
     ? `Hoogte: Actueel Hoogtebestand Nederland (AHN), ${nlSigned(ground.value)} m NAP. Gemeten op de grond ${nl(ground.distance)} meter van je adres, want onder een huis meet het AHN de grond niet. Je drempel ligt vaak iets hoger.`
     : "Hoogte: Actueel Hoogtebestand Nederland (AHN).";
 
+  const pumps = drainage.pumps;
+  const board = (pumps[0]?.waterbeheerder ?? drainage.area?.waterbeheerder)?.replace(/^Waterschap\s+/i, "");
+  const gemaal = (
+    <Tip kind="term" tip={TERMS.gemaal}>
+      {pumps.length > 1 ? "gemalen" : "gemaal"}
+    </Tip>
+  );
+  const waterschap = (
+    <Tip kind="term" tip={TERMS.waterschap}>
+      waterschap
+    </Tip>
+  );
+  let pumpText: ReactNode;
+  if (pumps.length) {
+    pumpText = (
+      <>
+        Elke dag {pumps.length > 1 ? "pompen" : "pompt"} {gemaal} {pumps.map((p) => p.name).join(" en ")} het water uit jouw{" "}
+        <Tip kind="term" tip={TERMS.polder}>
+          polder
+        </Tip>
+        .{board && (
+          <>
+            {" "}
+            {pumps.length > 1 ? "Ze zijn" : "Dat gemaal is"} van {waterschap} {board}.
+          </>
+        )}
+      </>
+    );
+  } else if (drainage.isPending) {
+    pumpText = "We zoeken welk gemaal het water hier wegpompt…";
+  } else if (drainage.isError) {
+    pumpText = "Het waterschapsregister gaf geen antwoord. Probeer het later nog eens.";
+  } else {
+    pumpText = (
+      <>
+        We vonden geen {gemaal} dat het water uit jouw gebied wegpompt
+        {board && (
+          <>
+            . Het water valt onder {waterschap} {board}
+          </>
+        )}
+        .
+      </>
+    );
+  }
+
   return (
     <section className="panel" id="p-info" data-mode={mode}>
       <div className="mode m-info" aria-hidden={mode !== "info"}>
         <h2 id="huisAdres">{place.address}</h2>
         <p>{heightText}</p>
-        <p>
-          Elke dag pompt{" "}
-          <Tip kind="term" tip={TERMS.gemaal}>
-            gemaal
-          </Tip>{" "}
-          {place.pumpName} het water uit jouw{" "}
-          <Tip kind="term" tip={TERMS.polder}>
-            polder
-          </Tip>
-          . Dat gemaal is van{" "}
-          <Tip kind="term" tip={TERMS.waterschap}>
-            waterschap
-          </Tip>{" "}
-          {place.waterBoard}.
-        </p>
+        <p>{pumpText}</p>
         <p>Dit land werd rond {place.drainedYear} droog gemaakt. In de tijdreis zie je hoe.</p>
         <p className="src">
           <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.`}>
@@ -89,7 +125,7 @@ export function InfoPanel({
           Als het misgaat
         </h2>
         <p className="lead">Laat het hard regenen, zet het gemaal uit of breek de dijk. Dan zie je hoe hoog het water in je huiskamer komt.</p>
-        <ScenarioControls place={place} scenario={scenario} onChange={onScenario} />
+        <ScenarioControls place={place} drainage={drainage} scenario={scenario} onChange={onScenario} />
       </div>
     </section>
   );

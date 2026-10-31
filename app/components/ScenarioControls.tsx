@@ -1,4 +1,5 @@
 import type { PlaceData } from "../data/place";
+import type { Drainage } from "../lib/drainage";
 import type { Scenario } from "../lib/scenario";
 
 interface Option {
@@ -45,10 +46,13 @@ function Segment({
 /* Segment buttons, one choice per row. The calculation updates at once. */
 export function ScenarioControls({
   place,
+  drainage,
   scenario,
   onChange,
 }: {
   place: PlaceData;
+  /* the 1-2 pumps that drain the area of the address */
+  drainage: Drainage;
   scenario: Scenario;
   onChange: (s: Scenario) => void;
 }) {
@@ -65,15 +69,35 @@ export function ScenarioControls({
           { label: "Wolkbreuk", sub: mm(place.rain.record), value: place.rain.record },
         ]}
       />
-      <Segment
-        label={`gemaal ${place.pumpName}`}
-        value={scenario.pump}
-        onPick={(pump) => onChange({ ...scenario, pump })}
-        options={[
-          { label: "Aan", value: place.pumpCapacity },
-          { label: "Valt uit", value: 0 },
-        ]}
-      />
+      {drainage.pumps.map((p) => (
+        <Segment
+          key={p.id}
+          label={`gemaal ${p.name}`}
+          value={scenario.pumpsOff.includes(p.id) ? 0 : 1}
+          onPick={(on) =>
+            onChange({
+              ...scenario,
+              pumpsOff: on ? scenario.pumpsOff.filter((id) => id !== p.id) : [...scenario.pumpsOff, p.id],
+            })
+          }
+          options={[
+            { label: "Aan", sub: `${Math.round(p.capacity)} kuub/min`, value: 1 },
+            { label: "Valt uit", value: 0 },
+          ]}
+        />
+      ))}
+      {drainage.pumps.length === 0 && (
+        <div className="row">
+          <small>gemaal</small>
+          <p>
+            {drainage.isPending
+              ? "We zoeken welk gemaal hier het water wegpompt…"
+              : drainage.isError
+                ? "Het waterschapsregister gaf geen antwoord. Probeer het later nog eens."
+                : "We vonden geen gemaal dat water uit jouw gebied wegpompt."}
+          </p>
+        </div>
+      )}
       <Segment
         label="dijk"
         value={scenario.dike}

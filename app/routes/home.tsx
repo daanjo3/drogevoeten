@@ -23,6 +23,7 @@ import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from
 import { useAddressHeight } from "../lib/ahn";
 import { endpointImagesQueryOptions, locationOf, type RijksImage, type Theme } from "../lib/rijksmuseum";
 import { addressOf, timelineQueryOptions } from "../lib/timeline";
+import { useDrainage } from "../lib/drainage";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
    with a place show only when the address lies there; works without a
@@ -196,6 +197,9 @@ export default function Home() {
   const place = { ...MIDDELBURG, address: locatie?.weergavenaam ?? (id ? "…" : MIDDELBURG.address), timeline: steps };
   /* ground level at the address (AHN); the panels read the same cached query */
   const height = useAddressHeight(locatie);
+  /* the drainage area and the 1-2 pumps that drain it (IMWA) */
+  const here = locationOf(locatie);
+  const drainage = useDrainage(here?.lat, here?.lon);
 
   /* Rijksmuseum works: the local ones for this woonplaats, and the featured
      spots from the endpoint. While it answers the featured spots stay empty;
@@ -229,7 +233,7 @@ export default function Home() {
   const [mode, setMode] = useState<Mode>("info");
   const [scenario, setScenario] = useState<Scenario>({
     rain: place.rain.record,
-    pump: place.pumpCapacity,
+    pumpsOff: [],
     dike: 0,
   });
   const canvas = useCanvas();
@@ -363,10 +367,17 @@ export default function Home() {
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
-        <HuiskamerPanel place={place} locatie={locatie} mode={mode} scenario={scenario} loadRoom={phase !== "idle"} />
+        <HuiskamerPanel
+          locatie={locatie}
+          drainage={drainage}
+          mode={mode}
+          scenario={scenario}
+          loadRoom={phase !== "idle"}
+        />
         <InfoPanel
           place={place}
           locatie={locatie}
+          drainage={drainage}
           mode={mode}
           scenario={scenario}
           onScenario={setScenario}

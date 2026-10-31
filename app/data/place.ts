@@ -25,16 +25,8 @@ export interface PlaceData {
   address: string;
   /* floor height in m above NAP (AHN) */
   nap: number;
-  waterArea: string;
-  /* pump capacity in m3/min (IMWA) */
-  pumpCapacity: number;
-  pumpName: string;
-  /* the water board that owns the pump */
-  waterBoard: string;
   /* the year the land was drained, roughly */
   drainedYear: number;
-  /* area of the water level area in km2 (IMWA) */
-  areaKm2: number;
   /* rain options in mm (KNMI, Vlissingen) */
   rain: { normal: number; heavy: number; record: number };
   timeline: TimelineStep[];
@@ -44,12 +36,7 @@ export interface PlaceData {
 export const MIDDELBURG: PlaceData = {
   address: "Abdij 4, Middelburg",
   nap: 2.0,
-  waterArea: "GPG437",
-  pumpCapacity: 844,
-  pumpName: "Boreel",
-  waterBoard: "Scheldestromen",
   drainedYear: 1200,
-  areaKm2: 3.09,
   rain: { normal: 10, heavy: 31.8, record: 80.9 },
   timeline: [
     {

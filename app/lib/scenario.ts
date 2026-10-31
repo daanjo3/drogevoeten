@@ -5,8 +5,8 @@
 export interface Scenario {
   /* rain in mm */
   rain: number;
-  /* pump capacity in m3/min, 0 when the pump fails */
-  pump: number;
+  /* ids of the pumps (IMWA) that fail */
+  pumpsOff: string[];
   /* extra water in m from the dike: 0 holds, 0.5 leaks, 2 breaks */
   dike: number;
 }
@@ -20,10 +20,13 @@ export interface ScenarioResult {
 
 const MAX_LEVEL = 2.4;
 
-export function calcScenario(s: Scenario, areaKm2: number): ScenarioResult {
-  const m3 = (s.rain / 1000) * areaKm2 * 1e6;
-  const hours = s.pump ? m3 / (s.pump * 60) : 0;
-  const fromRain = s.pump ? Math.max(0, (s.rain - 393) / 1000) : s.rain / 1000;
+/* capacity: m3/min of the pumps that still run; areaM2: the drainage area.
+   Without a known area or pump (null) only the dike counts. */
+export function calcScenario(s: Scenario, areaM2: number | null, capacity: number | null): ScenarioResult {
+  if (areaM2 === null || capacity === null) return { level: Math.min(MAX_LEVEL, s.dike), hours: 0 };
+  const m3 = (s.rain / 1000) * areaM2;
+  const hours = capacity ? m3 / (capacity * 60) : 0;
+  const fromRain = capacity ? Math.max(0, (s.rain - 393) / 1000) : s.rain / 1000;
   const level = Math.min(MAX_LEVEL, s.dike + fromRain);
   return { level, hours };
 }

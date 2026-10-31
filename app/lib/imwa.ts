@@ -90,7 +90,7 @@ export function itemUrl(collection: CollectionId, id: string, format: "html" | "
   return `${BASE_URL}/collections/${collection}/items/${encodeURIComponent(id)}?f=${format}`;
 }
 
-async function getItems<C extends CollectionId>(
+export async function getItems<C extends CollectionId>(
   params: ItemsParams<C>,
   signal?: AbortSignal,
 ): Promise<ItemsResponse<CollectionProperties[C]>> {

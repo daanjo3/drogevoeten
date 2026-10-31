@@ -129,7 +129,7 @@ export function toLatLngs(g: AreaGeometry): [number, number][][][] {
 }
 
 /* Even-odd point in polygon; holes are rings too, so they count out. */
-function containsPoint(g: AreaGeometry, lon: number, lat: number): boolean {
+export function containsPoint(g: AreaGeometry, lon: number, lat: number): boolean {
   const polygons = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
   return polygons.some((rings) => rings.filter((ring) => inRing(ring, lon, lat)).length % 2 === 1);
 }
