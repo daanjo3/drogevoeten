@@ -8,6 +8,7 @@ import { usePeilgebied } from "../lib/waterbeheergebieden";
 import { locationOf } from "../lib/rijksmuseum";
 import { liwoClass, useLiwo } from "../lib/liwo";
 import { Icon } from "./Icons";
+import { FullscreenSheet } from "./FullscreenSheet";
 import { ScenarioControls } from "./ScenarioControls";
 import { Tip } from "./Tip";
 import { UnityRoom, type RoomView } from "./UnityRoom";
@@ -18,6 +19,7 @@ import { TERMS } from "../data/place";
 export function HuiskamerPanel({
   locatie,
   mode,
+  onMode,
   scenario,
   onScenario,
   loadRoom,
@@ -26,6 +28,8 @@ export function HuiskamerPanel({
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
   mode: Mode;
+  /* the sheet in the fullscreen room (phones) switches to risk mode when it opens */
+  onMode: (m: Mode) => void;
   scenario: Scenario;
   /* the scenario buttons also live in the fullscreen view of the room */
   onScenario: (s: Scenario) => void;
@@ -107,6 +111,24 @@ export function HuiskamerPanel({
       );
   }
 
+  /* the scenario choices and the water depth, in the fullscreen room */
+  const fsBody = (
+    <>
+      <ScenarioControls scenario={scenario} onChange={onScenario} />
+      <p className="fs-out" aria-live="polite">
+        {scenario.outside === "flood" && liwo.isPending ? (
+          "We kijken hoe hoog het water komt…"
+        ) : r.depth ? (
+          <>
+            Water in je huiskamer: <b>{nl(r.depth)} meter</b>
+          </>
+        ) : (
+          "Hier blijft het droog."
+        )}
+      </p>
+    </>
+  );
+
   return (
     <section className={`panel${risk ? " risk" : ""}`} id="p-huis">
       <div className="room">
@@ -116,25 +138,19 @@ export function HuiskamerPanel({
           waterLevel={risk ? r.level : 0}
           view={view}
           overlay={
-            risk && (
-              <div className="fs-panel">
-                <strong className="fs-title">
-                  <Icon name="drop" /> Als het misgaat
-                </strong>
-                <ScenarioControls scenario={scenario} onChange={onScenario} />
-                <p className="fs-out" aria-live="polite">
-                  {scenario.outside === "flood" && liwo.isPending ? (
-                    "We kijken hoe hoog het water komt…"
-                  ) : r.depth ? (
-                    <>
-                      Water in je huiskamer: <b>{nl(r.depth)} meter</b>
-                    </>
-                  ) : (
-                    "Hier blijft het droog."
-                  )}
-                </p>
-              </div>
-            )
+            <>
+              {/* desktop: panel top left, in risk mode only */}
+              {risk && (
+                <div className="fs-panel">
+                  <strong className="fs-title">
+                    <Icon name="drop" /> Als het misgaat
+                  </strong>
+                  {fsBody}
+                </div>
+              )}
+              {/* phones: bar at the bottom that slides the same choices up */}
+              <FullscreenSheet onOpen={() => onMode("risk")}>{fsBody}</FullscreenSheet>
+            </>
           }
         />
         <span className="tag" id="huisTag">{risk ? "WELKOM THUIS · als het misgaat" : "WELKOM THUIS"}</span>

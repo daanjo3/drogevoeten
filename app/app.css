@@ -42,8 +42,8 @@ h2 svg{width:28px;height:28px;flex:none}
 svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
 /* vignet, deel 2: een lichte donkere rand over het hele scherm, boven het canvas en onder de knoppen */
-body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box-shadow:inset 0 0 22vmin 7vmin rgba(34,10,52,.9)}
-@media (max-width:600px){body::after{box-shadow:inset 0 0 12vmin 4vmin rgba(34,10,52,.8)}}
+body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box-shadow:inset 0 0 17vmin 5vmin rgba(34,10,52,.9)}
+@media (max-width:600px){body::after{box-shadow:inset 0 0 9vmin 3vmin rgba(34,10,52,.8)}}
 /* vignet: het hele canvas vaagt aan de randen weg in de achtergrond */
 #world{
   --fade:14vmin;
@@ -472,8 +472,32 @@ body.room-full #world{-webkit-mask:none;mask:none}
 .fs-title{display:flex;align-items:center;gap:8px;margin-bottom:12px;font:700 var(--fs-p) var(--font)}
 .fs-title svg{width:20px;height:20px}
 .fs-out{margin:0 0 12px;font-size:var(--fs-p)}
+/* the fullscreen button says "volledig scherm" on desktop, "Bekijk je huiskamer" on phones */
+.fs .fs-long{display:none}
+.fs-sheet{display:none}
 @media (max-width:600px){
-  .scene-wrap:fullscreen,.scene-wrap.faux{display:flex;flex-direction:column}
-  .scene-wrap:fullscreen .scene-canvas,.scene-wrap.faux .scene-canvas{position:relative;inset:auto;flex:1;min-height:0;height:auto}
-  .scene-wrap .fs-panel{position:relative;left:auto;top:auto;flex:none;width:auto;max-height:55%;border-radius:22px 22px 0 0;padding:14px 16px calc(6px + env(safe-area-inset-bottom))}
+  /* Over and Deel: icon only (the link-copied message shows its text for a moment) */
+  .corner{width:44px;height:44px;padding:0;justify-content:center;gap:0}
+  .corner .corner-txt:not(.copied){display:none}
+  .corner:has(.copied){width:auto;padding:0 14px;gap:8px}
+  /* the room: one clear button in the middle opens the fullscreen view */
+  .fs .fs-short{display:none}
+  .fs .fs-long{display:inline}
+  #p-huis .room .fs:not(.exit),#p-huis.risk .room .fs:not(.exit){top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%);padding:14px 22px;font-size:var(--fs-p);text-transform:none;letter-spacing:0;background:#fff;box-shadow:var(--shadow);z-index:3}
+  #p-huis .room .fs:not(.exit) svg{width:20px;height:20px}
+  /* the separate scenario panel is not shown on phones: the choices live in the fullscreen room */
+  #p-info[data-mode=risk]{background:var(--g-sunshade);color:var(--ink);border-color:transparent}
+  #p-info[data-mode=risk] .m-risk{display:none}
+  #p-info[data-mode=risk] .m-info{opacity:1;transform:none;visibility:visible;pointer-events:auto}
+  /* fullscreen: a round cross at the top right, and a sheet at the bottom */
+  .scene-wrap .fs.exit{width:44px;height:44px;padding:0;justify-content:center;border-radius:50%;gap:0}
+  .scene-wrap .fs.exit svg{width:20px;height:20px}
+  .fs-exit-text{display:none}
+  .fs-panel{display:none}
+  .fs-sheet{display:block;position:absolute;left:0;right:0;bottom:0;z-index:4;background:var(--dark);color:#fff;border-radius:22px 22px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  .fs-bar{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;padding:0 16px;background:none;border:0;color:#fff;font:700 var(--fs-p) var(--font);cursor:pointer}
+  .fs-sheet-body{max-height:0;overflow:hidden;visibility:hidden;padding:0 16px;transition:max-height .3s ease,visibility 0s .3s}
+  .fs-sheet.open .fs-sheet-body{max-height:min(55vh,460px);overflow:auto;visibility:visible;padding-bottom:6px;transition:max-height .3s ease,visibility 0s}
+  /* the room moves up with the sheet, so the water stays in view above it */
+  .scene-wrap:fullscreen .scene-canvas,.scene-wrap.faux .scene-canvas{transform:translateY(calc(var(--sheet-h,0px) / -2))}
 }

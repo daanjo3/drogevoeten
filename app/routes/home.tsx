@@ -387,14 +387,14 @@ export default function Home() {
         message={searchMsg}
       />
 
-      <button type="button" className="corner" id="infoBtn" onClick={() => setAbout(true)}>
-        <Icon name="info" /> Over
+      <button type="button" className="corner" id="infoBtn" aria-label="Over" onClick={() => setAbout(true)}>
+        <Icon name="info" /> <span className="corner-txt">Over</span>
       </button>
       <div id="where">
         <span className="where-lbl">jouw locatie</span> <b id="whereTxt">{place.address}</b>
       </div>
-      <button type="button" className="corner" id="shareBtn" onClick={share}>
-        <Icon name="share" /> {copied ? "Link gekopieerd" : "Deel"}
+      <button type="button" className="corner" id="shareBtn" aria-label={copied ? "Link gekopieerd" : "Deel"} onClick={share}>
+        <Icon name="share" /> <span className={copied ? "corner-txt copied" : "corner-txt"}>{copied ? "Link gekopieerd" : "Deel"}</span>
       </button>
 
       <FloatingNav
@@ -412,6 +412,7 @@ export default function Home() {
         <HuiskamerPanel
           locatie={locatie}
           mode={mode}
+          onMode={setMode}
           scenario={scenario}
           onScenario={setScenario}
           loadRoom={phase !== "idle"}

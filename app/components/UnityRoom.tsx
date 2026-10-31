@@ -142,8 +142,8 @@ export function UnityRoom({
         <canvas id="unity-canvas" className="scene-canvas" ref={canvas} aria-label="3D-huiskamer" style={{ opacity: ready ? 1 : 0 }} />
         {(full || faux) && (
           <>
-            <button type="button" className="fs exit" onClick={exitFullscreen}>
-              <Icon name="close" /> sluit volledig scherm
+            <button type="button" className="fs exit" aria-label="Sluiten" onClick={exitFullscreen}>
+              <Icon name="close" /> <span className="fs-exit-text">sluit volledig scherm</span>
             </button>
             {overlay}
           </>
@@ -158,7 +158,8 @@ export function UnityRoom({
       )}
       {ready && (
         <button type="button" className="fs" onClick={enterFullscreen}>
-          <Icon name="fullscreen" /> volledig scherm
+          <Icon name="fullscreen" /> <span className="fs-short">volledig scherm</span>
+          <span className="fs-long">Bekijk je huiskamer</span>
         </button>
       )}
     </>
