@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { PlaceData } from "../data/place";
 import { Icon } from "./Icons";
 import { RichText, Tip } from "./Tip";
@@ -9,8 +9,21 @@ import { RichText, Tip } from "./Tip";
 export function TijdreisPanel({ place }: { place: PlaceData }) {
   // the first year in the line, e.g. "840" from "840–900" or "1300" from "Vóór 1300"
   const first = place.timeline[0]?.year.match(/\d{3,4}/)?.[0];
+  const ref = useRef<HTMLElement>(null);
+  // share the block's height with the canvas, so the tile below can follow it
+  useEffect(() => {
+    const el = ref.current;
+    const canvas = el?.parentElement;
+    if (!el || !canvas) return;
+    const ro = new ResizeObserver(() => canvas.style.setProperty("--tijd-h", `${el.offsetHeight}px`));
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      canvas.style.removeProperty("--tijd-h");
+    };
+  }, []);
   return (
-    <section className="panel" id="p-tijd">
+    <section className="panel" id="p-tijd" ref={ref}>
       <span className="meta">{first ? `${first} → nu` : "tot nu"}</span>
       <h2>
         <Icon name="tijd" />

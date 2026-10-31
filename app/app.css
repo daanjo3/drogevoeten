@@ -226,7 +226,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #i-cruquius     {left:126vw;bottom:185vh;width:22vw}
 #i-dongepolders {left:152vw;bottom:185vh;width:28vw}
 #i-keere        {left:184vw;bottom:185vh;width:30vw}
-#i-kinderdijk   {left:52vw; top:201vh;width:36vw}
+/* under the Tijdreis, 6vh below it; --tijd-h is its measured height (TijdreisPanel) */
+#i-kinderdijk   {left:52vw; top:calc(51vh + var(--tijd-h, 150vh));width:36vw}
 
 /* kamers */
 .room{position:absolute;inset:0}
