@@ -435,3 +435,107 @@ NOTEBOOKS = [
     ("zeeland.sparqlbook", ZLD, ZEELAND),
     ("water-boards.sparqlbook", WB, WATER_BOARDS),
 ]
+
+SC = ["concept-merges.ttl", "pumping-stations.ttl", "windmills.ttl", "lost-windmills.ttl", "drained-lakes.ttl",
+      "breach-pools.ttl", "zeeland-dikes.ttl", "zeeland-polders.ttl", "gift-houses-1953.ttl"]
+SHARED = [
+    intro("Gedeelde termen en plaatsen over de datasets heen",
+          "Deze notebook laat zien wat het samenvoegen oplevert: termen, woonplaatsen en gebieden die in meer dan één dataset voorkomen, zijn één knoop. Waar dat door samenvoegen komt, staat in `build/concept-merges.ttl` (`dct:replaces`, met de regel in `rdfs:comment`). Het complete gecombineerde bestand (`build/droge-voeten.ttl`) is te groot om hier per query te laden; de losse datasets gebruiken dezelfde gedeelde knopen, dus deze queries combineren ze.",
+          SC),
+    ("md", "## 1. Wat is er samengevoegd?\n\nAantal samengevoegde knopen per soort gedeelde knoop."),
+    ("q", """SELECT ?soort (COUNT(DISTINCT ?nieuw) AS ?gedeeldeKnopen) (COUNT(?oud) AS ?opgegaan) WHERE {
+  ?nieuw <http://purl.org/dc/terms/replaces> ?oud .
+  BIND(REPLACE(STR(?nieuw), "^urn:drogevoeten:([a-z]+:[a-z-]+).*$", "$1") AS ?soort)
+}
+GROUP BY ?soort
+ORDER BY DESC(?opgegaan)""", ["concept-merges.ttl"]),
+    ("md", "## 2. Eén term, meerdere termensets: poldermolen\n\n\"poldermolen\" kwam voor als molenfunctie, als hoofdcategorie en als soort maalinrichting. Nu is het één term, die in alle drie de termensets zit."),
+    ("q", """SELECT ?termenset ?dataset (COUNT(DISTINCT ?r) AS ?records) WHERE {
+  <urn:drogevoeten:term:drainage-structure:poldermolen> schema:inDefinedTermSet/schema:name ?termenset .
+  FILTER(LANG(?termenset) = "nl")
+  ?r schema:additionalType <urn:drogevoeten:term:drainage-structure:poldermolen> ;
+     schema:isPartOf/schema:name ?dataset .
+}
+GROUP BY ?termenset ?dataset
+ORDER BY ?dataset ?termenset""", ["windmills.ttl", "lost-windmills.ttl", "drained-lakes.ttl"]),
+    ("md", "## 3. Termen die in meer dan één dataset gebruikt worden"),
+    ("q", """SELECT ?term (COUNT(DISTINCT ?d) AS ?datasets) (COUNT(DISTINCT ?r) AS ?records) WHERE {
+  ?t a schema:DefinedTerm ; schema:name ?term .
+  FILTER(LANG(?term) = "nl")
+  FILTER(!STRSTARTS(STR(?t), "urn:drogevoeten:term:event-type:"))
+  ?r ?p ?t ; schema:isPartOf ?d .
+}
+GROUP BY ?term
+HAVING (COUNT(DISTINCT ?d) > 1)
+ORDER BY DESC(?datasets) DESC(?records)
+LIMIT 25"""),
+    ("md", "## 4. Woonplaatsen in meer dan één dataset\n\nMolens en wielen hebben geen provincie in de bron; hun woonplaats is samengevoegd met dezelfde woonplaats mét provincie (bijv. van de gemalen) als de records binnen 10 km van elkaar liggen."),
+    ("q", """SELECT ?woonplaats ?provincie (COUNT(DISTINCT ?d) AS ?datasets) (GROUP_CONCAT(DISTINCT ?ds; separator=", ") AS ?welke) WHERE {
+  ?w schema:name ?woonplaats .
+  FILTER(STRSTARTS(STR(?w), "urn:drogevoeten:place:locality:"))
+  OPTIONAL { ?w schema:containedInPlace+ ?pv . ?pv schema:name ?provincie FILTER(STRSTARTS(STR(?pv), "urn:drogevoeten:place:province:")) }
+  { ?x schema:containedInPlace ?w . ?r schema:locationCreated ?x } UNION { ?r schema:containedInPlace ?w }
+  ?r schema:isPartOf ?d .
+  BIND(STRAFTER(STR(?d), "dataset:") AS ?ds)
+}
+GROUP BY ?woonplaats ?provincie
+HAVING (COUNT(DISTINCT ?d) > 2)
+ORDER BY DESC(?datasets) ?woonplaats
+LIMIT 25""", ["pumping-stations.ttl", "windmills.ttl", "breach-pools.ttl", "lost-windmills.ttl", "gift-houses-1953.ttl"]),
+    ("md", "## 5. Een polder bij een dijk is het polderrecord\n\nDe polder die de dijkenlaag noemt, is samengevoegd met het record uit de polderdataset (zelfde naam, dijk in of bij de polder). Zo komen de dijken en de indijking van de polder bij elkaar."),
+    ("q", """SELECT ?polder ?indijking (COUNT(DISTINCT ?dijk) AS ?dijken) WHERE {
+  ?p schema:isPartOf <urn:drogevoeten:dataset:zeeland-polders> ; schema:name ?polder .
+  ?dijk dv:inPolder ?p .
+  OPTIONAL { ?e schema:about ?p ; dv:dateText ?indijking }
+}
+GROUP BY ?polder ?indijking
+ORDER BY DESC(?dijken)
+LIMIT 20""", ["zeeland-dikes.ttl", "zeeland-polders.ttl"]),
+    ("md", "## 6. Gemalen die een droogmakerij bemalen\n\nHet bemalingsgebied van een gemaal is samengevoegd met de droogmakerij met dezelfde naam als het gemaal erin of erbij ligt."),
+    ("q", """SELECT ?droogmakerij ?drooggemaakt (GROUP_CONCAT(DISTINCT ?gemaal; separator=", ") AS ?gemalen) WHERE {
+  ?d schema:isPartOf <urn:drogevoeten:dataset:drained-lakes> ; schema:name ?droogmakerij .
+  ?g dv:drainsArea ?d ; schema:name ?gemaal .
+  OPTIONAL { ?e schema:about ?d ; dv:dateText ?drooggemaakt }
+}
+GROUP BY ?droogmakerij ?drooggemaakt
+ORDER BY ?droogmakerij
+LIMIT 25""", ["pumping-stations.ttl", "drained-lakes.ttl"]),
+    ("md", "## 7. Waar komt een gedeelde knoop vandaan?\n\nDe linkset `concept-merges` noemt per gedeelde knoop de knopen die erin zijn opgegaan, met de regel."),
+    ("q", """SELECT ?gedeeld ?naam ?toelichting WHERE {
+  ?gedeeld <http://purl.org/dc/terms/replaces> ?oud ;
+           schema:name ?naam ;
+           rdfs:comment ?toelichting .
+  FILTER(STRSTARTS(STR(?gedeeld), "urn:drogevoeten:term:"))
+}
+GROUP BY ?gedeeld ?naam ?toelichting
+ORDER BY ?gedeeld
+LIMIT 25""", ["concept-merges.ttl"]),
+]
+NOTEBOOKS.append(("shared-concepts.sparqlbook", SC, SHARED))
+
+
+def _rq(name):
+    """A query from queries/ without its own PREFIX lines (make_sparqlbook adds the shared prefixes)."""
+    import os
+    text = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "queries", name), encoding="utf-8").read()
+    return "\n".join(line for line in text.splitlines() if not line.startswith("PREFIX ")).strip()
+
+
+TL_POLDER = ["zeeland-polders.ttl", "drained-lakes.ttl"]
+TIMELINE = [
+    ("md", """# Tijdlijn per adres
+
+Drie queries voor de tijdlijn "Hoe werd dit droog?", elk op een paar kleine datasets, zodat ze in een fractie van een seconde antwoorden. Ze staan ook als losse bestanden in `queries/timeline-*.rq`; een app vervangt alleen de `VALUES`-regel door de coördinaten van het adres. Hier: **Abdij 4, Middelburg** (de HackaLOD-locatie).
+
+**Eerst:** draai `make` in `linkeddata/`.
+
+- Ruimtelijk werkt met GeoSPARQL-functies (`geof:sfContains`, `geof:sfIntersects`), die Oxigraph kent. `geof:distance` kent het niet; daarom een vierkant rond het adres en afstanden in klassen.
+- De links helpen: `bemaaltDezePolder` en `vanDezePolder` zijn `true` als het gemaal of de dijk volgens de bron bij de polder van dit adres hoort (via de samengevoegde polderknoop, DECISIONS §29)."""),
+    ("md", "## 1. Wanneer werd deze plek polder?\n\nDe indijking (Zeeuwse polders) of droogmaking (droogmakerijen) van het gebied waarin het adres ligt."),
+    ("q", _rq("timeline-polder.rq"), TL_POLDER),
+    ("md", "## 2. Wanneer zijn de gemalen in de buurt gesticht?\n\nGemalen binnen ca. 3 km, van dichtbij naar ver."),
+    ("q", _rq("timeline-gemalen.rq"), ["pumping-stations.ttl"] + TL_POLDER),
+    ("md", "## 3. Wanneer zijn de dijken in de buurt aangelegd?\n\nDijken die een vierkant van ca. 250 m rond het adres raken (alleen Zeeland)."),
+    ("q", _rq("timeline-dijken.rq"), ["zeeland-dikes.ttl", "zeeland-polders.ttl"]),
+]
+NOTEBOOKS.append(("timeline.sparqlbook", TL_POLDER, TIMELINE))

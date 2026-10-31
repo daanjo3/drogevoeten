@@ -1,0 +1,36 @@
+# Tijdlijn 2: wanneer zijn de gemalen in de buurt gesticht? Gemalen binnen ca. 3 km (vierkant rond het adres), en
+# apart gemarkeerd: de gemalen die volgens de bron de polder of droogmakerij van dit adres bemalen (dv:drainsArea).
+# Data: build/pumping-stations.ttl (+ zeeland-polders.ttl en drained-lakes.ttl voor 'bemaalt deze polder').
+# Invoer: vervang de VALUES-regel (WGS84). De afstand is een benadering in klassen (SPARQL heeft geen wortel);
+# de volgorde is van dichtbij naar ver.
+PREFIX schema: <https://schema.org/>
+PREFIX dv: <urn:drogevoeten:def:>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?gemaal ?gesticht ?status ?functie ?bemaaltDezePolder ?afstandKm ?gemalenNl WHERE {
+  VALUES (?lat ?lon) { (51.50096523 3.61479556) }
+  BIND(3.0 AS ?km)
+  ?g schema:isPartOf <urn:drogevoeten:dataset:pumping-stations> ;
+     schema:name ?gemaal ;
+     schema:locationCreated/schema:geo ?pt .
+  ?pt schema:latitude ?la ; schema:longitude ?lo .
+  BIND(xsd:double(?la - ?lat) * 110.54 AS ?dy)  # double: decimals overflow when squared
+  BIND(xsd:double(?lo - ?lon) * 69.4 AS ?dx)
+  FILTER(?dy > -?km && ?dy < ?km && ?dx > -?km && ?dx < ?km)
+  BIND(?dx * ?dx + ?dy * ?dy AS ?km2)
+  BIND(ROUND(?km2 * 100) / 100 AS ?afstandKm2)
+  BIND(IF(?km2 < 0.25, "< 0,5 km", IF(?km2 < 1, "0,5-1 km", IF(?km2 < 4, "1-2 km", "2-3 km"))) AS ?afstandKm)  # no sqrt in SPARQL
+  OPTIONAL { ?g schema:dateCreated ?gesticht }
+  OPTIONAL { ?g schema:creativeWorkStatus/schema:name ?status }
+  OPTIONAL { ?g schema:additionalType ?f . ?f schema:inDefinedTermSet <urn:drogevoeten:termset:pumping-station-function> ; schema:name ?functie }
+  OPTIONAL { ?g schema:url ?gemalenNl }
+  OPTIONAL {
+    ?g dv:drainsArea ?p .
+    ?p geo:hasGeometry/geo:asWKT ?vlak .
+    FILTER(geof:sfContains(?vlak, STRDT(CONCAT("POINT (", STR(?lon), " ", STR(?lat), ")"), geo:wktLiteral)))
+    BIND(true AS ?bemaaltDezePolder)
+  }
+}
+ORDER BY ?km2

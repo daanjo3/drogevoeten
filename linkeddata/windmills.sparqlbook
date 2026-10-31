@@ -14,7 +14,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:additionalType <urn:drogevoeten:term:object-type:windmill> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?dataset",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?dataset (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:additionalType <urn:drogevoeten:term:object-type:windmill> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?dataset",
     "metadata": {}
   },
   {
@@ -26,7 +26,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?type (COUNT(DISTINCT ?bestaand) AS ?bestaand_) (COUNT(DISTINCT ?verdwenen) AS ?verdwenen_) WHERE {\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:windmill-type> ;\n     schema:name ?type .\n  ?m schema:additionalType ?t .\n  OPTIONAL { ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> . BIND(?m AS ?bestaand) }\n  OPTIONAL { ?m schema:isPartOf <urn:drogevoeten:dataset:lost-windmills> . BIND(?m AS ?verdwenen) }\n}\nGROUP BY ?type\nORDER BY DESC(?verdwenen_)\nLIMIT 20",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?type (COUNT(DISTINCT ?bestaand) AS ?bestaand_) (COUNT(DISTINCT ?verdwenen) AS ?verdwenen_) WHERE {\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:windmill-type> ;\n     schema:name ?type .\n  ?m schema:additionalType ?t .\n  OPTIONAL { ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> . BIND(?m AS ?bestaand) }\n  OPTIONAL { ?m schema:isPartOf <urn:drogevoeten:dataset:lost-windmills> . BIND(?m AS ?verdwenen) }\n}\nGROUP BY ?type\nORDER BY DESC(?verdwenen_)\nLIMIT 20",
     "metadata": {}
   },
   {
@@ -38,7 +38,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?staat (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:creativeWorkStatus/schema:name ?staat .\n}\nGROUP BY ?staat\nORDER BY DESC(?molens)",
+    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?staat (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:creativeWorkStatus/schema:name ?staat .\n}\nGROUP BY ?staat\nORDER BY DESC(?molens)",
     "metadata": {}
   },
   {
@@ -50,7 +50,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?bouwjaar ?woonplaats ?type WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:name ?naam ;\n     schema:dateCreated ?bouwjaar ;\n     schema:locationCreated/schema:containedInPlace/schema:name ?woonplaats .\n  OPTIONAL { ?m schema:additionalType ?t . ?t schema:inDefinedTermSet <urn:drogevoeten:termset:windmill-type> ; schema:name ?type }\n}\nORDER BY ?bouwjaar\nLIMIT 15",
+    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?bouwjaar ?woonplaats ?type WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:name ?naam ;\n     schema:dateCreated ?bouwjaar ;\n     schema:locationCreated/schema:containedInPlace/schema:name ?woonplaats .\n  OPTIONAL { ?m schema:additionalType ?t . ?t schema:inDefinedTermSet <urn:drogevoeten:termset:windmill-type> ; schema:name ?type }\n}\nORDER BY ?bouwjaar\nLIMIT 15",
     "metadata": {}
   },
   {
@@ -62,7 +62,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?decennium (COUNT(?e) AS ?verdwenen) WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:disappearance> ;\n     schema:startDate ?d .\n  BIND(xsd:integer(FLOOR(xsd:integer(SUBSTR(STR(?d), 1, 4)) / 10) * 10) AS ?decennium)\n}\nGROUP BY ?decennium\nORDER BY ?decennium",
+    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?decennium (COUNT(?e) AS ?verdwenen) WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:disappearance> ;\n     schema:startDate ?d .\n  BIND(xsd:integer(FLOOR(xsd:integer(SUBSTR(STR(?d), 1, 4)) / 10) * 10) AS ?decennium)\n}\nGROUP BY ?decennium\nORDER BY ?decennium",
     "metadata": {}
   },
   {
@@ -74,7 +74,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?soort ?zekerheid (COUNT(?e) AS ?gebeurtenissen) (SAMPLE(?tekst) AS ?voorbeeld) WHERE {\n  ?e a schema:Event ;\n     schema:additionalType/schema:name ?soort ;\n     dv:datePrecision ?zekerheid .\n  FILTER(LANG(?soort) = \"nl\")\n  OPTIONAL { ?e dv:dateText ?tekst }\n}\nGROUP BY ?soort ?zekerheid\nORDER BY ?soort DESC(?gebeurtenissen)",
+    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?soort ?zekerheid (COUNT(?e) AS ?gebeurtenissen) (SAMPLE(?tekst) AS ?voorbeeld) WHERE {\n  ?e a schema:Event ;\n     schema:additionalType/schema:name ?soort ;\n     dv:datePrecision ?zekerheid .\n  FILTER(LANG(?soort) = \"nl\")\n  OPTIONAL { ?e dv:dateText ?tekst }\n}\nGROUP BY ?soort ?zekerheid\nORDER BY ?soort DESC(?gebeurtenissen)",
     "metadata": {}
   },
   {
@@ -86,7 +86,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nCONSTRUCT { ?s ?p ?o . } WHERE {\n  ?s ?p ?o .\n  FILTER(STRSTARTS(STR(?s), \"urn:drogevoeten:id:lost-windmill:1053\"))\n}",
+    "value": "# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nCONSTRUCT { ?s ?p ?o . } WHERE {\n  ?s ?p ?o .\n  FILTER(STRSTARTS(STR(?s), \"urn:drogevoeten:id:lost-windmill:1053\"))\n}",
     "metadata": {}
   },
   {
@@ -98,7 +98,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?woonplaats (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:locationCreated/schema:containedInPlace ?w .\n  ?w schema:name ?woonplaats .\n}\nGROUP BY ?woonplaats\nORDER BY DESC(?molens)\nLIMIT 15",
+    "value": "# [endpoint=./build/windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?woonplaats (COUNT(?m) AS ?molens) WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:windmills> ;\n     schema:locationCreated/schema:containedInPlace ?w .\n  ?w schema:name ?woonplaats .\n}\nGROUP BY ?woonplaats\nORDER BY DESC(?molens)\nLIMIT 15",
     "metadata": {}
   },
   {
@@ -110,7 +110,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?nummer ?bestaand ?verdwenen WHERE {\n  ?a schema:isPartOf <urn:drogevoeten:dataset:windmills> ; schema:name ?bestaand ; schema:identifier ?ia .\n  ?ia schema:propertyID \"Ten Bruggencate-nummer\" ; schema:value ?nummer .\n  ?b schema:isPartOf <urn:drogevoeten:dataset:lost-windmills> ; schema:name ?verdwenen ; schema:identifier ?ib .\n  ?ib schema:propertyID \"Ten Bruggencate-nummer\" ; schema:value ?nummer .\n}\nORDER BY ?nummer\nLIMIT 20",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?nummer ?bestaand ?verdwenen WHERE {\n  ?a schema:isPartOf <urn:drogevoeten:dataset:windmills> ; schema:name ?bestaand ; schema:identifier ?ia .\n  ?ia schema:propertyID \"Ten Bruggencate-nummer\" ; schema:value ?nummer .\n  ?b schema:isPartOf <urn:drogevoeten:dataset:lost-windmills> ; schema:name ?verdwenen ; schema:identifier ?ib .\n  ?ib schema:propertyID \"Ten Bruggencate-nummer\" ; schema:value ?nummer .\n}\nORDER BY ?nummer\nLIMIT 20",
     "metadata": {}
   }
 ]

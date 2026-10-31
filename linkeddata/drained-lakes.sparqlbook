@@ -14,7 +14,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?poldertype (COUNT(DISTINCT ?d) AS ?droogmakerijen) (MIN(?jaar) AS ?vroegst) (MAX(?jaar) AS ?laatst) WHERE {\n  ?d schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-type> ; schema:name ?poldertype .\n  ?e schema:about ?d ; schema:additionalType <urn:drogevoeten:term:event-type:reclamation> .\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n  BIND(xsd:integer(SUBSTR(STR(COALESCE(?s, ?eind)), 1, 4)) AS ?jaar)\n}\nGROUP BY ?poldertype\nORDER BY ?vroegst",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?poldertype (COUNT(DISTINCT ?d) AS ?droogmakerijen) (MIN(?jaar) AS ?vroegst) (MAX(?jaar) AS ?laatst) WHERE {\n  ?d schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-type> ; schema:name ?poldertype .\n  ?e schema:about ?d ; schema:additionalType <urn:drogevoeten:term:event-type:reclamation> .\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n  BIND(xsd:integer(SUBSTR(STR(COALESCE(?s, ?eind)), 1, 4)) AS ?jaar)\n}\nGROUP BY ?poldertype\nORDER BY ?vroegst",
     "metadata": {}
   },
   {
@@ -26,7 +26,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?jaartekst ?zekerheid ?polderpeil WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:reclamation> ;\n     schema:about ?d ;\n     dv:dateText ?jaartekst ;\n     dv:datePrecision ?zekerheid .\n  ?d schema:name ?naam .\n  OPTIONAL { ?d dv:waterLevel ?polderpeil }\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n}\nORDER BY COALESCE(?s, ?eind)\nLIMIT 15",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?jaartekst ?zekerheid ?polderpeil WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:reclamation> ;\n     schema:about ?d ;\n     dv:dateText ?jaartekst ;\n     dv:datePrecision ?zekerheid .\n  ?d schema:name ?naam .\n  OPTIONAL { ?d dv:waterLevel ?polderpeil }\n  OPTIONAL { ?e schema:startDate ?s } OPTIONAL { ?e schema:endDate ?eind }\n}\nORDER BY COALESCE(?s, ?eind)\nLIMIT 15",
     "metadata": {}
   },
   {
@@ -38,7 +38,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?soort (COUNT(?m) AS ?aantal) WHERE {\n  ?m schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-structure-type> ; schema:name ?soort .\n}\nGROUP BY ?soort\nORDER BY DESC(?aantal)",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?soort (COUNT(?m) AS ?aantal) WHERE {\n  ?m schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-structure-type> ; schema:name ?soort .\n}\nGROUP BY ?soort\nORDER BY DESC(?aantal)",
     "metadata": {}
   },
   {
@@ -50,7 +50,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?droogmakerij (COUNT(?m) AS ?maalinrichtingen) (GROUP_CONCAT(DISTINCT ?soort; separator=\", \") AS ?soorten) WHERE {\n  ?m schema:locationCreated/schema:containedInPlace ?d ;\n     schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-structure-type> ; schema:name ?soort .\n  ?d schema:additionalType <urn:drogevoeten:term:object-type:drained-lake> ; schema:name ?droogmakerij .\n}\nGROUP BY ?droogmakerij\nORDER BY DESC(?maalinrichtingen)\nLIMIT 15",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?droogmakerij (COUNT(?m) AS ?maalinrichtingen) (GROUP_CONCAT(DISTINCT ?soort; separator=\", \") AS ?soorten) WHERE {\n  ?m schema:locationCreated/schema:containedInPlace ?d ;\n     schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:drained-lake-structure-type> ; schema:name ?soort .\n  ?d schema:additionalType <urn:drogevoeten:term:object-type:drained-lake> ; schema:name ?droogmakerij .\n}\nGROUP BY ?droogmakerij\nORDER BY DESC(?maalinrichtingen)\nLIMIT 15",
     "metadata": {}
   },
   {
@@ -62,7 +62,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?polderpeil (COUNT(?d) AS ?droogmakerijen) WHERE {\n  ?d dv:waterLevel ?polderpeil .\n}\nGROUP BY ?polderpeil\nORDER BY DESC(?droogmakerijen)",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?polderpeil (COUNT(?d) AS ?droogmakerijen) WHERE {\n  ?d dv:waterLevel ?polderpeil .\n}\nGROUP BY ?polderpeil\nORDER BY DESC(?droogmakerijen)",
     "metadata": {}
   },
   {
@@ -74,7 +74,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/drained-lakes.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?droogmakerij ?maalinrichting ?gemaal ?stichtingsjaar WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:drained-lakes> ;\n     schema:identifier ?i ; schema:name ?maalinrichting ; schema:locationCreated/schema:containedInPlace/schema:name ?droogmakerij .\n  ?i schema:propertyID \"Nederlandse Gemalen Stichting gem_id\" ; schema:value ?nummer .\n  ?g schema:isPartOf <urn:drogevoeten:dataset:pumping-stations> ; schema:name ?gemaal ; schema:identifier ?j .\n  ?j schema:propertyID \"Nederlandse Gemalen Stichting gem_id\" ; schema:value ?nummer .\n  OPTIONAL { ?g schema:dateCreated ?stichtingsjaar }\n}\nORDER BY ?droogmakerij\nLIMIT 20",
+    "value": "# [endpoint=./build/drained-lakes.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?droogmakerij ?maalinrichting ?gemaal ?stichtingsjaar WHERE {\n  ?m schema:isPartOf <urn:drogevoeten:dataset:drained-lakes> ;\n     schema:identifier ?i ; schema:name ?maalinrichting ; schema:locationCreated/schema:containedInPlace/schema:name ?droogmakerij .\n  ?i schema:propertyID \"Nederlandse Gemalen Stichting gem_id\" ; schema:value ?nummer .\n  ?g schema:isPartOf <urn:drogevoeten:dataset:pumping-stations> ; schema:name ?gemaal ; schema:identifier ?j .\n  ?j schema:propertyID \"Nederlandse Gemalen Stichting gem_id\" ; schema:value ?nummer .\n  OPTIONAL { ?g schema:dateCreated ?stichtingsjaar }\n}\nORDER BY ?droogmakerij\nLIMIT 20",
     "metadata": {}
   }
 ]

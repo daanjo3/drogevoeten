@@ -1,0 +1,26 @@
+# Tijdlijn 1: wanneer werd deze plek polder? Indijking (Zeeuwse polders) of droogmaking (droogmakerijen) van het
+# gebied waarin het adres ligt. Data: build/zeeland-polders.ttl, build/drained-lakes.ttl.
+# Invoer: vervang de VALUES-regel door de coördinaten van het adres (WGS84).
+PREFIX schema: <https://schema.org/>
+PREFIX dv: <urn:drogevoeten:def:>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT ?polder ?gebeurtenis ?van ?tot ?jaartekst ?zekerheid ?bron WHERE {
+  VALUES (?lat ?lon) { (51.50096523 3.61479556) }
+  BIND(STRDT(CONCAT("POINT (", STR(?lon), " ", STR(?lat), ")"), geo:wktLiteral) AS ?hier)
+  VALUES ?soort { <urn:drogevoeten:term:object-type:polder> <urn:drogevoeten:term:object-type:drained-lake> }
+  ?p schema:additionalType ?soort ;
+     geo:hasGeometry/geo:asWKT ?vlak ;
+     schema:name ?polder .
+  FILTER(geof:sfContains(?vlak, ?hier))
+  ?e schema:about ?p ;
+     schema:additionalType/schema:name ?gebeurtenis ;
+     prov:wasDerivedFrom ?bron .
+  FILTER(LANG(?gebeurtenis) = "nl")
+  OPTIONAL { ?e schema:startDate ?van }
+  OPTIONAL { ?e schema:endDate ?tot }
+  OPTIONAL { ?e dv:dateText ?jaartekst }
+  OPTIONAL { ?e dv:datePrecision ?zekerheid }
+}

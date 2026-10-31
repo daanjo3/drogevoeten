@@ -133,14 +133,28 @@ def _term_ttl(t, prefixes):
     return _qname(t, prefixes) or f"<{t}>"
 
 
-def to_turtle(g, prefixes=None, header=""):
+def _apply(s, po, transform):
+    """Apply an optional triple transform (lib/merge.remapper) to one subject's triples -> (subject, [(p, o)])."""
+    if transform is None:
+        return s, po
+    out, s2 = [], s
+    seen = set()
+    for p, o in po:
+        for s2, p2, o2 in transform(s, p, o):
+            if (p2, o2) not in seen:
+                seen.add((p2, o2))
+                out.append((p2, o2))
+    return s2, out
+
+
+def to_turtle(g, prefixes=None, header="", transform=None, with_prefixes=True):
     prefixes = dict(PREFIXES, **(prefixes or {}))
-    out = [f"@prefix {p}: <{ns}> ." for p, ns in prefixes.items()]
+    out = [f"@prefix {p}: <{ns}> ." for p, ns in prefixes.items()] if with_prefixes else []
     if header:
         out += [""] + ["# " + line for line in header.splitlines()]
     a = IRI(RDF + "type")
-    for s in g.subjects():
-        po = g._subjects[s]
+    for s0 in g.subjects():
+        s, po = _apply(s0, g._subjects[s0], transform)
         po = sorted(po, key=lambda x: 0 if x[0] == a else 1)  # rdf:type first, rest in insertion order
         lines, i = [], 0
         while i < len(po):
@@ -156,7 +170,8 @@ def to_turtle(g, prefixes=None, header=""):
     return "\n".join(out) + "\n"
 
 
-def to_ntriples(g):
+def to_ntriples(g, transform=None, skip=None):
+    """skip: a set of already written lines (to write a union of graphs without repeating shared nodes)."""
     def term(t):
         if isinstance(t, Lit):
             s = f'"{_esc(t.value)}"'
@@ -164,7 +179,17 @@ def to_ntriples(g):
         if isinstance(t, RelIRI):
             raise ValueError("relative IRIs cannot be written as N-Triples")
         return f"<{t}>"
-    return "".join(f"{term(s)} {term(p)} {term(o)} .\n" for s, p, o in g.triples())
+    lines = []
+    for s0 in g.subjects():
+        s, po = _apply(s0, g._subjects[s0], transform)
+        for p, o in po:
+            line = f"{term(s)} {term(p)} {term(o)} .\n"
+            if skip is not None and not str(s).startswith("urn:drogevoeten:id:"):  # shared nodes: write once
+                if line in skip:
+                    continue
+                skip.add(line)
+            lines.append(line)
+    return "".join(lines)
 
 
 def to_jsonld(g, prefixes=None):

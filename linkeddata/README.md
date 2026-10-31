@@ -50,6 +50,10 @@ Voorbeeldqueries voor de VS Code-extensie *SPARQL Notebook* (Zazuko), op de best
 | `breach-pools.sparqlbook` | wielen |
 | `zeeland.sparqlbook` | dijken, polders, geschenkwoningen, verdronken dorpen en Deltawerken (via de gedeelde gemeenten) |
 | `water-boards.sparqlbook` | IMWA-gemalen, -sluizen en -stuwen (en de historische gemalen via de gedeelde objectsoort) |
+| `shared-concepts.sparqlbook` | wat het samenvoegen oplevert: gedeelde termen, woonplaatsen, polders en droogmakerijen over de datasets heen |
+| `timeline.sparqlbook` | de tijdlijn per adres: indijking of droogmaking, gemalen en dijken in de buurt |
+
+**Tijdlijn per adres:** `queries/timeline-polder.rq`, `timeline-gemalen.rq` en `timeline-dijken.rq` geven de indijking of droogmaking van de polder waarin een adres ligt, de stichting van de gemalen in de buurt (ca. 3 km) en de aanleg van de dijken in de buurt (ca. 250 m, alleen Zeeland). Vervang de `VALUES`-regel door de coördinaten van het adres. Elke query draait op een paar kleine datasets, in minder dan een tiende seconde (DECISIONS §30).
 
 `make notebook` maakt ze opnieuw en test elke query; de queries staan in `make_sparqlbook.py` (gemalen) en `notebook_cells.py` (de rest).
 
@@ -73,6 +77,21 @@ Stand op 31-10-2026. Alle datasets komen uit de oogst van het prototype van 28-1
 | `water-board-pumping-stations`, `water-board-locks`, `water-board-weirs` | Het Waterschapshuis, IMWA (PDOK) | 8.565 + 890 + 53.137 | CC BY-SA 4.0 |
 
 Niet gebouwd: de Zeeuwse **poldernamen**, omdat er geen licentie te vinden is.
+
+**Alles samen:**
+
+| Dataset | Inhoud | Licentie |
+|---|---|---|
+| `droge-voeten` | alle datasets in één bestand (`build/droge-voeten.ttl`, `.nt`) | CC BY-SA 4.0 (bevat IMWA) |
+| `concept-merges` | welke termen en plaatsen uit verschillende datasets tot één knoop zijn samengevoegd (`dct:replaces`), en volgens welke regel | CC0 |
+
+Termen, woonplaatsen en gebieden die in meer dan één dataset voorkomen, zijn één knoop, ook in de losse datasets. Voorbeelden:
+- "poldermolen" als molenfunctie en als soort maalinrichting;
+- Meppel bij de molens en bij de gemalen;
+- de Onrustpolder bij een dijk is het polderrecord;
+- het bemalingsgebied "De Beemster" is de droogmakerij.
+
+De regels staan in DECISIONS §29.
 
 ## Review van termen en plaatsen
 

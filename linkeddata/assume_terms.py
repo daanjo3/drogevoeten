@@ -6,7 +6,8 @@ For every row in terms/<field>.csv with status 'voorstel' (an exact label match 
     dropped, because exact labels there were homonyms in practice (AAT 'gemalen' = royal consorts);
   - the CHT term is accepted ('aangenomen') when one of its broader terms (up to 3 levels) lies in the domain of the
     field (DOMAINS); otherwise it is rejected ('afgewezen') with the broader terms as the reason.
-Rows with status 'twijfel' or '' become 'afgewezen' (no exact term). Rows already reviewed are left alone.
+Rows with status 'twijfel' or '' become 'afgewezen' (no exact term). Rows already reviewed are left alone, except with
+--opnieuw: rows rejected for their domain are judged again (the candidate URI is kept in 'opmerking').
 Network: NDE Termennetwerk (lookup by URI).
 
 Run:  python3 -I linkeddata/assume_terms.py [field ...]
@@ -14,6 +15,7 @@ Run:  python3 -I linkeddata/assume_terms.py [field ...]
 import csv
 import json
 import os
+import re
 import sys
 import urllib.request
 
@@ -30,10 +32,11 @@ DOMAINS = {
     "drained-lake-structure-type": MILLS | {"gemalen", "motorgemalen", "stoomgemalen"},
     "pumping-station-function": {"gemalen"},
     "drained-lake-type": {"polders", "droogmakerijen (landschapszone)"},
-    "dike-original-function": {"dijken", "waterkeringen", "dammen"},
-    "dike-later-function": {"dijken", "waterkeringen", "dammen"},
+    "dike-original-function": {"dijken", "waterkeringen", "dammen", "wallen (verdedigingswerk)"},
+    "dike-later-function": {"dijken", "waterkeringen", "dammen", "wallen (verdedigingswerk)"},
     "facade-material": {"materialen", "bouwmaterialen", "hout", "kunststoffen", "steen"},
-    "roofing": {"materialen", "bouwmaterialen", "dakbedekkingen", "dakbedekkingsmaterialen"},
+    "roofing": {"materialen", "bouwmaterialen", "dakbedekking", "dakbedekkingen", "dakbedekkingsmaterialen",
+                "materialen naar vorm en samenstelling"},
     "land-consolidation-form": {"landinrichting", "ruilverkaveling", "functionele activiteiten"},
     "breach-pool-type": {"waterpartijen", "landschapselementen", "poelen"},
 }
@@ -114,7 +117,7 @@ def not_linked(field):
     print(f"{field}: niet gekoppeld")
 
 
-def main(only):
+def main(only, again=False):
     if not only or "object-type" in only:
         own_object_types()
     for field in sorted(NOT_LINKED):
@@ -129,6 +132,9 @@ def main(only):
         rows = list(csv.DictReader(open(path, encoding="utf-8")))
         n_acc = n_rej = 0
         for r in rows:
+            m = re.search(r"CHT-kandidaat <([^>]+)> valt buiten", r["opmerking"]) if again else None
+            if m and r["status"] == "afgewezen":
+                r["status"], r["cht"] = "voorstel", m.group(1)
             if r["status"] in ("gecontroleerd", "aangenomen", "afgewezen", "weglaten"):
                 continue
             hint = r["opmerking"]
@@ -141,7 +147,8 @@ def main(only):
                     r["status"], r["opmerking"] = "aangenomen", f"aangenomen ({WHO}): CHT-term onder {', '.join(sorted(labels & domain))}"
                     n_acc += 1
                     continue
-                r["opmerking"] = f"afgewezen ({WHO}): CHT-kandidaat valt buiten het domein (breder: {', '.join(sorted(labels)[:4])})"
+                r["opmerking"] = (f"afgewezen ({WHO}): CHT-kandidaat <{cht}> valt buiten het domein "
+                                  f"(breder: {', '.join(sorted(labels)[:4])})")
             else:
                 r["opmerking"] = f"afgewezen ({WHO}): geen exacte passende term" + (f"; eerdere hint: {hint}" if hint else "")
             r["cht"], r["status"] = "", "afgewezen"
@@ -151,4 +158,5 @@ def main(only):
 
 
 if __name__ == "__main__":
-    main(set(sys.argv[1:]))
+    args = sys.argv[1:]
+    main({a for a in args if not a.startswith("--")}, again="--opnieuw" in args)

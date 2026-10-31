@@ -405,6 +405,10 @@ Bron: Het Waterschapshuis, IMWA kunstwerken (PDOK, OGC API), **CC BY-SA 4.0**. S
 
 ---
 
+## Samen: één dataset met gedeelde concepten (31-10-2026, uitgevoerd)
+
+`build.py` maakt naast de losse datasets `droge-voeten` (alles samen, CC BY-SA 4.0) en `concept-merges` (welke knopen zijn samengevoegd en waarom). Termen, woonplaatsen en gebieden die in meer dan één dataset voorkomen, zijn één knoop, ook in de losse datasets. De regels staan in DECISIONS §29 en `lib/merge.py`. Uitbreiden: een nieuw betekenisdomein toevoegen aan `TERM_GROUPS`, of een nieuw gebiedspredicaat aan `AREA_PREDICATES`.
+
 ## Fase 2: links tussen de datasets (later)
 
 Elke soort link wordt een **eigen linkset-dataset**: VoID, met per link de methode en `prov:wasDerivedFrom`, en een eigen beschrijving in de catalogus. Waar het kan, hergebruiken we de logica uit `prototype/datalayer/build_v3.py`:
@@ -421,7 +425,7 @@ Elke soort link wordt een **eigen linkset-dataset**: VoID, met per link de metho
   - wiel bij dijk;
   - verdronken dorp in polder;
   - eventueel de provincie bij records zonder provincieveld (open vraag).
-- **Gedeelde plaatsen** (`drained-area`, `receiving-water`, `polder`, `locality`, ...) koppelen aan echte gebieden (IMWA-afvoergebieden, onze polders, BAG-woonplaatsen, Wikidata). Alleen bij een eenduidige naam plus ligging, na review via `sameAs` of als linkset.
+- **Gedeelde plaatsen:** de polder bij een dijk en het bemalingsgebied zijn al waar mogelijk samengevoegd met onze polder- en droogmakerijrecords (DECISIONS §29). Nog te doen: koppelen aan IMWA-afvoergebieden, BAG-woonplaatsen en Wikidata, alleen bij een eenduidige naam plus ligging.
 
 ## Open punten
 

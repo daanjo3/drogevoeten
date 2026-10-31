@@ -14,7 +14,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?rivier (COUNT(?w) AS ?wielen) WHERE {\n  ?w dv:alongRiver/schema:name ?rivier .\n}\nGROUP BY ?rivier\nORDER BY DESC(?wielen)\nLIMIT 20",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?rivier (COUNT(?w) AS ?wielen) WHERE {\n  ?w dv:alongRiver/schema:name ?rivier .\n}\nGROUP BY ?rivier\nORDER BY DESC(?wielen)\nLIMIT 20",
     "metadata": {}
   },
   {
@@ -26,7 +26,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?andereNaam ?woonplaats WHERE {\n  ?w schema:additionalType <urn:drogevoeten:term:object-type:breach-pool> ;\n     schema:name ?naam .\n  FILTER(!CONTAINS(?naam, \"(naam onbekend)\"))\n  OPTIONAL { ?w schema:alternateName ?andereNaam }\n  OPTIONAL { ?w schema:containedInPlace/schema:name ?woonplaats }\n}\nORDER BY ?naam\nLIMIT 30",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?andereNaam ?woonplaats WHERE {\n  ?w schema:additionalType <urn:drogevoeten:term:object-type:breach-pool> ;\n     schema:name ?naam .\n  FILTER(!CONTAINS(?naam, \"(naam onbekend)\"))\n  OPTIONAL { ?w schema:alternateName ?andereNaam }\n  OPTIONAL { ?w schema:containedInPlace/schema:name ?woonplaats }\n}\nORDER BY ?naam\nLIMIT 30",
     "metadata": {}
   },
   {
@@ -38,7 +38,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?wiel ?naam ?jaar ?beschrijving WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:dike-breach> ;\n     schema:about ?w ;\n     schema:startDate ?jaar .\n  ?w schema:name ?naam .\n  BIND(STRAFTER(STR(?w), \"breach-pool:\") AS ?wiel)\n  OPTIONAL { ?w schema:description ?beschrijving }\n}\nORDER BY ?jaar",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?wiel ?naam ?jaar ?beschrijving WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:dike-breach> ;\n     schema:about ?w ;\n     schema:startDate ?jaar .\n  ?w schema:name ?naam .\n  BIND(STRAFTER(STR(?w), \"breach-pool:\") AS ?wiel)\n  OPTIONAL { ?w schema:description ?beschrijving }\n}\nORDER BY ?jaar",
     "metadata": {}
   },
   {
@@ -50,7 +50,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?woonplaats (COUNT(?w) AS ?wielen) WHERE {\n  ?w schema:additionalType <urn:drogevoeten:term:object-type:breach-pool> ;\n     schema:containedInPlace/schema:name ?woonplaats .\n}\nGROUP BY ?woonplaats\nORDER BY DESC(?wielen)\nLIMIT 15",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?woonplaats (COUNT(?w) AS ?wielen) WHERE {\n  ?w schema:additionalType <urn:drogevoeten:term:object-type:breach-pool> ;\n     schema:containedInPlace/schema:name ?woonplaats .\n}\nGROUP BY ?woonplaats\nORDER BY DESC(?wielen)\nLIMIT 15",
     "metadata": {}
   },
   {
@@ -62,7 +62,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?foto ?fotograaf WHERE {\n  ?w schema:name ?naam ;\n     schema:associatedMedia ?m .\n  ?m schema:thumbnailUrl ?foto .\n  OPTIONAL { ?m schema:copyrightNotice ?fotograaf }\n  FILTER(!CONTAINS(?naam, \"(naam onbekend)\"))\n}\nORDER BY ?naam\nLIMIT 20",
+    "value": "# [endpoint=./build/breach-pools.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?foto ?fotograaf WHERE {\n  ?w schema:name ?naam ;\n     schema:associatedMedia ?m .\n  ?m schema:thumbnailUrl ?foto .\n  OPTIONAL { ?m schema:copyrightNotice ?fotograaf }\n  FILTER(!CONTAINS(?naam, \"(naam onbekend)\"))\n}\nORDER BY ?naam\nLIMIT 20",
     "metadata": {}
   }
 ]

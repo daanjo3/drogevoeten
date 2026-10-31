@@ -14,7 +14,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/water-board-locks.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?waterschap (COUNT(DISTINCT ?g) AS ?gemalen) (COUNT(DISTINCT ?s) AS ?sluizen) WHERE {\n  ?k schema:maintainer ?w .\n  ?w schema:name ?waterschap .\n  OPTIONAL { ?k schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> . BIND(?k AS ?g) }\n  OPTIONAL { ?k schema:additionalType <urn:drogevoeten:term:object-type:lock> . BIND(?k AS ?s) }\n}\nGROUP BY ?waterschap\nORDER BY DESC(?gemalen)",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/water-board-locks.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?waterschap (COUNT(DISTINCT ?g) AS ?gemalen) (COUNT(DISTINCT ?s) AS ?sluizen) WHERE {\n  ?k schema:maintainer ?w .\n  ?w schema:name ?waterschap .\n  OPTIONAL { ?k schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> . BIND(?k AS ?g) }\n  OPTIONAL { ?k schema:additionalType <urn:drogevoeten:term:object-type:lock> . BIND(?k AS ?s) }\n}\nGROUP BY ?waterschap\nORDER BY DESC(?gemalen)",
     "metadata": {}
   },
   {
@@ -26,7 +26,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?functie (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:imwa-function> ; schema:name ?functie .\n}\nGROUP BY ?functie\nORDER BY DESC(?gemalen)",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?functie (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:imwa-function> ; schema:name ?functie .\n}\nGROUP BY ?functie\nORDER BY DESC(?gemalen)",
     "metadata": {}
   },
   {
@@ -38,7 +38,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/water-board-weirs.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?waterschap (COUNT(?s) AS ?stuwen) WHERE {\n  ?s schema:maintainer/schema:name ?waterschap .\n}\nGROUP BY ?waterschap\nORDER BY DESC(?stuwen)",
+    "value": "# [endpoint=./build/water-board-weirs.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?waterschap (COUNT(?s) AS ?stuwen) WHERE {\n  ?s schema:maintainer/schema:name ?waterschap .\n}\nGROUP BY ?waterschap\nORDER BY DESC(?stuwen)",
     "metadata": {}
   },
   {
@@ -50,7 +50,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/water-board-locks.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset (COUNT(?k) AS ?totaal) (SUM(?onbekend) AS ?zonderNaam) WHERE {\n  ?k schema:isPartOf/schema:name ?dataset ; schema:name ?naam .\n  FILTER(LANG(?naam) = \"nl\")\n  BIND(IF(CONTAINS(?naam, \"(naam onbekend)\"), 1, 0) AS ?onbekend)\n}\nGROUP BY ?dataset",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/water-board-locks.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?dataset (COUNT(?k) AS ?totaal) (SUM(?onbekend) AS ?zonderNaam) WHERE {\n  ?k schema:isPartOf/schema:name ?dataset ; schema:name ?naam .\n  FILTER(LANG(?naam) = \"nl\")\n  BIND(IF(CONTAINS(?naam, \"(naam onbekend)\"), 1, 0) AS ?onbekend)\n}\nGROUP BY ?dataset",
     "metadata": {}
   },
   {
@@ -62,7 +62,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?dataset (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?dataset",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?dataset (COUNT(?g) AS ?gemalen) WHERE {\n  ?g schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?dataset",
     "metadata": {}
   },
   {
@@ -74,7 +74,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?waterschap ?lat ?lon WHERE {\n  ?g schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> ;\n     schema:name ?naam ;\n     schema:maintainer/schema:name ?waterschap ;\n     schema:locationCreated/schema:geo ?geo .\n  ?geo schema:latitude ?lat ; schema:longitude ?lon .\n  BIND((?lat - 51.4988) * 111.2 AS ?dy)\n  BIND((?lon - 3.6136) * 69.3 AS ?dx)\n  BIND(?dx * ?dx + ?dy * ?dy AS ?km2)\n}\nORDER BY ?km2\nLIMIT 10",
+    "value": "# [endpoint=./build/water-board-pumping-stations.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?waterschap ?lat ?lon WHERE {\n  ?g schema:additionalType <urn:drogevoeten:term:object-type:pumping-station> ;\n     schema:name ?naam ;\n     schema:maintainer/schema:name ?waterschap ;\n     schema:locationCreated/schema:geo ?geo .\n  ?geo schema:latitude ?lat ; schema:longitude ?lon .\n  BIND((?lat - 51.4988) * 111.2 AS ?dy)\n  BIND((?lon - 3.6136) * 69.3 AS ?dx)\n  BIND(?dx * ?dx + ?dy * ?dy AS ?km2)\n}\nORDER BY ?km2\nLIMIT 10",
     "metadata": {}
   }
 ]

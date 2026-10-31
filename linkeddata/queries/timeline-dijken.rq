@@ -1,0 +1,35 @@
+# Tijdlijn 3: wanneer zijn de dijken in de buurt aangelegd? Dijken die een vierkant van ca. 250 m rond het adres
+# raken, en apart gemarkeerd: de dijken die volgens de bron bij de polder van dit adres horen (dv:inPolder).
+# Data: build/zeeland-dikes.ttl (+ zeeland-polders.ttl voor 'van deze polder'). Alleen Zeeland.
+# Invoer: vervang de VALUES-regel (WGS84). Een jaartal staat in ?gebouwd (zeker) of in de aanleggebeurtenis.
+PREFIX schema: <https://schema.org/>
+PREFIX dv: <urn:drogevoeten:def:>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+
+SELECT ?dijk ?gebouwd ?aanlegVan ?aanlegTot ?jaartekst ?functie ?status ?vanDezePolder WHERE {
+  VALUES (?lat ?lon) { (51.50096523 3.61479556) }
+  BIND(0.00225 AS ?dlat)  # 250 m
+  BIND(0.0036 AS ?dlon)   # 250 m op 51-53 graden noorderbreedte
+  BIND(STRDT(CONCAT("POLYGON ((", STR(?lon - ?dlon), " ", STR(?lat - ?dlat), ", ", STR(?lon + ?dlon), " ", STR(?lat - ?dlat), ", ",
+                    STR(?lon + ?dlon), " ", STR(?lat + ?dlat), ", ", STR(?lon - ?dlon), " ", STR(?lat + ?dlat), ", ",
+                    STR(?lon - ?dlon), " ", STR(?lat - ?dlat), "))"), geo:wktLiteral) AS ?vierkant)
+  ?d schema:isPartOf <urn:drogevoeten:dataset:zeeland-dikes> ;
+     schema:name ?dijk ;
+     schema:locationCreated/geo:hasGeometry/geo:asWKT ?lijn .
+  FILTER(geof:sfIntersects(?lijn, ?vierkant))
+  OPTIONAL { ?d schema:dateCreated ?gebouwd }
+  OPTIONAL { ?e schema:about ?d ; schema:additionalType <urn:drogevoeten:term:event-type:construction> .
+             OPTIONAL { ?e schema:startDate ?aanlegVan } OPTIONAL { ?e schema:endDate ?aanlegTot }
+             OPTIONAL { ?e dv:dateText ?jaartekst } }
+  OPTIONAL { ?d schema:additionalType ?f . ?f schema:name ?functie .
+             FILTER(STRSTARTS(STR(?f), "urn:drogevoeten:term:dike-") && LANG(?functie) = "nl") }
+  OPTIONAL { ?d schema:creativeWorkStatus/schema:name ?status }
+  OPTIONAL {
+    ?d dv:inPolder ?p .
+    ?p geo:hasGeometry/geo:asWKT ?vlak .
+    FILTER(geof:sfContains(?vlak, STRDT(CONCAT("POINT (", STR(?lon), " ", STR(?lat), ")"), geo:wktLiteral)))
+    BIND(true AS ?vanDezePolder)
+  }
+}
+ORDER BY COALESCE(?gebouwd, ?aanlegVan, ?aanlegTot)

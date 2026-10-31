@@ -1,0 +1,44 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Tijdlijn per adres\n\nDrie queries voor de tijdlijn \"Hoe werd dit droog?\", elk op een paar kleine datasets, zodat ze in een fractie van een seconde antwoorden. Ze staan ook als losse bestanden in `queries/timeline-*.rq`; een app vervangt alleen de `VALUES`-regel door de coördinaten van het adres. Hier: **Abdij 4, Middelburg** (de HackaLOD-locatie).\n\n**Eerst:** draai `make` in `linkeddata/`.\n\n- Ruimtelijk werkt met GeoSPARQL-functies (`geof:sfContains`, `geof:sfIntersects`), die Oxigraph kent. `geof:distance` kent het niet; daarom een vierkant rond het adres en afstanden in klassen.\n- De links helpen: `bemaaltDezePolder` en `vanDezePolder` zijn `true` als het gemaal of de dijk volgens de bron bij de polder van dit adres hoort (via de samengevoegde polderknoop, DECISIONS §29).",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Wanneer werd deze plek polder?\n\nDe indijking (Zeeuwse polders) of droogmaking (droogmakerijen) van het gebied waarin het adres ligt.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-polders.ttl]\n# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\n# Tijdlijn 1: wanneer werd deze plek polder? Indijking (Zeeuwse polders) of droogmaking (droogmakerijen) van het\n# gebied waarin het adres ligt. Data: build/zeeland-polders.ttl, build/drained-lakes.ttl.\n# Invoer: vervang de VALUES-regel door de coördinaten van het adres (WGS84).\n\nSELECT ?polder ?gebeurtenis ?van ?tot ?jaartekst ?zekerheid ?bron WHERE {\n  VALUES (?lat ?lon) { (51.50096523 3.61479556) }\n  BIND(STRDT(CONCAT(\"POINT (\", STR(?lon), \" \", STR(?lat), \")\"), geo:wktLiteral) AS ?hier)\n  VALUES ?soort { <urn:drogevoeten:term:object-type:polder> <urn:drogevoeten:term:object-type:drained-lake> }\n  ?p schema:additionalType ?soort ;\n     geo:hasGeometry/geo:asWKT ?vlak ;\n     schema:name ?polder .\n  FILTER(geof:sfContains(?vlak, ?hier))\n  ?e schema:about ?p ;\n     schema:additionalType/schema:name ?gebeurtenis ;\n     prov:wasDerivedFrom ?bron .\n  FILTER(LANG(?gebeurtenis) = \"nl\")\n  OPTIONAL { ?e schema:startDate ?van }\n  OPTIONAL { ?e schema:endDate ?tot }\n  OPTIONAL { ?e dv:dateText ?jaartekst }\n  OPTIONAL { ?e dv:datePrecision ?zekerheid }\n}",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Wanneer zijn de gemalen in de buurt gesticht?\n\nGemalen binnen ca. 3 km, van dichtbij naar ver.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n# [endpoint=./build/zeeland-polders.ttl]\n# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\n# Tijdlijn 2: wanneer zijn de gemalen in de buurt gesticht? Gemalen binnen ca. 3 km (vierkant rond het adres), en\n# apart gemarkeerd: de gemalen die volgens de bron de polder of droogmakerij van dit adres bemalen (dv:drainsArea).\n# Data: build/pumping-stations.ttl (+ zeeland-polders.ttl en drained-lakes.ttl voor 'bemaalt deze polder').\n# Invoer: vervang de VALUES-regel (WGS84). De afstand is een benadering in klassen (SPARQL heeft geen wortel);\n# de volgorde is van dichtbij naar ver.\n\nSELECT ?gemaal ?gesticht ?status ?functie ?bemaaltDezePolder ?afstandKm ?gemalenNl WHERE {\n  VALUES (?lat ?lon) { (51.50096523 3.61479556) }\n  BIND(3.0 AS ?km)\n  ?g schema:isPartOf <urn:drogevoeten:dataset:pumping-stations> ;\n     schema:name ?gemaal ;\n     schema:locationCreated/schema:geo ?pt .\n  ?pt schema:latitude ?la ; schema:longitude ?lo .\n  BIND(xsd:double(?la - ?lat) * 110.54 AS ?dy)  # double: decimals overflow when squared\n  BIND(xsd:double(?lo - ?lon) * 69.4 AS ?dx)\n  FILTER(?dy > -?km && ?dy < ?km && ?dx > -?km && ?dx < ?km)\n  BIND(?dx * ?dx + ?dy * ?dy AS ?km2)\n  BIND(ROUND(?km2 * 100) / 100 AS ?afstandKm2)\n  BIND(IF(?km2 < 0.25, \"< 0,5 km\", IF(?km2 < 1, \"0,5-1 km\", IF(?km2 < 4, \"1-2 km\", \"2-3 km\"))) AS ?afstandKm)  # no sqrt in SPARQL\n  OPTIONAL { ?g schema:dateCreated ?gesticht }\n  OPTIONAL { ?g schema:creativeWorkStatus/schema:name ?status }\n  OPTIONAL { ?g schema:additionalType ?f . ?f schema:inDefinedTermSet <urn:drogevoeten:termset:pumping-station-function> ; schema:name ?functie }\n  OPTIONAL { ?g schema:url ?gemalenNl }\n  OPTIONAL {\n    ?g dv:drainsArea ?p .\n    ?p geo:hasGeometry/geo:asWKT ?vlak .\n    FILTER(geof:sfContains(?vlak, STRDT(CONCAT(\"POINT (\", STR(?lon), \" \", STR(?lat), \")\"), geo:wktLiteral)))\n    BIND(true AS ?bemaaltDezePolder)\n  }\n}\nORDER BY ?km2",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Wanneer zijn de dijken in de buurt aangelegd?\n\nDijken die een vierkant van ca. 250 m rond het adres raken (alleen Zeeland).",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n# [endpoint=./build/zeeland-polders.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\n# Tijdlijn 3: wanneer zijn de dijken in de buurt aangelegd? Dijken die een vierkant van ca. 250 m rond het adres\n# raken, en apart gemarkeerd: de dijken die volgens de bron bij de polder van dit adres horen (dv:inPolder).\n# Data: build/zeeland-dikes.ttl (+ zeeland-polders.ttl voor 'van deze polder'). Alleen Zeeland.\n# Invoer: vervang de VALUES-regel (WGS84). Een jaartal staat in ?gebouwd (zeker) of in de aanleggebeurtenis.\n\nSELECT ?dijk ?gebouwd ?aanlegVan ?aanlegTot ?jaartekst ?functie ?status ?vanDezePolder WHERE {\n  VALUES (?lat ?lon) { (51.50096523 3.61479556) }\n  BIND(0.00225 AS ?dlat)  # 250 m\n  BIND(0.0036 AS ?dlon)   # 250 m op 51-53 graden noorderbreedte\n  BIND(STRDT(CONCAT(\"POLYGON ((\", STR(?lon - ?dlon), \" \", STR(?lat - ?dlat), \", \", STR(?lon + ?dlon), \" \", STR(?lat - ?dlat), \", \",\n                    STR(?lon + ?dlon), \" \", STR(?lat + ?dlat), \", \", STR(?lon - ?dlon), \" \", STR(?lat + ?dlat), \", \",\n                    STR(?lon - ?dlon), \" \", STR(?lat - ?dlat), \"))\"), geo:wktLiteral) AS ?vierkant)\n  ?d schema:isPartOf <urn:drogevoeten:dataset:zeeland-dikes> ;\n     schema:name ?dijk ;\n     schema:locationCreated/geo:hasGeometry/geo:asWKT ?lijn .\n  FILTER(geof:sfIntersects(?lijn, ?vierkant))\n  OPTIONAL { ?d schema:dateCreated ?gebouwd }\n  OPTIONAL { ?e schema:about ?d ; schema:additionalType <urn:drogevoeten:term:event-type:construction> .\n             OPTIONAL { ?e schema:startDate ?aanlegVan } OPTIONAL { ?e schema:endDate ?aanlegTot }\n             OPTIONAL { ?e dv:dateText ?jaartekst } }\n  OPTIONAL { ?d schema:additionalType ?f . ?f schema:name ?functie .\n             FILTER(STRSTARTS(STR(?f), \"urn:drogevoeten:term:dike-\") && LANG(?functie) = \"nl\") }\n  OPTIONAL { ?d schema:creativeWorkStatus/schema:name ?status }\n  OPTIONAL {\n    ?d dv:inPolder ?p .\n    ?p geo:hasGeometry/geo:asWKT ?vlak .\n    FILTER(geof:sfContains(?vlak, STRDT(CONCAT(\"POINT (\", STR(?lon), \" \", STR(?lat), \")\"), geo:wktLiteral)))\n    BIND(true AS ?vanDezePolder)\n  }\n}\nORDER BY COALESCE(?gebouwd, ?aanlegVan, ?aanlegTot)",
+    "metadata": {}
+  }
+]

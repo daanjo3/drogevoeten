@@ -19,6 +19,7 @@ Hier worden de bronlagen van het prototype omgezet naar losse linked datasets vo
   `sameAs` alleen na menselijke review. Zie DECISIONS §7–9 en §22.
 - **"Geen", "Nvt" en dergelijke blijven gewone waarden; samengestelde waarden worden niet systematisch gesplitst**, alleen via een expliciete splitstabel in de module voor duidelijke gevallen in een kleine codelijst (DECISIONS §27, teruggedraaid op verzoek van Jari: niet opnieuw invoeren). Maak termen en plaatsen altijd met `terms.link()`, `terms.link_place()`, `terms.terms()` of `terms.places()`.
 - Geen persoonsgegevens van privépersonen (DECISIONS §23).
+- **Gedeelde concepten over datasets heen** worden samengevoegd in `lib/merge.py` (DECISIONS §29); nieuwe velden met hetzelfde begrippenkader horen in `TERM_GROUPS`. Een losse dataset bouwen (`build.py <slug>`) slaat het samenvoegen over; alleen een volledige bouw maakt `droge-voeten` en `concept-merges`.
 - **Verzin niets.** Een onbekende waarde geeft geen statement; een onleesbare waarde wordt gemeld in `report.json`.
 - Python alleen standaardbibliotheek, altijd `python3 -I`. pyshacl en pyoxigraph alleen via `uv` in `make validate` en `make notebook`.
 - Hergebruik helpers uit `prototype/datalayer/build_v3.py` via `lib/source.py`.

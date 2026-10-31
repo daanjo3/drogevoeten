@@ -14,7 +14,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?vorm (COUNT(DISTINCT ?p) AS ?projecten) (ROUND(SUM(?ha)) AS ?hectare) WHERE {\n  ?p schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:land-consolidation-form> ; schema:name ?vorm .\n  OPTIONAL { ?p schema:additionalProperty/schema:value ?ha }\n}\nGROUP BY ?vorm\nORDER BY DESC(?projecten)",
+    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?vorm (COUNT(DISTINCT ?p) AS ?projecten) (ROUND(SUM(?ha)) AS ?hectare) WHERE {\n  ?p schema:additionalType ?t .\n  ?t schema:inDefinedTermSet <urn:drogevoeten:termset:land-consolidation-form> ; schema:name ?vorm .\n  OPTIONAL { ?p schema:additionalProperty/schema:value ?ha }\n}\nGROUP BY ?vorm\nORDER BY DESC(?projecten)",
     "metadata": {}
   },
   {
@@ -26,7 +26,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?provincie (COUNT(?p) AS ?projecten) WHERE {\n  ?p schema:additionalType <urn:drogevoeten:term:object-type:land-consolidation-project> ;\n     schema:containedInPlace ?prov .\n  ?prov schema:name ?provincie .\n}\nGROUP BY ?provincie\nORDER BY DESC(?projecten)",
+    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?provincie (COUNT(?p) AS ?projecten) WHERE {\n  ?p schema:additionalType <urn:drogevoeten:term:object-type:land-consolidation-project> ;\n     schema:containedInPlace ?prov .\n  ?prov schema:name ?provincie .\n}\nGROUP BY ?provincie\nORDER BY DESC(?projecten)",
     "metadata": {}
   },
   {
@@ -38,7 +38,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?decennium (COUNT(?e) AS ?projecten) WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:execution> ; schema:startDate ?d .\n  BIND(xsd:integer(FLOOR(xsd:integer(SUBSTR(STR(?d), 1, 4)) / 10) * 10) AS ?decennium)\n}\nGROUP BY ?decennium\nORDER BY ?decennium",
+    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?decennium (COUNT(?e) AS ?projecten) WHERE {\n  ?e schema:additionalType <urn:drogevoeten:term:event-type:execution> ; schema:startDate ?d .\n  BIND(xsd:integer(FLOOR(xsd:integer(SUBSTR(STR(?d), 1, 4)) / 10) * 10) AS ?decennium)\n}\nGROUP BY ?decennium\nORDER BY ?decennium",
     "metadata": {}
   },
   {
@@ -50,7 +50,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?ha ?vorm ?status WHERE {\n  ?p schema:name ?naam ;\n     schema:additionalProperty ?a .\n  ?a schema:value ?ha .\n  OPTIONAL { ?p schema:additionalType ?t . ?t schema:inDefinedTermSet <urn:drogevoeten:termset:land-consolidation-form> ; schema:name ?vorm }\n  OPTIONAL { ?p dv:status/schema:name ?status }\n}\nORDER BY DESC(?ha)\nLIMIT 15",
+    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?ha ?vorm ?status WHERE {\n  ?p schema:name ?naam ;\n     schema:additionalProperty ?a .\n  ?a schema:value ?ha .\n  OPTIONAL { ?p schema:additionalType ?t . ?t schema:inDefinedTermSet <urn:drogevoeten:termset:land-consolidation-form> ; schema:name ?vorm }\n  OPTIONAL { ?p dv:status/schema:name ?status }\n}\nORDER BY DESC(?ha)\nLIMIT 15",
     "metadata": {}
   },
   {
@@ -62,7 +62,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?project ?mijlpaal ?jaar WHERE {\n  ?p schema:name \"Walcheren\"@nl ; schema:name ?project .\n  ?e schema:about ?p ; schema:startDate ?jaar ; schema:additionalType/schema:name ?mijlpaal .\n  FILTER(LANG(?mijlpaal) = \"nl\")\n}\nORDER BY ?jaar",
+    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?project ?mijlpaal ?jaar WHERE {\n  ?p schema:name \"Walcheren\"@nl ; schema:name ?project .\n  ?e schema:about ?p ; schema:startDate ?jaar ; schema:additionalType/schema:name ?mijlpaal .\n  FILTER(LANG(?mijlpaal) = \"nl\")\n}\nORDER BY ?jaar",
     "metadata": {}
   },
   {
@@ -74,7 +74,7 @@
   {
     "kind": 2,
     "language": "sparql",
-    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT ?naam ?provincie ?uitvoering WHERE {\n  ?p dv:status/schema:name \"lopend\"@nl ;\n     schema:name ?naam .\n  OPTIONAL { ?p schema:containedInPlace/schema:name ?provincie }\n  OPTIONAL { ?e schema:about ?p ; schema:additionalType <urn:drogevoeten:term:event-type:execution> ; schema:startDate ?uitvoering }\n}\nORDER BY ?uitvoering",
+    "value": "# [endpoint=./build/land-consolidation.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?naam ?provincie ?uitvoering WHERE {\n  ?p dv:status/schema:name \"lopend\"@nl ;\n     schema:name ?naam .\n  OPTIONAL { ?p schema:containedInPlace/schema:name ?provincie }\n  OPTIONAL { ?e schema:about ?p ; schema:additionalType <urn:drogevoeten:term:event-type:execution> ; schema:startDate ?uitvoering }\n}\nORDER BY ?uitvoering",
     "metadata": {}
   }
 ]

@@ -72,7 +72,9 @@ def main():
         if not os.path.exists(shp):
             sys.exit(f"ontbreekt: {shp} (draai: make shapes)")
     for name in sorted(os.listdir(BUILD)):
-        if name.endswith(".ttl") and name != "catalog.ttl":
+        # droge-voeten.ttl is the union of the datasets validated here (too large for pyshacl); checked by
+        # check_combined() in build.py instead (one nl name per node after merging).
+        if name.endswith(".ttl") and name not in ("catalog.ttl", "droge-voeten.ttl"):
             bad += run(os.path.join(BUILD, name), profile, "records", out)
     bad += run(os.path.join(BUILD, "catalog.ttl"), register, "datasetbeschrijvingen", out)
     text = "\n".join(out) + f"\n\nOnverwachte overtredingen: {bad}\n"

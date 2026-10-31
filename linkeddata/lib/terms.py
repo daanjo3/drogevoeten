@@ -112,7 +112,10 @@ class Terms:
         types = ["DefinedTerm", "URL"] if url_cotype else ["DefinedTerm"]
         node = iri(f"{config.BASE}term:{field}:{slug_en}")
         row = self.table(field).get(key(slug_en)) or {}
-        self.labels.setdefault(node, row.get("label_nl") or name_nl)  # Dutch name, not the slug
+        review_label = row.get("label_nl")
+        if review_label == slug_en:  # a row added by terms_lookup.py carries the slug, not a Dutch name
+            review_label = None
+        self.labels.setdefault(node, review_label or name_nl)  # Dutch name, not the slug
         t = self._node(g, field, slug_en, None, node, types)
         if t is None:
             return None

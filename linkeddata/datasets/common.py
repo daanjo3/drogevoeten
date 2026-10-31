@@ -74,12 +74,13 @@ class Keys:
 
 
 def year(v):
-    """A plain four-digit year from a source field, or None (0 and blanks are unknown, R6)."""
+    """A plain year (three or four digits, e.g. 840 for the Ringwalburg) from a source field, or None (0, blanks and
+    shorter numbers such as '41' are unknown or unreadable, R6). Written as xsd:gYear with four digits ('0840')."""
     v = value(v)
     if v is None:
         return None
     s = str(v).strip()
-    return int(s) if s.isdigit() and len(s) == 4 and int(s) > 0 else None
+    return int(s) if s.isdigit() and len(s) in (3, 4) and int(s) >= 100 else None
 
 
 def missing_name(name, fallback, stats):

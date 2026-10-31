@@ -326,3 +326,46 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
 - **Kwalificaties bij jaartallen** ("voor", "ca.", "of eerder; 1674 verwoest…"): de tekst gaat letterlijk in `dv:dateText`; alleen het begin bepaalt de precisie. "Voor <jaar>" maakt van het jaar een `endDate` (uiterlijk), niet een `startDate`.
 - **Steekproef** (`spot_check.py`, `make check`): 3 records per dataset live vergeleken met de bron. Eén verschil: een IMWA-sluis heet in de oogst van 28-10 "Sluis 1 (Oudehorne)" en nu "Willem Loresluis". De bron is dus gewijzigd. De datasets zijn een momentopname van de oogst; een nieuwe `make harvest` in het prototype werkt ze bij.
 
+## 29. Alle datasets samen, en gedeelde concepten samenvoegen (31-10-2026)
+
+**Vraag van Jari:** combineer alle datasets in één grote dataset; staat dezelfde term in dataset A en B, dan moet er één term zijn waar beide naar linken, voor zoveel mogelijk termen.
+
+**Wat al zo was:** term-, plaats- en organisatie-IRI's bevatten geen dataset (`term:<veld>:<waarde>`, §3, §22). Dezelfde waarde in hetzelfde veld is dus al één knoop in alle datasets.
+
+**Wat erbij komt: samenvoegen** (`lib/merge.py`), in twee rondes in `build.py`. Ronde 1 verzamelt per dataset de feiten (namen, `sameAs`, termensets, coördinaten van de records die een knoop gebruiken). Daarna wordt bepaald wat samengaat, en ronde 2 schrijft alles met de samengevoegde IRI's. Dat geldt ook voor de losse datasets: ook die linken nu naar de gedeelde knoop. Regels, van sterk naar minder sterk:
+1. **Dezelfde externe term:** knopen met een gedeelde `schema:sameAs` (status `aangenomen` of `gecontroleerd`). Voorbeeld: "paltrok" en "paltrokmolen" (beide CHT "paltrokmolens").
+2. **Hetzelfde label binnen één betekenisdomein** (`TERM_GROUPS`): `drainage-structure` (de molen- en maalvelden), `dike-function`, `status`, `protection`, `material`. Dat wordt één term `term:<domein>:<slug>`, die in alle betrokken termensets zit. Voorbeeld: "poldermolen" als molenfunctie, hoofdcategorie en soort maalinrichting. **Niet over domeinen heen:** "Geen" als aandrijving is iets anders dan "Geen" als bescherming.
+3. **Woonplaats zonder provincie** (`locality:no-context:<naam>`, uit de molens en de wielen) → de enige woonplaats met dezelfde naam én een provincie, als de records van beide binnen 10 km van elkaar liggen. Twee of meer kandidaten: niet samenvoegen.
+4. **Een genoemd gebied wordt het gebiedsrecord:** de polder bij een dijk (`dv:inPolder`) en het bemalingsgebied van een gemaal (`dv:drainsArea`) → het record met dezelfde naam in `zeeland-polders` of `drained-lakes`, als een coördinaat van een record dat het gebied noemt, in de omhullende rechthoek van het gebied ligt (plus ca. 1 km). Alleen bij precies één kandidaat.
+
+**De gedeelde knoop** is een record als dat erbij zit, anders een knoop met provincie (boven een zonder), anders een eigen term, anders een nieuwe domeinterm (regel 2). Hij krijgt één Nederlandse naam; afwijkende labels worden `schema:alternateName`. `build.py` controleert in het gecombineerde bestand dat elke knoop hooguit één naam per taal heeft.
+
+**Herleidbaar:** de dataset `concept-merges` (`build/concept-merges.ttl`) noemt per gedeelde knoop de opgegane knopen (`dct:replaces`), met de regel in `rdfs:comment`. Stand op 31-10-2026: 947 knopen opgegaan in 911 gedeelde knopen, waaronder 522 woonplaatsen, 337 polders bij dijken, 33 bemalingsgebieden die een droogmakerij zijn, en 45 termen.
+
+**De gecombineerde dataset** `droge-voeten` (`build/droge-voeten.ttl` en `.nt`) bevat alle datasets plus `concept-merges`, en `schema:hasPart` naar elk ervan. **Licentie CC BY-SA 4.0**, omdat de IMWA-data erin zit (share-alike). De losse RCE- en Zeeland-datasets blijven CC0. Het bestand is de vereniging van de gevalideerde datasets en wordt zelf niet met pyshacl gevalideerd: met bijna 2,5 miljoen triples is het daarvoor te groot (§20).
+
+**Bewust niet samengevoegd:** rivieren (wielen) met wateren (gemalen), omdat namen als "IJssel" en "Hollandse IJssel" te dicht bij elkaar liggen; bemalingsgebieden met elkaar over provinciegrenzen heen; namen die als gebied meer dan één kandidaat hebben. Koppelingen tussen **records** (molen ↔ rijksmonument, gemaal ↔ IMWA) zijn nog fase 2.
+
+## 30. Tijdlijnqueries per adres (31-10-2026)
+
+**Vraag van Jari:** de belangrijkste momenten voor de tijdlijn zijn de indijking van de polder, de stichting van de gemalen in de buurt en de aanleg van de dijken in de buurt. Kan dat efficiënt op de kleinere datasets, en zijn ze goed genoeg gelinkt?
+
+- **Drie queries** in `queries/` (`timeline-polder.rq`, `timeline-gemalen.rq`, `timeline-dijken.rq`), elk op twee of drie kleine datasets. Laden kost 0,2 s, een query 0,02–0,1 s. De invoer is één `VALUES (?lat ?lon)`-regel (WGS84). Notebook: `timeline.sparqlbook`.
+- **Niet op het gecombineerde bestand:** een tijdlijnquery over 2,4 miljoen triples met `UNION { BIND(?r AS ?n) }` en `geof:distance` liep minuten. Dat kwam niet door de data, maar door een query die Oxigraph slecht optimaliseert.
+- **Ruimtelijk:**
+  - Oxigraph (0.5) kent `geof:sfContains` en `geof:sfIntersects`, maar **niet `geof:distance`** (geeft geen waarde).
+  - Daarom: polder of droogmakerij met `sfContains`; dijken met `sfIntersects` met een vierkant van ca. 250 m (opgebouwd in de query uit lat/lon); gemalen met een getallenvak van ca. 3 km en een afstand in klassen (SPARQL heeft geen wortel).
+  - Rekenen in `xsd:double`: het kwadraat van een `xsd:decimal` met tien decimalen loopt in Oxigraph over en geeft geen waarde.
+- **De links helpen:** de gemalen- en dijkenquery markeren met `?bemaaltDezePolder` en `?vanDezePolder` wat volgens de bron bij de polder van het adres hoort (via de samengevoegde polderknoop, §29). Daarvoor is regel 4 van §29 uitgebreid:
+  - eerst de exacte naam;
+  - daarna dezelfde naam zonder "polder", "de", "het" en zonder een toevoeging tussen haakjes **aan de verwijzende kant** ("De Beemster (Waterland)" → "De Beemster", "Vierbannen van Duiveland" → "Polder Vierbannen van Duiveland").
+
+  Bij het record blijven de haakjes staan: "Slabbekoornpolder (oost)" is een deel van de polder, niet de hele polder.
+- **Fout hersteld:** jaartallen van drie cijfers (de Ringwalburg, aangelegd 840–900) vielen weg. Ze worden nu als `xsd:gYear` "0840" geschreven.
+- **Bekende grenzen:**
+  - dijken zijn er alleen voor Zeeland;
+  - een indijkingsjaar alleen voor Zeeuwse polders, een droogmakingsjaar alleen voor droogmakerijen;
+  - de dijken rond Middelburg noemen als "polder" de stad ("Middelburg"), dus die worden geen polderrecord;
+  - "Polder Vierbannen en Duiveland" (met "en") wordt niet gekoppeld aan "…van Duiveland": we zoeken niet bij benadering;
+  - de 1953-laag en de Waterstaatskaart uit de tijdlijn van het prototype zijn (nog) geen linked data.
+

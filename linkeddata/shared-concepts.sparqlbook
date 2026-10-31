@@ -1,0 +1,92 @@
+[
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "# Gedeelde termen en plaatsen over de datasets heen\n\nDeze notebook laat zien wat het samenvoegen oplevert: termen, woonplaatsen en gebieden die in meer dan één dataset voorkomen, zijn één knoop. Waar dat door samenvoegen komt, staat in `build/concept-merges.ttl` (`dct:replaces`, met de regel in `rdfs:comment`). Het complete gecombineerde bestand (`build/droge-voeten.ttl`) is te groot om hier per query te laden; de losse datasets gebruiken dezelfde gedeelde knopen, dus deze queries combineren ze.\n\n**Eerst:** draai `make` in `linkeddata/`, zodat `build/concept-merges.ttl`, `build/pumping-stations.ttl`, `build/windmills.ttl`, `build/lost-windmills.ttl`, `build/drained-lakes.ttl`, `build/breach-pools.ttl`, `build/zeeland-dikes.ttl`, `build/zeeland-polders.ttl`, `build/gift-houses-1953.ttl` bestaan. Elke query laadt de bestanden lokaal (Oxigraph); bij grote bestanden duurt dat even. Open dit bestand in VS Code met de extensie *SPARQL Notebook* (Zazuko) en klik op ▶ bij een cel.\n\n## Hoe de data is opgebouwd\n\n- Elk object is een record (`schema:CreativeWork` voor gebouwde objecten, `schema:Place` voor gebieden) met IRI `urn:drogevoeten:id:<soort>:<sleutel>`. Wat alleen bij dat record hoort, heeft een IRI eronder (`#location`, `#image`, `#…-id`, en gebeurtenissen als `#construction` of `#disappearance`).\n- Wat ook bij andere records voorkomt, is een gedeelde knoop: termen `urn:drogevoeten:term:<veld>:<waarde>` (in een termenset `termset:<veld>`), plaatsen `urn:drogevoeten:place:<veld>:…` en organisaties `urn:drogevoeten:org:…`. Termensets gelden voor alle datasets, dus dezelfde term in twee datasets is dezelfde knoop.\n- Gebeurtenissen (`schema:Event`) wijzen met `schema:about` naar hun record en bewaren de jaartekst uit de bron (`dv:dateText`) en de zekerheid (`dv:datePrecision`).\n- Inhoud is Nederlands (`@nl`); eigen termen en termensets hebben ook een Engelse naam. Kies in een query daarom één taal.",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 1. Wat is er samengevoegd?\n\nAantal samengevoegde knopen per soort gedeelde knoop.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/concept-merges.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?soort (COUNT(DISTINCT ?nieuw) AS ?gedeeldeKnopen) (COUNT(?oud) AS ?opgegaan) WHERE {\n  ?nieuw <http://purl.org/dc/terms/replaces> ?oud .\n  BIND(REPLACE(STR(?nieuw), \"^urn:drogevoeten:([a-z]+:[a-z-]+).*$\", \"$1\") AS ?soort)\n}\nGROUP BY ?soort\nORDER BY DESC(?opgegaan)",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 2. Eén term, meerdere termensets: poldermolen\n\n\"poldermolen\" kwam voor als molenfunctie, als hoofdcategorie en als soort maalinrichting. Nu is het één term, die in alle drie de termensets zit.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?termenset ?dataset (COUNT(DISTINCT ?r) AS ?records) WHERE {\n  <urn:drogevoeten:term:drainage-structure:poldermolen> schema:inDefinedTermSet/schema:name ?termenset .\n  FILTER(LANG(?termenset) = \"nl\")\n  ?r schema:additionalType <urn:drogevoeten:term:drainage-structure:poldermolen> ;\n     schema:isPartOf/schema:name ?dataset .\n}\nGROUP BY ?termenset ?dataset\nORDER BY ?dataset ?termenset",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 3. Termen die in meer dan één dataset gebruikt worden",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/concept-merges.ttl]\n# [endpoint=./build/pumping-stations.ttl]\n# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n# [endpoint=./build/drained-lakes.ttl]\n# [endpoint=./build/breach-pools.ttl]\n# [endpoint=./build/zeeland-dikes.ttl]\n# [endpoint=./build/zeeland-polders.ttl]\n# [endpoint=./build/gift-houses-1953.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?term (COUNT(DISTINCT ?d) AS ?datasets) (COUNT(DISTINCT ?r) AS ?records) WHERE {\n  ?t a schema:DefinedTerm ; schema:name ?term .\n  FILTER(LANG(?term) = \"nl\")\n  FILTER(!STRSTARTS(STR(?t), \"urn:drogevoeten:term:event-type:\"))\n  ?r ?p ?t ; schema:isPartOf ?d .\n}\nGROUP BY ?term\nHAVING (COUNT(DISTINCT ?d) > 1)\nORDER BY DESC(?datasets) DESC(?records)\nLIMIT 25",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 4. Woonplaatsen in meer dan één dataset\n\nMolens en wielen hebben geen provincie in de bron; hun woonplaats is samengevoegd met dezelfde woonplaats mét provincie (bijv. van de gemalen) als de records binnen 10 km van elkaar liggen.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n# [endpoint=./build/windmills.ttl]\n# [endpoint=./build/breach-pools.ttl]\n# [endpoint=./build/lost-windmills.ttl]\n# [endpoint=./build/gift-houses-1953.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?woonplaats ?provincie (COUNT(DISTINCT ?d) AS ?datasets) (GROUP_CONCAT(DISTINCT ?ds; separator=\", \") AS ?welke) WHERE {\n  ?w schema:name ?woonplaats .\n  FILTER(STRSTARTS(STR(?w), \"urn:drogevoeten:place:locality:\"))\n  OPTIONAL { ?w schema:containedInPlace+ ?pv . ?pv schema:name ?provincie FILTER(STRSTARTS(STR(?pv), \"urn:drogevoeten:place:province:\")) }\n  { ?x schema:containedInPlace ?w . ?r schema:locationCreated ?x } UNION { ?r schema:containedInPlace ?w }\n  ?r schema:isPartOf ?d .\n  BIND(STRAFTER(STR(?d), \"dataset:\") AS ?ds)\n}\nGROUP BY ?woonplaats ?provincie\nHAVING (COUNT(DISTINCT ?d) > 2)\nORDER BY DESC(?datasets) ?woonplaats\nLIMIT 25",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 5. Een polder bij een dijk is het polderrecord\n\nDe polder die de dijkenlaag noemt, is samengevoegd met het record uit de polderdataset (zelfde naam, dijk in of bij de polder). Zo komen de dijken en de indijking van de polder bij elkaar.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/zeeland-dikes.ttl]\n# [endpoint=./build/zeeland-polders.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?polder ?indijking (COUNT(DISTINCT ?dijk) AS ?dijken) WHERE {\n  ?p schema:isPartOf <urn:drogevoeten:dataset:zeeland-polders> ; schema:name ?polder .\n  ?dijk dv:inPolder ?p .\n  OPTIONAL { ?e schema:about ?p ; dv:dateText ?indijking }\n}\nGROUP BY ?polder ?indijking\nORDER BY DESC(?dijken)\nLIMIT 20",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 6. Gemalen die een droogmakerij bemalen\n\nHet bemalingsgebied van een gemaal is samengevoegd met de droogmakerij met dezelfde naam als het gemaal erin of erbij ligt.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/pumping-stations.ttl]\n# [endpoint=./build/drained-lakes.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?droogmakerij ?drooggemaakt (GROUP_CONCAT(DISTINCT ?gemaal; separator=\", \") AS ?gemalen) WHERE {\n  ?d schema:isPartOf <urn:drogevoeten:dataset:drained-lakes> ; schema:name ?droogmakerij .\n  ?g dv:drainsArea ?d ; schema:name ?gemaal .\n  OPTIONAL { ?e schema:about ?d ; dv:dateText ?drooggemaakt }\n}\nGROUP BY ?droogmakerij ?drooggemaakt\nORDER BY ?droogmakerij\nLIMIT 25",
+    "metadata": {}
+  },
+  {
+    "kind": 1,
+    "language": "markdown",
+    "value": "## 7. Waar komt een gedeelde knoop vandaan?\n\nDe linkset `concept-merges` noemt per gedeelde knoop de knopen die erin zijn opgegaan, met de regel.",
+    "metadata": {}
+  },
+  {
+    "kind": 2,
+    "language": "sparql",
+    "value": "# [endpoint=./build/concept-merges.ttl]\n\nPREFIX schema: <https://schema.org/>\nPREFIX prov: <http://www.w3.org/ns/prov#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX dv: <urn:drogevoeten:def:>\nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX geo: <http://www.opengis.net/ont/geosparql#>\nPREFIX geof: <http://www.opengis.net/def/function/geosparql/>\n\nSELECT ?gedeeld ?naam ?toelichting WHERE {\n  ?gedeeld <http://purl.org/dc/terms/replaces> ?oud ;\n           schema:name ?naam ;\n           rdfs:comment ?toelichting .\n  FILTER(STRSTARTS(STR(?gedeeld), \"urn:drogevoeten:term:\"))\n}\nGROUP BY ?gedeeld ?naam ?toelichting\nORDER BY ?gedeeld\nLIMIT 25",
+    "metadata": {}
+  }
+]
