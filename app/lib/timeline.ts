@@ -350,11 +350,53 @@ const distance = (km: number) =>
 const meters = (m: number) => distance(m / 1000);
 /* "Beenhouwersingel,Molenberg" -> "Beenhouwersingel, Molenberg" */
 const names = (s: string) => s.replace(/,(?=\S)/g, ", ");
-const capital = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+/* also "[gemaal] X" -> "[Gemaal] X" */
+const capital = (s: string) => s.replace(/^(\[?)(.)/, (_, b: string, c: string) => b + c.toUpperCase());
 /* Some mill names in the Molendatabase hold html */
 const plain = (s?: string) => (s ?? "").replace(/<[^>]+>/g, "").trim();
 /* "Noorwegen, Zweden, Denemarken" -> "Noorwegen, Zweden en Denemarken" */
 const list = (xs: string[]) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} en ${xs[xs.length - 1]}` : xs[0] ?? "");
+
+/* linkeddata/ builds a name from other fields when the source has none, and
+   marks it: "Polderdijk in Vierbannen van Duiveland (naam onbekend)". */
+const UNNAMED = " (naam onbekend)";
+const named = (s?: string) => (s && !s.endsWith(UNNAMED) ? plain(s) : undefined);
+
+/* The Zeeland dike layer often names a dike after the streets on its trace:
+   "Schoolstraat,Molenstraat,Stationsstraat, rolleklootsedijk". Then the parts
+   with "dijk" are the name. Without a name: "een polderdijk in <polder>". */
+function dikeName(raw: string): string {
+  if (raw.endsWith(UNNAMED)) {
+    const built = raw.slice(0, -UNNAMED.length);
+    return `een ${built.charAt(0).toLowerCase()}${built.slice(1)}`;
+  }
+  const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  const dikes = parts.filter((s) => /dijk|dyk/i.test(s)).map(capital);
+  if (parts.length < 2 || !dikes.length) return `de ${names(raw)}`;
+  return `de ${dikes[0]}${dikes.length > 1 ? ` (of ${list(dikes.slice(1))})` : ""}`;
+}
+
+/* The polder level of the RCE drained lakes is a class in m NAP: "-2 / -1", "< -10" */
+function polderLevel(raw: string): string {
+  const nap = (v: string) => `NAP ${v.replace("-", "−").replace(".", ",")} m`;
+  const range = raw.match(/^\s*(-?[\d.,]+)\s*\/\s*(-?[\d.,]+)\s*$/);
+  if (range) return `ligt het water in de sloten tussen ${nap(range[1])} en ${nap(range[2])}`;
+  const below = raw.match(/^\s*<\s*(-?[\d.,]+)\s*$/);
+  if (below) return `ligt het water in de sloten lager dan ${nap(below[1])}`;
+  return `is het polderpeil ${raw}`;
+}
+
+/* The drive of a pumping station as a phrase after "werkt(e)" */
+const DRIVE: Record<string, string> = {
+  elektro: "elektrisch",
+  stoom: "op stoom",
+  diesel: "op diesel",
+  zuiggas: "op zuiggas",
+  aardgas: "op aardgas",
+  hybride: "op meer dan één soort aandrijving",
+  "dual fuel": "op twee brandstoffen",
+};
+const drive = (s?: string) => DRIVE[(s ?? "").trim().toLowerCase()];
 
 /* sort: Infinity for a step without a year; those go last */
 type Step = TimelineStep & { sort: number };
@@ -369,18 +411,18 @@ function polderStep(r: Row): Step | undefined {
   if (!w || !r.name) return undefined;
   let text =
     r.eventType === "indijking"
-      ? `${r.name} wordt ingedijkt. Een [dijk] houdt het water buiten en het land wordt [polder]. Jouw adres ligt in deze polder.`
+      ? `${r.name} wordt ingedijkt. Er komt een [dijk] omheen, en het land daarachter wordt een [polder]. Daar staat nu je huis.`
       : r.eventType === "droogmaking"
-        ? `${r.name} wordt drooggemaakt: het water wordt weggepompt en het land wordt [polder]. Jouw adres ligt in deze droogmakerij.`
-        : `${capital(r.eventType ?? "gebeurtenis")}: ${r.name}. Jouw adres ligt hier.`;
-  if (r.waterLevel) text += ` Het polderpeil is volgens de bron ${r.waterLevel}.`;
+        ? `${r.name} wordt drooggemaakt. Het water wordt weggepompt, en waar het stond komt land: een [polder]. Daar staat nu je huis.`
+        : `${capital(r.eventType ?? "gebeurtenis")}: ${r.name}. Je huis staat in dit gebied.`;
+  if (r.waterLevel) text += ` Tegenwoordig ${polderLevel(r.waterLevel)}.`;
   const literature = r.citations ? `Literatuur: ${r.citations}.` : undefined;
   return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.precision, r.dateText, literature) };
 }
 
 /* No polder or drained lake: say so, as the prototype does */
 const NO_POLDER_STEP = undated(
-  "Wanneer deze plek is ingedijkt of drooggemaakt, weten we niet. De kaarten die we gebruiken dekken deze plek niet. Dat zegt niet dat hier geen [polder] is.",
+  "Wanneer deze plek is ingedijkt of drooggemaakt, weten we niet: onze kaarten van polders en droogmakerijen komen niet tot hier. Er kan best een [polder] zijn.",
   "Bron: Droge Voeten linked data (polders van de Provincie Zeeland, droogmakerijen van de RCE).",
 );
 
@@ -389,9 +431,10 @@ function landStep(r: Row): Step | undefined {
   const w = when(r.execStart, r.execEnd, r.execPrecision, r.execText);
   const deed = year(r.deedStart ?? r.deedEnd);
   const done = year(r.doneStart ?? r.doneEnd);
-  let text = `${r.form ?? "Landinrichting"}: ${r.name}. Kavels, sloten en wegen worden opnieuw ingedeeld. Jouw adres ligt in dit gebied.`;
-  const later = [deed && `volgt de akte in ${deed}`, done && `wordt het project in ${done} afgesloten`].filter(Boolean);
-  if (later.length) text += ` Volgens de bron ${list(later as string[])}.`;
+  const form = (r.form ?? "landinrichting").toLowerCase();
+  let text = `Bij de ${form} ${r.name} worden de kavels, sloten en wegen rond je huis opnieuw ingedeeld.`;
+  const later = [deed && `in ${deed} volgt de akte`, done && `in ${done} is het project afgerond`].filter(Boolean);
+  if (later.length) text += ` ${capital(list(later as string[]))}.`;
   const tip = sourceTip(r.source, r.execPrecision, undefined, r.status ? `Status: ${r.status}.` : undefined);
   return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
 }
@@ -400,15 +443,25 @@ function stationStep(r: Row, homeAreas: Set<string>): Step | undefined {
   if (!r.name) return undefined;
   const w = when(r.founded);
   const drainsHome = (r.drainsAreas ?? "").split(" ").some((a) => homeAreas.has(a));
-  let text = `[Gemaal] ${r.name} wordt gesticht, op ${distance(Number(r.km))} van je adres.`;
-  if (drainsHome) text += " Volgens de bron pompt het water uit jouw polder.";
-  const then = r.driveThen?.toLowerCase();
-  const now = r.driveNow?.toLowerCase();
-  if (then && now === "geen") text += ` Het werkte eerst op ${then}; nu heeft het geen aandrijving meer.`;
-  else if (then && now && then !== now) text += ` Het werkte eerst op ${then}, nu op ${now}.`;
-  else if (then) text += ` Aandrijving: ${then}.`;
-  if (r.status) text += ` Nu: ${r.status.toLowerCase()}.`;
-  if (!w) return undated(`${text} Wanneer het gesticht is, staat niet in de bron.`, sourceTip(r.source));
+  const dist = distance(Number(r.km));
+  const what = /gemaal/i.test(r.name) ? `het ${r.name}` : `[gemaal] ${r.name}`;
+  let text = drainsHome
+    ? `${capital(what)} wordt gebouwd, op ${dist} van je huis. Het pompt het water uit jouw polder.`
+    : `Op ${dist} van je huis wordt ${what} gebouwd.`;
+  // the statuses of the RCE layer: in bedrijf, werkende staat, niet werkend, gesloopt, onbekend
+  const status = r.status?.trim().toLowerCase();
+  const gone = status === "gesloopt";
+  const then = drive(r.driveThen);
+  const now = drive(r.driveNow);
+  const noDrive = r.driveNow?.trim().toLowerCase() === "geen";
+  if (then && now && then !== now) text += ` Eerst werkte het ${then}, nu ${now}.`;
+  else if (then && noDrive && !gone) text += ` Eerst werkte het ${then}; nu heeft het geen aandrijving meer.`;
+  else if (then) text += ` Het ${gone || noDrive ? "werkte" : "werkt"} ${then}.`;
+  if (status === "in bedrijf") text += " Het is nog steeds in bedrijf.";
+  else if (status === "werkende staat") text += " Het kan nog steeds draaien.";
+  else if (status === "niet werkend" && !(then && noDrive)) text += " Het werkt niet meer.";
+  else if (gone) text += " Inmiddels is het gesloopt.";
+  if (!w) return undated(`${text} Wanneer het is gebouwd, weten we niet.`, sourceTip(r.source));
   return { year: w.label, sort: w.sort, text, source: sourceTip(r.source) };
 }
 
@@ -416,17 +469,30 @@ function dikeStep(r: Row, homeAreas: Set<string>): Step | undefined {
   const w = when(r.built ?? r.start, r.built ?? r.end, r.built ? undefined : r.precision);
   if (!w || !r.name) return undefined;
   const ofHome = (r.polders ?? "").split(" ").some((a) => homeAreas.has(a));
-  let text = `De [dijk] ${names(r.name)} wordt aangelegd, op ${meters(Number(r.m))} van je adres.`;
-  if (ofHome) text += " Volgens de bron hoort hij bij jouw polder.";
-  if (r.status) text += ` Nu: ${r.status.toLowerCase()}.`;
+  const name = dikeName(r.name);
+  let text = /dijk/i.test(name)
+    ? `Op ${meters(Number(r.m))} van je huis wordt ${name} aangelegd.`
+    : `Op ${meters(Number(r.m))} van je huis wordt een [dijk] aangelegd: ${name}.`;
+  if (ofHome) text += " Hij hoort bij jouw polder.";
+  // the statuses of the Zeeland layer; a few combine two ("Relict/geslecht") and are left out
+  const status = r.status?.trim().toLowerCase();
+  if (status === "waterkerend") text += " Hij houdt nog steeds het water tegen.";
+  else if (status === "waterscheidend") text += " Nu scheidt hij het water van twee gebieden.";
+  else if (status === "relict") text += " Hij ligt er nog, maar keert geen water meer.";
+  else if (status === "geslecht") text += " Later is hij afgegraven.";
+  else if (status === "verdwenen") text += " Hij is verdwenen.";
   return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.built ? undefined : r.precision) };
 }
 
 function villageStep(r: Row): Step | undefined {
   if (!r.name) return undefined;
   const w = when(r.start, r.end, r.precision, r.dateText);
-  let text = `Het dorp ${r.name} verdrinkt: de zee neemt het land terug. Het lag op ${distance(Number(r.km))} van je adres.`;
-  if (r.altNames) text += ` Ook bekend als ${r.altNames}.`;
+  const name = named(r.name);
+  const dist = distance(Number(r.km));
+  let text = name
+    ? `Het dorp ${name} verdrinkt: de zee neemt het land terug. Het lag op ${dist} van je huis.`
+    : `Een dorp op ${dist} van je huis verdrinkt: de zee neemt het land terug. Hoe het heette, weten we niet.`;
+  if (r.altNames) text += ` Het heette ook ${r.altNames.split(/,\s*/).join(" of ")}.`;
   const tip = sourceTip(r.source, r.precision, r.dateText);
   return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
 }
@@ -441,7 +507,7 @@ function lostMillSteps(rows: Row[]): Step[] {
     return other
       ? [
           undated(
-            `Binnen ${MILL_KM} km zijn geen [poldermolens] bekend. Wel verdwenen hier ${other} andere ${other === 1 ? "molen" : "molens"} (koren, olie, zaag), die geen water verzetten.`,
+            `Binnen ${MILL_KM} km van je huis kennen we geen [poldermolens]. Wel ${other === 1 ? "stond hier een andere molen" : `stonden hier ${other} andere molens`}, voor bijvoorbeeld graan, olie of hout. ${other === 1 ? "Die maalde geen water en is verdwenen." : "Die maalden geen water en zijn verdwenen."}`,
             sourceTip(source),
           ),
         ]
@@ -456,20 +522,28 @@ function lostMillSteps(rows: Row[]): Step[] {
     .filter((x): x is { r: Row; w: When } => !!x.w)
     .sort((a, b) => b.w.sort - a.w.sort);
   const n = polder.length;
-  let text = `Binnen ${MILL_KM} km van je adres ${n === 1 ? "stond 1 [poldermolen]" : `stonden ${n} [poldermolens]`}. Ze pompten het water uit de polder.`;
+  let text =
+    n === 1
+      ? `Binnen ${MILL_KM} km van je huis stond een [poldermolen], die het water uit de polder maalde. Hij is verdwenen.`
+      : `Binnen ${MILL_KM} km van je huis stonden ${n} [poldermolens], die het water uit de polder maalden. ${n === 2 ? "Ze zijn allebei" : "Ze zijn allemaal"} verdwenen.`;
   const oldest = built[0];
-  if (oldest) text += ` De oudste met een bekend bouwjaar: ${plain(oldest.r.name)}.`;
-  text += n === 1 ? " Hij is verdwenen." : " Ze zijn allemaal verdwenen.";
-  if (other) text += ` Ook ${other} andere ${other === 1 ? "molen" : "molens"} (koren, olie, zaag) verdwenen hier.`;
+  const oldestName = oldest && named(oldest.r.name);
+  if (n > 1 && oldestName) text += ` De oudste waarvan we het bouwjaar kennen, is ${oldestName}.`;
+  else if (n === 1 && oldestName) text += ` Hij heette ${oldestName}.`;
+  if (other) text += ` Ook ${other === 1 ? "een andere molen" : `${other} andere molens`} (voor bijvoorbeeld graan, olie of hout) ${other === 1 ? "is" : "zijn"} verdwenen.`;
   const first = oldest ? oldest.r : undefined;
   const tip = sourceTip(source, first && precisionOf(first, first.built, "built"), first?.builtText);
   const steps: Step[] = [oldest ? { year: oldest.w.label, sort: oldest.w.sort, text, source: tip } : undated(text, tip)];
   const last = gone[0];
   if (last) {
+    const lastName = named(last.r.name);
+    const where = `${distance(Number(last.r.km))} van je huis`;
     steps.push({
       year: last.w.label,
       sort: last.w.sort,
-      text: `De laatste [poldermolen] hier verdwijnt: ${plain(last.r.name)}, op ${distance(Number(last.r.km))} van je adres.`,
+      text: lastName
+        ? `De laatste [poldermolen] in de buurt verdwijnt: ${lastName}, op ${where}.`
+        : `De laatste [poldermolen] in de buurt verdwijnt, op ${where}.`,
       source: sourceTip(source, last.r.gonePrecision, last.r.goneText),
     });
   }
@@ -479,13 +553,17 @@ function lostMillSteps(rows: Row[]): Step[] {
 /* A polder mill that still stands */
 function standingMillStep(r: Row): Step {
   const w = whenOf(r, r.built, "built");
-  let text = `De [poldermolen] ${plain(r.name)} wordt gebouwd, op ${distance(Number(r.km))} van je adres.`;
+  const name = named(r.name);
+  const dist = distance(Number(r.km));
+  let text = name
+    ? `Op ${dist} van je huis wordt [poldermolen] ${name} gebouwd.`
+    : `Op ${dist} van je huis wordt een [poldermolen] gebouwd.`;
   // the statuses of the RCE layer: bestaand, herbouwd, restant, in aanbouw
   const status = r.status?.toLowerCase();
-  if (status === "bestaand") text += " Hij staat er nog.";
-  else if (status === "herbouwd") text += " Hij is herbouwd en staat er weer.";
-  else if (status === "restant") text += " Er staat nog een restant van.";
-  else if (status) text += ` Nu: ${status}.`;
+  if (status === "bestaand") text += " Hij staat er nog steeds.";
+  else if (status === "herbouwd") text += " Later is hij herbouwd, en nu staat hij er weer.";
+  else if (status === "restant") text += " Er staat nog een stuk van.";
+  else if (status === "in aanbouw") text += " Op dit moment wordt er aan hem gebouwd.";
   const tip = sourceTip(r.source, precisionOf(r, r.built, "built"), r.built ? undefined : r.builtText);
   return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
 }
@@ -502,15 +580,16 @@ function poolSteps(rows: Row[]): Step[] {
     const r = g[0];
     const n = g.length;
     const w = when(r.breachStart, r.breachEnd, r.breachPrecision, r.breachText);
-    const type = (r.type ?? "wiel").toLowerCase();
-    const what =
-      n === 1
-        ? `${r.name}, een ${type} op ${distance(Number(r.km))} van je adres${r.river ? `, langs de ${r.river}` : ""}`
-        : `${n}× ${r.name}, vanaf ${distance(Number(r.km))} van je adres${r.river ? `, langs de ${r.river}` : ""}`;
-    const kolk = n === 1 ? "een diepe kolk" : `${n} diepe kolken`;
-    const text = w
-      ? `Een dijk breekt door. Het water slaat ${kolk} uit: ${what}. Zo'n kolk heet een [wiel].`
-      : `Hier brak ooit een dijk door. Het water sloeg ${kolk} uit: ${what}. Zo'n kolk heet een [wiel]. Wanneer, staat niet in de bron.`;
+    const name = named(r.name);
+    const maybe = (r.type ?? "").toLowerCase().startsWith("mogelijk");
+    const where = `${distance(Number(r.km))} van je huis${r.river ? `, langs de ${r.river}` : ""}`;
+    const pools = n === 1 ? "een diepe kolk" : `${n} diepe kolken`;
+    let text = w
+      ? `Een dijk breekt door, en het water slaat ${pools} uit: ${n === 1 ? "een [wiel]" : "[wielen]"}.`
+      : `Ooit brak hier een dijk door, en het water sloeg ${pools} uit: ${n === 1 ? "een [wiel]" : "[wielen]"}.`;
+    if (n === 1) text += name ? ` Het heet ${name} en ligt op ${where}.` : ` Het ligt op ${where}.`;
+    else text += `${name ? ` Ze heten allemaal ${name}.` : ""} De dichtstbijzijnde ligt op ${where}.`;
+    if (maybe) text += " Of het echt een wiel is, is niet zeker.";
     const tip = sourceTip(r.source, r.breachPrecision, r.breachText);
     return w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip);
   });
@@ -528,7 +607,7 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
   if (own) {
     const w = whenOf(own, own.built, "built");
     const from = own.countries ? ` uit ${list(own.countries.split(", "))}` : "";
-    const text = `Je huis is een geschenk${from}. Na de watersnoodramp van 1953 gaven andere landen huizen aan de mensen die alles kwijt waren. Dit is zo'n [geschenkwoning].`;
+    const text = `Je huis is een [geschenkwoning]${from}. Na de watersnoodramp van 1953 gaven andere landen huizen aan mensen die alles kwijt waren.`;
     const tip = sourceTip(own.source, precisionOf(own, own.built, "built"), own.built ? undefined : own.builtText);
     return [w ? { year: w.label, sort: w.sort, text, source: tip } : undated(text, tip)];
   }
@@ -538,8 +617,11 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
     .filter((w): w is When => !!w)
     .sort((a, b) => a.sort - b.sort);
   const n = rows.length;
-  let text = `Binnen ${distance(GIFT_KM)} van je adres ${n === 1 ? "staat 1 [geschenkwoning]" : `staan ${n} [geschenkwoningen]`}: huizen die andere landen gaven na de watersnoodramp van 1953.`;
-  if (countries.length) text += ` Ze komen uit ${list(countries)}.`;
+  let text =
+    n === 1
+      ? `Binnen ${distance(GIFT_KM)} van je huis staat een [geschenkwoning]: een huis dat een ander land gaf na de watersnoodramp van 1953.`
+      : `Binnen ${distance(GIFT_KM)} van je huis staan ${n} [geschenkwoningen]: huizen die andere landen gaven na de watersnoodramp van 1953.`;
+  if (countries.length) text += ` ${n === 1 ? "Het komt" : "Ze komen"} uit ${list(countries)}.`;
   const tip = sourceTip(rows[0].source, undefined, undefined, dated.length ? "Het jaar is dat van de oudste woning." : undefined);
   return [dated[0] ? { year: dated[0].label, sort: dated[0].sort, text, source: tip } : undated(text, tip)];
 }

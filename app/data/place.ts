@@ -115,6 +115,7 @@ export const TERMS: Record<string, string> = {
   poldermolen: "Een windmolen die water uit de polder pompt. Voordat er gemalen waren, deden molens dat werk.",
   poldermolens: "Windmolens die water uit de polder pompen. Voordat er gemalen waren, deden molens dat werk.",
   wiel: "Een diepe plas achter een dijk. Het water sloeg die kolk uit toen de dijk doorbrak.",
+  wielen: "Diepe plassen achter een dijk. Het water sloeg die kolken uit toen de dijk doorbrak.",
   geschenkwoning: "Een huis dat een ander land gaf na de watersnoodramp van 1953.",
   geschenkwoningen: "Huizen die andere landen gaven na de watersnoodramp van 1953.",
   sluis: "Een soort deur in het water. Gaat hij open, dan kan water of een boot erdoor.",
