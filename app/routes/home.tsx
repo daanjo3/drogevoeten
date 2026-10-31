@@ -177,27 +177,6 @@ function toWork(img: RijksImage): RijksWork {
   };
 }
 
-/* Whether this browser finished or skipped the tour, so it does not start
-   again after every search. Storage can be blocked (private mode), then the
-   tour just runs as before. */
-const TOUR_DONE_KEY = "drogevoeten.tourDone";
-
-function tourDone(): boolean {
-  try {
-    return localStorage.getItem(TOUR_DONE_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function rememberTourDone() {
-  try {
-    localStorage.setItem(TOUR_DONE_KEY, "1");
-  } catch {
-    /* storage blocked: nothing to remember */
-  }
-}
-
 /* Start screen plus the canvas for one address. State at app level: the
    address (in the url as ?id=, a Locatieserver id), the mode (info or risk)
    and the scenario choices. */
@@ -287,7 +266,6 @@ export default function Home() {
   }
 
   function onTourEnd(how: "skip" | "try") {
-    rememberTourDone();
     canvas.setInset(0);
     setTour(null);
     setMode(how === "try" ? "risk" : "info");
@@ -355,11 +333,9 @@ export default function Home() {
     setMode("info");
     canvas.go("huis", false);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    /* only the first time in this browser; Rondleiding opnieuw still starts it */
-    const tour = !tourDone();
     if (reduce) {
       setPhase("hidden");
-      if (tour) startTour();
+      startTour();
       return;
     }
     setAway(true);
@@ -367,7 +343,7 @@ export default function Home() {
     window.setTimeout(() => {
       setPhase("hidden");
       setAway(false);
-      if (tour) startTour();
+      startTour();
     }, 1150);
   }
 
