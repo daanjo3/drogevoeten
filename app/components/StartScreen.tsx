@@ -65,7 +65,7 @@ export function StartScreen({
       <div className="nde">
         <span>Een project uit HackaLOD 2026, de hackathon van</span>
         <a href="https://netwerkdigitaalerfgoed.nl" target="_blank" rel="noreferrer">
-          <img src="/img/nde-logo-wit.png" alt="Netwerk Digitaal Erfgoed" />
+          <img src={`${import.meta.env.BASE_URL}img/nde-logo-wit.png`} alt="Netwerk Digitaal Erfgoed" />
         </a>
       </div>
     </section>

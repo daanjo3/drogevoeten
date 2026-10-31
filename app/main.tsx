@@ -19,7 +19,10 @@ const router = createBrowserRouter([
   },
   // unstyled test page, outside Root
   { path: "/rijksmuseum-test", Component: RijksmuseumTest },
-]);
+], {
+  // the app can live under a path (GitHub Pages), see vite.config.js
+  basename: import.meta.env.BASE_URL,
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

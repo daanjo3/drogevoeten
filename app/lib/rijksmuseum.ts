@@ -12,7 +12,7 @@ import { wktPoint, type LocatieserverDoc } from "./locatieserver";
 export const DATA_URL = `${import.meta.env?.BASE_URL ?? "/"}data/rijksmuseum-water.nt`;
 
 /* QLever from qlever/docker-compose.yml; set VITE_RIJKSMUSEUM_SPARQL for another one */
-export const SPARQL_URL: string = import.meta.env?.VITE_RIJKSMUSEUM_SPARQL ?? "http://localhost:7001";
+export const SPARQL_URL: string = import.meta.env?.VITE_RIJKSMUSEUM_SPARQL || "http://localhost:7001";
 
 /* Give up on the endpoint after this long, so callers can fall back */
 const ENDPOINT_TIMEOUT_MS = 8000;

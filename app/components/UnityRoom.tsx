@@ -8,7 +8,7 @@ import { Icon } from "./Icons";
    fails the png simply stays. */
 
 const EMBED_URL = "/woonkamer/unity-embed.js";
-const PLACEHOLDER = "/img/huiskamer-3d.png";
+const PLACEHOLDER = `${import.meta.env.BASE_URL}img/huiskamer-3d.png`;
 
 /* the part of the api of unity-embed.js we use */
 interface UnityPlayer {

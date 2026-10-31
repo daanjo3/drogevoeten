@@ -15,7 +15,7 @@ export type MapProps = {
     children?: ReactNode;
 };
 
-const tilesetOpenStreetMap = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+// alternative tileset: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 const tilesetPdok = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png'
 
 // MapContainer only reads center/zoom on mount; this keeps the view in sync with props.
