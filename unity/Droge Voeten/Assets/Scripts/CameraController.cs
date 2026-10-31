@@ -10,6 +10,11 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Camera))]
 public class CameraController : MonoBehaviour
 {
+    public enum View { Room, House }
+
+    // The view whose pose is on screen; changes at the moment the screen is black during a switch
+    public View ShownView { get; private set; } = View.Room;
+
     [Tooltip("Rotation for a drag across the full screen height, in multiples of the camera's vertical field of view.")]
     [SerializeField]
     private float dragSensitivity = 1f;
@@ -52,8 +57,8 @@ public class CameraController : MonoBehaviour
 
     // View switch: fade to black, jump to switchTarget, fade back in. switchTarget is null once the jump is done.
     private Transform switchTarget;
-    // The view SetView last switched to ("room" at the start)
-    private string currentView = "room";
+    // The view SetView last switched to (Room at the start); ShownView catches up at the jump
+    private View currentView = View.Room;
     // 0 = clear, 1 = black
     private float fade;
     private GameObject fadeCanvas;
@@ -108,12 +113,13 @@ public class CameraController : MonoBehaviour
     // "room" or "house" (as sent by the web page through WebBridge.SetView): fade over to that view pose
     public void SetView(string view)
     {
-        Transform target = view?.Trim().ToLowerInvariant() switch
+        View? requested = view?.Trim().ToLowerInvariant() switch
         {
-            "room" => roomPose,
-            "house" => housePose,
+            "room" => View.Room,
+            "house" => View.House,
             _ => null,
         };
+        Transform target = requested == View.Room ? roomPose : requested == View.House ? housePose : null;
         if (target == null)
         {
             Debug.LogWarning($"[CameraController] Unknown view '{view}' or its pose isn't assigned; expected \"room\" or \"house\".");
@@ -128,7 +134,7 @@ public class CameraController : MonoBehaviour
 
         // A switch during a fade simply changes where it ends up; a fade-in in progress turns back to black
         switchTarget = target;
-        currentView = target == housePose ? "house" : "room";
+        currentView = requested.Value;
     }
 
     private void Update()
@@ -137,7 +143,7 @@ public class CameraController : MonoBehaviour
         // Editor only, for testing: space toggles between the room and house views
         if (Keyboard.current != null && Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            SetView(currentView == "room" ? "house" : "room");
+            SetView(currentView == View.Room ? "house" : "room");
         }
 #endif
 
@@ -181,6 +187,7 @@ public class CameraController : MonoBehaviour
                 yaw = 0f;
                 pitch = 0f;
                 switchTarget = null;
+                ShownView = currentView;
             }
         }
         else

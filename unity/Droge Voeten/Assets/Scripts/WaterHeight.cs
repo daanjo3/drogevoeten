@@ -5,9 +5,12 @@ public class WaterHeight : MonoBehaviour
     float targetHeight;
     bool hasLevel;
     Renderer waterRenderer;
+    CameraController cameraController;
 
     // World height of the floor's top. SetLevel measures from here.
     public float floorHeight = 0.1f;
+    [Tooltip("The camera view this water belongs to; it's hidden while the other view is on screen.")]
+    public CameraController.View view = CameraController.View.Room;
     // How fast the surface moves to a new height, in meters per second
     public float riseSpeed = 0.2f;
 
@@ -18,6 +21,7 @@ public class WaterHeight : MonoBehaviour
     private void Awake()
     {
         waterRenderer = GetComponent<Renderer>();
+        cameraController = FindAnyObjectByType<CameraController>();
     }
 
     private void OnEnable()
@@ -38,13 +42,15 @@ public class WaterHeight : MonoBehaviour
         UpdateVisibility();
     }
 
-    // Draw nothing while the surface is at or under the floor, otherwise the wave displacement pokes through it.
-    // forceRenderingOff keeps the renderer's bounds valid (FishSpawner uses them as the room's floor plan).
+    // Draw nothing while the surface is at or under the floor (otherwise the wave displacement pokes through it) or
+    // while the camera shows the other view. forceRenderingOff keeps the renderer's bounds valid (FishSpawner uses
+    // them as the room's floor plan).
     private void UpdateVisibility()
     {
         if (waterRenderer != null)
         {
-            waterRenderer.forceRenderingOff = transform.position.y <= floorHeight;
+            bool otherView = cameraController != null && cameraController.ShownView != view;
+            waterRenderer.forceRenderingOff = transform.position.y <= floorHeight || otherView;
         }
     }
 
