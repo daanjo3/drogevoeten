@@ -11,7 +11,8 @@ export type StartPhase = "idle" | "going" | "hidden";
 const EXAMPLES: { label: string; address: string }[] = [
   { label: "Middelburg", address: "Abdij 4, Middelburg" },
   { label: "Middenbeemster", address: "Middenweg 68a, Middenbeemster" },
-  { label: "Nieuwerkerk", address: "Koningin Maudplein 1, Nieuwerkerk" },
+  { label: "Nieuwerkerk", address: "Koningin Maudplein 1, 4306AR Nieuwerkerk" },
+  { label: "Heijningen", address: "Elisabethweg 2, 4794RT Heijningen" },
 ];
 
 export function StartScreen({
