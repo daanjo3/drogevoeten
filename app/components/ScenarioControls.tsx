@@ -4,6 +4,8 @@ import { LIWO_CLASSES, liwoClass, type LiwoMap } from "../lib/liwo";
 interface Option<T> {
   label: string;
   sub?: string;
+  /* shorter version of sub for the phone dropdown */
+  short?: string;
   value: T;
 }
 
@@ -12,8 +14,11 @@ export function Segment<T extends string | number>({
   options,
   value,
   onPick,
+  stacked = false,
 }: {
   label: string;
+  /* one button per line, for options with a long small line */
+  stacked?: boolean;
   options: Option<T>[];
   value: T;
   onPick: (v: T) => void;
@@ -21,7 +26,7 @@ export function Segment<T extends string | number>({
   return (
     <div className="row">
       <small>{label}</small>
-      <div className="seg" role="group" aria-label={label}>
+      <div className={stacked ? "seg stack" : "seg"} role="group" aria-label={label}>
         {options.map((o) => (
           <button key={o.value} type="button" aria-pressed={o.value === value} onClick={() => onPick(o.value)}>
             {o.label}
@@ -39,7 +44,7 @@ export function Segment<T extends string | number>({
         {options.map((o, i) => (
           <option key={o.value} value={i}>
             {o.label}
-            {o.sub ? ` · ${o.sub}` : ""}
+            {o.short ?? o.sub ? ` · ${o.short ?? o.sub}` : ""}
           </option>
         ))}
       </select>
@@ -49,7 +54,7 @@ export function Segment<T extends string | number>({
 
 /* Segment buttons, one choice per row. The water in the room follows at once. */
 export function ScenarioControls({ scenario, onChange }: { scenario: Scenario; onChange: (s: Scenario) => void }) {
-  const odds = liwoClass(scenario.liwoMap).odds;
+  const kans = liwoClass(scenario.liwoMap);
   return (
     <>
       <Segment
@@ -64,19 +69,20 @@ export function ScenarioControls({ scenario, onChange }: { scenario: Scenario; o
       {scenario.outside === "flood" && (
         <>
           <Segment
-            label="kans per jaar"
+            label="hoe vaak gebeurt het?"
+            stacked
             value={scenario.liwoMap}
             onPick={(liwoMap: LiwoMap) => onChange({ ...scenario, liwoMap })}
             options={LIWO_CLASSES.map((c) => ({
               label: c.label,
-              sub: c.map === 1 ? `meer dan 1 op ${c.odds}` : c.odds ? `1 op ${c.odds}` : "nog kleiner",
+              sub: c.sub,
+              short: c.short,
               value: c.map,
             }))}
           />
           <p className="hint">
-            {odds
-              ? `Elk jaar is er een kans van ${scenario.liwoMap === 1 ? "meer dan " : ""}1 op ${odds} op zo'n overstroming. Gemiddeld komt die eens in de ${odds} jaar${scenario.liwoMap === 1 ? " of vaker" : ""} voor, maar hij kan ook twee keer kort na elkaar komen, of eeuwenlang niet.`
-              : "De kans is kleiner dan 1 op 30.000 per jaar. Zo'n overstroming komt bijna nooit voor. Dit is dezelfde kaart als op overstroomik.nl."}
+            Zo'n overstroming gebeurt gemiddeld {kans.often}. Dat betekent niet dat je zo lang veilig bent. Het kan ook volgend jaar
+            gebeuren.
           </p>
         </>
       )}

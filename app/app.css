@@ -232,6 +232,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 
 /* scenario-keuzes, compact */
 /* info-blok wisselt van inhoud */
+/* the scenario buttons are tall: the block scrolls when the screen is small */
+#p-info{overflow-y:auto;scrollbar-width:thin}
 #p-info .mode{grid-area:1/1;transition:opacity .35s ease,transform .45s cubic-bezier(.2,.7,.2,1),visibility 0s linear .45s}
 #p-info[data-mode=info] .m-risk,#p-info[data-mode=risk] .m-info{opacity:0;transform:translateY(16px);visibility:hidden;pointer-events:none}
 #p-info[data-mode=info] .m-info,#p-info[data-mode=risk] .m-risk{transition-delay:.12s,.12s,0s}
@@ -256,6 +258,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .seg{display:flex;background:#333;border-radius:12px;padding:3px;gap:3px}
 .seg button{flex:1;background:transparent;color:#fff;border:0;border-radius:9px;padding:9px 6px;font-weight:700;font-size:14px;line-height:1.2}
 .seg button span{display:block;font:400 var(--fs-label)/1.3 var(--font);opacity:.65;margin-top:2px}
+/* one button per line: big text left, small line right */
+.seg.stack{flex-direction:column}
+.seg.stack button{display:flex;justify-content:space-between;align-items:baseline;gap:12px;text-align:left;padding:8px 12px}
+.seg.stack button span{margin:0;text-align:right}
 .seg button:hover{background:#444}
 .seg button[aria-pressed="true"]{background:var(--sun);color:var(--ink)}
 .seg button[aria-pressed="true"] span{opacity:.8}

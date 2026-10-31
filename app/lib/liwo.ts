@@ -25,13 +25,15 @@ const BASE_URL = "https://basisinformatie-overstromingen.nl/geoserver/ows";
 
 /* The five probability classes. "odds" is the class bound: map n holds the
    floods with a chance of at least 1 in odds per year (map 1: more than 1 in
-   30; map 5: all, also below 1 in 30.000). "label" is the button text. */
+   30; map 5: all, also below 1 in 30.000). The buttons say how often it happens:
+   "label" is the big text, "sub" the small line, "short" the small line in the
+   phone dropdown, "often" the range as it reads in the sentence under them. */
 export const LIWO_CLASSES = [
-  { map: 1, name: "grote kans", probability: "meer dan 1/30 per jaar", label: "Groot", odds: "30" },
-  { map: 2, name: "middelgrote kans", probability: "1/30 tot 1/300 per jaar", label: "Middelgroot", odds: "300" },
-  { map: 3, name: "kleine kans", probability: "1/300 tot 1/3.000 per jaar", label: "Klein", odds: "3.000" },
-  { map: 4, name: "zeer kleine kans", probability: "1/3.000 tot 1/30.000 per jaar", label: "Zeer klein", odds: "30.000" },
-  { map: 5, name: "extreem kleine kans", probability: "minder dan 1/30.000 per jaar", label: "Extreem klein", odds: null },
+  { map: 1, name: "grote kans", probability: "meer dan 1/30 per jaar", label: "Vaak", sub: "vaker dan eens per 30 jaar", short: "30 jaar", often: "vaker dan eens per 30 jaar", odds: "30" },
+  { map: 2, name: "middelgrote kans", probability: "1/30 tot 1/300 per jaar", label: "Soms", sub: "eens per 30 tot 300 jaar", short: "300 jaar", often: "eens per 30 tot 300 jaar", odds: "300" },
+  { map: 3, name: "kleine kans", probability: "1/300 tot 1/3.000 per jaar", label: "Zelden", sub: "eens per 300 tot 3.000 jaar", short: "3.000 jaar", often: "eens per 300 tot 3.000 jaar", odds: "3.000" },
+  { map: 4, name: "zeer kleine kans", probability: "1/3.000 tot 1/30.000 per jaar", label: "Heel zelden", sub: "eens per 3.000 tot 30.000 jaar", short: "30.000 jaar", often: "eens per 3.000 tot 30.000 jaar", odds: "30.000" },
+  { map: 5, name: "extreem kleine kans", probability: "minder dan 1/30.000 per jaar", label: "Bijna nooit", sub: "nog minder vaak", short: "nog minder", often: "minder dan eens per 30.000 jaar", odds: null },
 ] as const;
 
 export type LiwoMap = (typeof LIWO_CLASSES)[number]["map"];
