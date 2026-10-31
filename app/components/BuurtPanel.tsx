@@ -4,9 +4,8 @@ import { Icon } from "./Icons";
 import { Tip } from "./Tip";
 import LeafletMap from "./leaflet-map";
 import type { LocatieserverDoc } from "../lib/locatieserver";
-import { featureUrl, useNear as useNearLandschapsatlas } from "../lib/landschapsatlas";
-import { itemUrl, useNear } from "../lib/imwa";
-import { combineGemalen, webUrl, MATCH_MAX_M, type CombinedGemaal } from "../lib/linkset";
+import { isBuiltName, useGemalen } from "../lib/gemalen";
+import { combineGemalen, MATCH_MAX_M, type CombinedGemaal } from "../lib/linkset";
 import { toLatLngs, usePeilgebied } from "../lib/waterbeheergebieden";
 import { TERMS } from "../data/place";
 
@@ -49,46 +48,40 @@ interface Poi {
   photo?: { src: string; tip: string };
 }
 
-/* A gemaal from IMWA, the Landschapsatlas or both. IMWA gives the current
-   register (position, function, capacity, water board), the Landschapsatlas
-   the history (founding year, drive, status, gemalen.nl page, photo). */
+/* A gemaal from IMWA, the Landschapsatlas or both, as linked data. IMWA
+   gives the current register (position, function, water board), the
+   Landschapsatlas the history (founding year, drive, status, gemalen.nl
+   page, photo). */
 function fromCombined(c: CombinedGemaal): Poi {
-  const im = c.imwa?.properties;
-  const la = c.atlas?.properties;
+  const im = c.imwa;
+  const la = c.atlas;
   // the position from the register when we have it
-  const [lon, lat] = (c.imwa ?? c.atlas)!.geometry.coordinates;
-  const name = im?.naam?.trim() || la?.naam_gemaal?.trim() || "Gemaal zonder naam";
-  // the Landschapsatlas uses " " for empty fields
-  const year = la?.stichtingsjaar?.trim();
-  const driveThen = la?.aandrijving_oorspronkelijk?.trim().toLowerCase();
-  const driveNow = la?.aandrijving_huidig?.trim().toLowerCase();
+  const { lat, lon } = (im ?? la)!;
+  // a name the conversion built ("... (naam onbekend)") only when there is no other
+  const name = im && !(isBuiltName(im.name) && la && !isBuiltName(la.name)) ? im.name : la!.name;
+  const driveThen = la?.driveThen?.toLowerCase();
+  const driveNow = la?.driveNow?.toLowerCase();
   const drive = driveThen && driveNow && driveThen !== driveNow ? `eerst ${driveThen}, nu ${driveNow}` : driveNow || driveThen;
-  const fn = im?.functiegemaal && im.functiegemaal !== "Onbekend" ? im.functiegemaal : la?.functie?.trim();
-  const outlet = la?.lozend_op?.trim();
+  const fn = im?.function || la?.functions.join(" en ");
   const parts = [
-    year ? `Gesticht in ${year}.` : "",
+    la?.founded ? `Gesticht in ${la.founded}.` : "",
     fn ? `Functie: ${fn.toLowerCase()}.` : "",
-    im?.maximalecapaciteit != null ? `Pompt maximaal ${im.maximalecapaciteit.toLocaleString("nl-NL")} m³ per minuut.` : "",
-    outlet ? `Loost op ${outlet}.` : "",
+    la?.outlets.length ? `Loost op ${la.outlets.join(" en ")}.` : "",
     drive ? `Aandrijving: ${drive}.` : "",
-    im?.waterbeheerder ? `Beheerd door ${im.waterbeheerder}.` : "",
+    im?.maintainer ? `Beheerd door ${im.maintainer}.` : "",
   ];
 
-  const gemalenNl = webUrl(la?.infolink);
-  const registerUrl = webUrl(im?.url);
   const linked = c.linkDistance !== undefined ? ` Gekoppeld aan het register van de waterschappen op naam en afstand (${Math.round(c.linkDistance)} m).` : "";
-  const source = gemalenNl
-    ? { href: gemalenNl, tip: `Bron: Nederlandse Gemalenstichting (gemalen.nl), via de RCE Landschapsatlas.${linked}` }
-    : registerUrl
-      ? { href: registerUrl, tip: "Bron: de website bij dit gemaal in het register van de waterschappen" }
-      : undefined;
+  const source = la?.url
+    ? { href: la.url, tip: `Bron: Nederlandse Gemalenstichting (gemalen.nl), via de RCE Landschapsatlas en de Droge Voeten linked data.${linked}` }
+    : undefined;
 
   const metadata: Poi["metadata"] = [];
-  if (c.imwa) {
-    metadata.push({ label: "imwa", href: itemUrl("gemaal", c.imwa.id, "html"), tip: "Alle gegevens van dit gemaal uit IMWA, het register van de waterschappen (PDOK)" });
+  if (im?.derivedFrom) {
+    metadata.push({ label: "imwa", href: htmlUrl(im.derivedFrom), tip: "Het bronobject in IMWA, het register van de waterschappen (PDOK), waar dit linked-datarecord uit gemaakt is" });
   }
-  if (c.atlas) {
-    metadata.push({ label: "rce", href: featureUrl("landschapsatlas:gemalen", c.atlas.id), tip: "Alle gegevens van dit gemaal uit de RCE Landschapsatlas (WFS, GeoJSON)" });
+  if (la?.derivedFrom) {
+    metadata.push({ label: "rce", href: la.derivedFrom, tip: "Het bronobject in de RCE Landschapsatlas (WFS, GeoJSON), waar dit linked-datarecord uit gemaakt is" });
   }
 
   return {
@@ -98,15 +91,26 @@ function fromCombined(c: CombinedGemaal): Poi {
     lon,
     distance: c.distance,
     // the Landschapsatlas says whether it still works ("In bedrijf", "Gesloopt"); IMWA only "gerealiseerd"
-    status: la?.status?.trim() || im?.statusobject || "onbekend",
+    status: la?.status || im?.status || "onbekend",
     text: parts.filter(Boolean).join(" ") || "Geen verdere gegevens.",
     source,
     metadata,
     photo:
-      la && isAllowedPhoto(la.foto_thumb)
-        ? { src: la.foto_thumb, tip: la.fotograaf ? `${la.naam_gemaal} · foto: ${la.fotograaf}` : la.naam_gemaal }
+      la?.photo && isAllowedPhoto(la.photo.thumb)
+        ? { src: la.photo.thumb, tip: la.photo.credit ? `${la.name} · ${la.photo.credit}` : la.name }
         : undefined,
   };
+}
+
+/* The OGC API item as a web page instead of JSON */
+function htmlUrl(href: string): string {
+  try {
+    const url = new URL(href);
+    url.searchParams.set("f", "html");
+    return url.toString();
+  } catch {
+    return href;
+  }
 }
 
 /* "POINT(lon lat)" -> [lat, lon] */
@@ -125,17 +129,10 @@ export function BuurtPanel({ place }: Props) {
   const here = parsePoint(place?.centroide_ll);
   const [lat, lon] = here ?? [undefined, undefined];
 
-  // Both sources in parallel, everything in the circle: combining needs them
-  // all, we show the nearest MAX_SHOWN of the union.
-  const imwa = useNear({ collection: "gemaal", lat, lon, radius: RADIUS_M, limit: 1000 });
-  // a bit wider, so IMWA gemalen near the edge can still be linked
-  const atlas = useNearLandschapsatlas({
-    typeName: "landschapsatlas:gemalen",
-    lat,
-    lon,
-    radius: RADIUS_M + MATCH_MAX_M,
-    limit: 1000,
-  });
+  // Both datasets in parallel from the linked data, everything in the circle:
+  // combining needs them all, we show the nearest MAX_SHOWN of the union.
+  // The Landschapsatlas a bit wider, so IMWA gemalen near the edge can still be linked.
+  const { imwa, atlas } = useGemalen(here && { lat: here[0], lon: here[1] }, RADIUS_M / 1000, MATCH_MAX_M / 1000);
 
   // the area around the address where one water level is kept
   const { peilgebied } = usePeilgebied(lat, lon);

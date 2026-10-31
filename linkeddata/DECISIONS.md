@@ -424,3 +424,14 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
 - **Later mogelijk als linked data:** de ramp als één gebeurtenis (met een link naar Wikidata), met de vlakken als gebied en de geschenkwoningen die ernaar verwijzen. Nu niet gedaan.
 - **Licentie:** het Nationaal Georegister noemt geen licentie voor deze kaart. Niet apart nagekeken.
 - **Getest:** Elisabethweg 2, Heijningen: zout water. Abdij 4, Middelburg; Koningin Maudplein 1, Nieuwerkerk en Breda: geen zin. In de app (headless Chromium) verschijnt de zin bij Heijningen.
+
+## 34. De gemalen in het buurtblok uit de linked data (31-10-2026)
+
+**Vraag van Jari:** het groene blok "Zij houden je voeten droog" (`BuurtPanel`) haalde de gemalen nog live uit de IMWA OGC API en de WFS van de RCE Landschapsatlas. Laat het, net als de tijdlijn, de linked datasets op het SPARQL-endpoint gebruiken.
+
+- **Hoe:** `app/lib/gemalen.ts` doet twee queries op de QLever-store: `pumping-stations` (RCE / Gemalenstichting) binnen 5,3 km en `water-board-pumping-stations` (IMWA) binnen 5 km. De afstandsfilter (`within`) is dezelfde als in de tijdlijn en staat nu met de prefixen in `app/lib/sparql.ts`. Elk antwoord duurt lokaal 60–150 ms.
+- **Koppelen blijft in de browser.** In de data is gemaal ↔ IMWA nog geen linkset (fase 2, §29). `app/lib/linkset.ts` koppelt daarom zoals eerst: gedeeld naamwoord en ≤ 300 m, één-op-één, dichtste paar eerst. "naam" en "onbekend" tellen niet mee als naamwoord, omdat de omzetting namen opbouwt als "Gemaal 30099GM (naam onbekend)". Zo'n opgebouwde naam wijkt in de lijst voor de naam uit de andere dataset.
+- **Wat wegvalt:** de maximale capaciteit (bewust niet overgenomen, het API-schema noemt geen eenheid, §28) en de website uit het IMWA-veld `url`. De links "metadata · imwa/rce" wijzen nu naar het bronobject uit `prov:wasDerivedFrom` (IMWA met `?f=html`).
+- **Endpoint onbereikbaar:** het blok meldt dat de bronnen geen antwoord gaven, zoals eerst bij de live diensten. Geen terugval op de live API's.
+- **Niet veranderd:** het peilgebied op de kaart en het gemaal in het adresblok en bij "Als het hard regent" (`app/lib/drainage.ts`) komen nog live uit IMWA, net als LIWO (§32).
+- **Getest** tegen een tijdelijke QLever-index van `droge-voeten.nt.gz`: Middelburg (Boreel, Sint Laurense Watergang, Domburgse Watergang gekoppeld), Heijningen (Geluk, Oude Prinslandse Polder) en Lemmer (Buma).

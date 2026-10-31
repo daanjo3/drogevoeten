@@ -29,12 +29,9 @@ import { queryOptions } from "@tanstack/react-query";
 import type { TimelineStep } from "../data/place";
 import { findFlood1953, type Flood } from "./flood1953";
 import type { LocatieserverDoc } from "./locatieserver";
-import { select, type Row } from "./sparql";
+import { DS, PREFIXES, select, sourceOf, within, wkt, type Point, type Row } from "./sparql";
 
-export interface Point {
-  lat: number;
-  lon: number;
-}
+export type { Point };
 
 /* The address as the gift houses name it: "Malmöweg 5", "Den Bommel" */
 export interface Address {
@@ -56,32 +53,8 @@ const MAX_STANDING_MILLS = 2;
 const MAX_VILLAGES = 2;
 const MAX_POOLS = 2;
 
-const PREFIXES = `PREFIX schema: <https://schema.org/>
-PREFIX dv: <urn:drogevoeten:def:>
-PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
-`;
-
-const DS = "urn:drogevoeten:dataset:";
 const EVENT = "urn:drogevoeten:term:event-type:";
 const POLDER_MILL = "<urn:drogevoeten:term:drainage-structure:poldermolen>";
-
-const wkt = ({ lat, lon }: Point) => `"POINT(${Number(lon)} ${Number(lat)})"^^geo:wktLiteral`;
-
-/* The name of a dataset's source, from the catalog */
-const sourceOf = (ds: string) => `VALUES ?ds { <${DS}${ds}> }
-  OPTIONAL { ?ds schema:isBasedOn/schema:name ?src }`;
-
-/* ?pt (schema:latitude/longitude) within `km` of p, as ?d in km. The box
-   first, so geof:distance only runs on the points close by. */
-function within(p: Point, km: number): string {
-  const dLat = km / 111;
-  const dLon = km / (111 * Math.cos((p.lat * Math.PI) / 180));
-  return `?pt schema:latitude ?lat ; schema:longitude ?lon .
-  FILTER(?lat >= ${p.lat - dLat} && ?lat <= ${p.lat + dLat} && ?lon >= ${p.lon - dLon} && ?lon <= ${p.lon + dLon})
-  BIND(geof:distance(STRDT(CONCAT("POINT(", STR(?lon), " ", STR(?lat), ")"), geo:wktLiteral), ${wkt(p)}) AS ?d)
-  FILTER(?d <= ${km})`;
-}
 
 /* An event of one type about ?subject, with its dates as ?<v>Start,
    ?<v>End, ?<v>Precision and ?<v>Text */

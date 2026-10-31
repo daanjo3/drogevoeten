@@ -31,3 +31,36 @@ export async function select(query: string, signal?: AbortSignal): Promise<Row[]
   const json = (await res.json()) as SparqlResults;
   return json.results.bindings.map((b) => Object.fromEntries(Object.entries(b).map(([k, v]) => [k, v?.value])));
 }
+
+/* Shared pieces for queries on the Droge Voeten linked data */
+
+export interface Point {
+  lat: number;
+  lon: number;
+}
+
+export const PREFIXES = `PREFIX schema: <https://schema.org/>
+PREFIX dv: <urn:drogevoeten:def:>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+`;
+
+export const DS = "urn:drogevoeten:dataset:";
+
+export const wkt = ({ lat, lon }: Point) => `"POINT(${Number(lon)} ${Number(lat)})"^^geo:wktLiteral`;
+
+/* The name of a dataset's source, from the catalog */
+export const sourceOf = (ds: string) => `VALUES ?ds { <${DS}${ds}> }
+  OPTIONAL { ?ds schema:isBasedOn/schema:name ?src }`;
+
+/* ?pt (schema:latitude/longitude) within `km` of p, as ?d in km. The box
+   first, so geof:distance only runs on the points close by. */
+export function within(p: Point, km: number): string {
+  const dLat = km / 111;
+  const dLon = km / (111 * Math.cos((p.lat * Math.PI) / 180));
+  return `?pt schema:latitude ?lat ; schema:longitude ?lon .
+  FILTER(?lat >= ${p.lat - dLat} && ?lat <= ${p.lat + dLat} && ?lon >= ${p.lon - dLon} && ?lon <= ${p.lon + dLon})
+  BIND(geof:distance(STRDT(CONCAT("POINT(", STR(?lon), " ", STR(?lat), ")"), geo:wktLiteral), ${wkt(p)}) AS ?d)
+  FILTER(?d <= ${km})`;
+}
