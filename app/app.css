@@ -182,8 +182,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
 #p-info {left:152vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
 #p-map  {left:92vw; top:7vh;   width:30vw; height:68vh; background:linear-gradient(180deg,#D3E9F8 0%,#EEF5FA 100%)}
-/* as tall as the time line, up to 150vh: a place with few steps gets a short block */
-#p-tijd {left:49vw; top:45vh;  width:36vw; height:auto; min-height:60vh; max-height:150vh; background:var(--g-lavender)}
+/* as tall as the time line: a place with few steps gets a short block, one with many a tall one */
+#p-tijd {left:49vw; top:45vh;  width:36vw; height:auto; min-height:60vh; background:var(--g-lavender)}
 #p-buurt{left:92vw; top:165vh; width:53vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 #p-gemaal{left:152vw;top:165vh; width:28vw; height:70vh; background:var(--g-lavender)}
 /* rain sum next to the gemalen; height follows the content (two pumps, slider) */
@@ -269,11 +269,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .row .pick{display:none;width:100%;background:#333;color:#fff;border:0;border-radius:12px;padding:12px 14px;font:700 15px var(--font);appearance:auto}
 
 /* tijdlijn */
-.tl{display:grid;grid-template-columns:28px 1fr;gap:14px;height:calc(100% - 70px)}
+.tl{display:grid;grid-template-columns:28px 1fr;gap:14px}
 .tl .axis{position:relative}
-/* rows share the height when there are many steps, but never grow past 16vh,
-   so a short timeline keeps compact steps instead of stretched ones */
-.tl ol{list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:minmax(auto,16vh);align-content:start;gap:10px;height:100%}
+/* every step is as tall as its text: a fixed row height let long steps (and their Bron label) run out of the card */
+.tl ol{list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:auto;align-content:start;gap:10px}
 .tl li{position:relative;background:rgba(255,255,255,.55);border-radius:14px;padding:12px 14px}
 .tl li:before{content:"";position:absolute;z-index:1;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
 /* the axis is drawn per step, down to the next dot, so it ends at the last step */
@@ -340,11 +339,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   #nav .t{font-size:13px}
   #mini{bottom:96px;width:72px;height:140px}
   #out{position:relative;left:0;right:0;bottom:0;margin-top:50vh}
-  /* the time line: every step is as tall as its text (a fixed row height let long steps run over the next one),
-     and the block grows with the steps instead of stopping at 150vh */
-  #p-tijd{max-height:none}
-  .tl{height:auto}
-  .tl ol{grid-auto-rows:auto;height:auto}
 }
 /* phone: the bar sticks to the bottom with only the titles, the street
    name sits just above it, no minimap, a lighter vignette */
