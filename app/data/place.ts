@@ -25,8 +25,6 @@ export interface PlaceData {
   address: string;
   /* floor height in m above NAP (AHN) */
   nap: number;
-  /* the year the land was drained, roughly */
-  drainedYear: number;
   timeline: TimelineStep[];
   nearby: NearbyWork[];
 }
@@ -34,7 +32,6 @@ export interface PlaceData {
 export const MIDDELBURG: PlaceData = {
   address: "Abdij 4, Middelburg",
   nap: 2.0,
-  drainedYear: 1200,
   timeline: [
     {
       year: "Rond 1200",

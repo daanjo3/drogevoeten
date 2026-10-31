@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import type { Mode, PlaceData } from "../data/place";
 import { TERMS } from "../data/place";
 import { useAddressHeight } from "../lib/ahn";
 import type { LocatieserverDoc } from "../lib/locatieserver";
 import type { Drainage } from "../lib/drainage";
 import { useFlood1953 } from "../lib/flood1953";
+import { locationOf } from "../lib/rijksmuseum";
+import { drainedQueryOptions } from "../lib/timeline";
 import { nl, nlSigned, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
 import { ScenarioControls } from "./ScenarioControls";
@@ -79,6 +82,17 @@ export function InfoPanel({
     ? ` Watersnoodramp: kaart "Historische Inundatie Ramp 1953" van de ${flood.publisher} (${flood.metadata}). Die kaart dekt alleen Noord-Brabant en zegt niet hoe diep het water stond.`
     : "";
 
+  /* only when the linked data has an embankment or reclamation with a year
+     for the polder this address lies in; elsewhere nothing */
+  const drained = useQuery(drainedQueryOptions(locationOf(locatie))).data;
+  const drainedText = drained && (
+    <>
+      Dit land werd {drained.when} {drained.kind === "indijking" ? "ingedijkt" : "drooggemaakt"}. In de tijdreis zie je
+      hoe.
+    </>
+  );
+  const drainedSource = drained ? ` Jaartal: ${drained.source}` : "";
+
   const pumps = drainage.pumps;
   const board = (pumps[0]?.waterbeheerder ?? drainage.area?.waterbeheerder)?.replace(/^Waterschap\s+/i, "");
   const gemaal = (
@@ -131,10 +145,10 @@ export function InfoPanel({
         <h2 id="huisAdres">{place.address}</h2>
         <p>{heightText}</p>
         <p>{pumpText}</p>
-        <p>Dit land werd rond {place.drainedYear} droog gemaakt. In de tijdreis zie je hoe.</p>
+        {drainedText && <p>{drainedText}</p>}
         {floodText && <p>{floodText}</p>}
         <p className="src">
-          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.${floodSource}`}>
+          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA).${drainedSource}${floodSource}`}>
             bron
           </Tip>
         </p>

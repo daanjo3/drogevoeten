@@ -696,3 +696,58 @@ export function timelineQueryOptions(p: Point | undefined, address?: Address) {
     staleTime: Infinity,
   });
 }
+
+/* How the land at a point became dry: the embankment or reclamation of the
+   polder or drained lake it lies in (the polder step of the time line). The
+   earliest one with a year, or null when the data has none: then the address
+   panel says nothing about it. */
+export interface Drained {
+  kind: "indijking" | "droogmaking";
+  /* how the year fits in a sentence: "in de 11e/12e eeuw", "rond 1612", "vóór 1550" */
+  when: string;
+  source: string;
+}
+
+/* The phrase for a year, from the precision of the source, as in when() */
+function whenPhrase(start?: string, end?: string, precision?: string, text?: string): string | undefined {
+  const s = year(start);
+  const e = year(end);
+  const sort = s ?? e;
+  if (sort === undefined) return undefined;
+  if (precision === "eeuw" && text) return /eeuw/i.test(text) ? `in de ${text}` : `in ${text}`;
+  if (precision === "voor" && e !== undefined) return `vóór ${e}`;
+  if (precision === "na" && s !== undefined) return `na ${s}`;
+  if (precision === "circa") return `rond ${sort}`;
+  if (s !== undefined && e !== undefined && s !== e) return `tussen ${s} en ${e}`;
+  return `in ${sort}`;
+}
+
+export async function findDrained(p: Point, signal?: AbortSignal): Promise<Drained | null> {
+  const rows = await select(polderQuery(p), signal);
+  let best: (Drained & { sort: number }) | undefined;
+  for (const r of rows) {
+    if ((r.eventType !== "indijking" && r.eventType !== "droogmaking") || !r.name) continue;
+    const phrase = whenPhrase(r.start, r.end, r.precision, r.dateText);
+    const sort = year(r.start) ?? year(r.end);
+    if (!phrase || sort === undefined || (best && best.sort <= sort)) continue;
+    best = {
+      kind: r.eventType,
+      when: phrase,
+      sort,
+      source: sourceTip(r.source, r.precision, r.dateText).replace(/^Bron: /, ""),
+    };
+  }
+  if (!best) return null;
+  const { sort: _, ...drained } = best;
+  return drained;
+}
+
+export function drainedQueryOptions(p: Point | undefined) {
+  return queryOptions({
+    queryKey: ["drained", p],
+    queryFn: ({ signal }) => findDrained(p!, signal),
+    enabled: !!p,
+    retry: false,
+    staleTime: Infinity,
+  });
+}
