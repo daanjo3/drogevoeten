@@ -407,5 +407,20 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
   - zonder polder of droogmakerij de stap "weten we niet", zoals het prototype.
 - **Stappen zonder jaar** krijgen "Onbekend" en staan onderaan.
 - **Snelheid:** acht queries tegelijk, 0,7–1,2 s per adres op een lokale QLever. De puntqueries filteren eerst op een vak rond het adres, en rekenen pas daarna `geof:distance`.
-- **Niet mogelijk, want geen linked data:** de Waterstaatskaart, de 1953-inundatiekaart van Noord-Brabant en de melding "of deze plek in 1953 onderliep, weten we niet", de poldernamenkaart van Zeeland (§28). "Vandaag" en "Risico" komen uit live diensten (IMWA, LIWO), niet uit de tijdlijn.
+- **Niet mogelijk, want geen linked data:** de Waterstaatskaart, de 1953-inundatiekaart van Noord-Brabant (inmiddels als GeoJSON, §33) en de melding "of deze plek in 1953 onderliep, weten we niet", de poldernamenkaart van Zeeland (§28). "Vandaag" en "Risico" komen uit live diensten (IMWA, LIWO), niet uit de tijdlijn.
 - **Getest** op de zeven demo-adressen naast het prototype: op de punten hierboven na dezelfde stappen. Bij Middelburg toont de app als derde gemaal Poppekinderen (bemaalt volgens de bron jouw polder, §31) in plaats van Veerse Watergang.
+
+
+## 33. De inundatiekaart van 1953 als GeoJSON in de app, niet als linked data (31-10-2026)
+
+**Vraag van Jari:** kan de app, zoals het prototype, zeggen dat een adres in 1953 onderliep? En past de inundatiekaart wel als linked data?
+
+- **Geen linked data, bewust.** De kaart "Historische Inundatie Ramp 1953" (Provincie Noord-Brabant) bestaat uit 19 naamloze vlakken. Per vlak staan er alleen een volgnummer, "zout" of "zoet", en de oppervlakte en omtrek. Er is niets om naar te verwijzen of aan te koppelen: het is een kaartlaag voor een punt-in-vlaktest. Dezelfde keuze als bij LIWO en IMWA, die de app ook rechtstreeks gebruikt (§32).
+- **Hoe:** `app/scripts/flood_1953.py` zet de vlakken uit de prototypebouw (`prototype/data/build/history-areas.json`, al omgerekend naar WGS84 en vereenvoudigd tot ca. 5 m) in `app/public/data/flood-1953-noord-brabant.geojson` (32 KB). `app/lib/flood1953.ts` laadt dat bestand en test in de browser of het adres in een vlak ligt.
+- **Waar het staat:** in het adresblok (`InfoPanel`, met het adres als titel), niet in de tijdlijn. Op verzoek van Jari: het is een feit over je adres, geen stap in hoe het land droog werd.
+- **Wat de app toont:** alleen als het adres in een vlak ligt: "In 1953 liep jouw adres onder water." Bij zout water: "Bij de watersnoodramp stroomde hier zout zeewater het land in." Bij zoet water: "stond hier zoet water. Waar dat vandaan kwam, staat niet in de kaart." Geen zin over de waterhoogte en geen aantal doden (op verzoek van Jari). Het woord "watersnoodramp" heeft een uitleg (`TERMS`). De kaart staat in de bron-tip van het blok.
+- **Buiten de vlakken geen tekst.** Het prototype zei elders "of deze plek in 1953 onderliep, weten we niet". Op verzoek van Jari laat de app dat weg: de zin verschijnt alleen als de bron zegt dat het onderliep.
+- **Laadt het bestand niet,** dan ontbreekt de zin; de rest van het blok blijft staan.
+- **Later mogelijk als linked data:** de ramp als één gebeurtenis (met een link naar Wikidata), met de vlakken als gebied en de geschenkwoningen die ernaar verwijzen. Nu niet gedaan.
+- **Licentie:** het Nationaal Georegister noemt geen licentie voor deze kaart. Niet apart nagekeken.
+- **Getest:** Elisabethweg 2, Heijningen: zout water. Abdij 4, Middelburg; Koningin Maudplein 1, Nieuwerkerk en Breda: geen zin. In de app (headless Chromium) verschijnt de zin bij Heijningen.

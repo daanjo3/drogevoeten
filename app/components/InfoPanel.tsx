@@ -4,6 +4,7 @@ import { TERMS } from "../data/place";
 import { useAddressHeight } from "../lib/ahn";
 import type { LocatieserverDoc } from "../lib/locatieserver";
 import type { Drainage } from "../lib/drainage";
+import { useFlood1953 } from "../lib/flood1953";
 import { nl, nlSigned, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
 import { ScenarioControls } from "./ScenarioControls";
@@ -56,6 +57,27 @@ export function InfoPanel({
   const heightSource = ground
     ? `Hoogte: Actueel Hoogtebestand Nederland (AHN), ${nlSigned(ground.value)} m NAP. Gemeten op de grond ${nl(ground.distance)} meter van je adres, want onder een huis meet het AHN de grond niet. Je drempel ligt vaak iets hoger.`
     : "Hoogte: Actueel Hoogtebestand Nederland (AHN).";
+
+  /* only when the 1953 flood map says this place flooded; elsewhere nothing */
+  const flood = useFlood1953(locatie).data;
+  const watersnoodramp = (
+    <Tip kind="term" tip={TERMS.watersnoodramp}>
+      watersnoodramp
+    </Tip>
+  );
+  const floodText = flood && (
+    <>
+      In 1953 liep jouw adres onder water. Bij de {watersnoodramp}{" "}
+      {flood.salt === "zout"
+        ? "stroomde hier zout zeewater het land in."
+        : flood.salt === "zoet"
+          ? "stond hier zoet water. Waar dat vandaan kwam, staat niet in de kaart."
+          : "stond hier water."}
+    </>
+  );
+  const floodSource = flood
+    ? ` Watersnoodramp: kaart "Historische Inundatie Ramp 1953" van de ${flood.publisher} (${flood.metadata}). Die kaart dekt alleen Noord-Brabant en zegt niet hoe diep het water stond.`
+    : "";
 
   const pumps = drainage.pumps;
   const board = (pumps[0]?.waterbeheerder ?? drainage.area?.waterbeheerder)?.replace(/^Waterschap\s+/i, "");
@@ -110,8 +132,9 @@ export function InfoPanel({
         <p>{heightText}</p>
         <p>{pumpText}</p>
         <p>Dit land werd rond {place.drainedYear} droog gemaakt. In de tijdreis zie je hoe.</p>
+        {floodText && <p>{floodText}</p>}
         <p className="src">
-          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.`}>
+          <Tip kind="bron" tip={`${heightSource} Gemaal: waterschapsregister (IMWA). Jaartal: Provincie Zeeland.${floodSource}`}>
             bron
           </Tip>
         </p>

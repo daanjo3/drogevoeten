@@ -116,6 +116,7 @@ export const TERMS: Record<string, string> = {
   poldermolens: "Windmolens die water uit de polder pompen. Voordat er gemalen waren, deden molens dat werk.",
   wiel: "Een diepe plas achter een dijk. Het water sloeg die kolk uit toen de dijk doorbrak.",
   wielen: "Diepe plassen achter een dijk. Het water sloeg die kolken uit toen de dijk doorbrak.",
+  watersnoodramp: "De grote overstroming van 1 februari 1953. Een zware storm duwde de zee over en door de dijken in Zeeland, Zuid-Holland en West-Brabant.",
   geschenkwoning: "Een huis dat een ander land gaf na de watersnoodramp van 1953.",
   geschenkwoningen: "Huizen die andere landen gaven na de watersnoodramp van 1953.",
   sluis: "Een soort deur in het water. Gaat hij open, dan kan water of een boot erdoor.",
