@@ -460,7 +460,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   #tour .dots i.on{background:var(--ink)}
   #tour .long{display:none}
 }
-}
 
 /* fullscreen room: the scenario panel sits top left; on phones it sits at the bottom and the room shrinks to fit above it */
 body.room-full .corner,body.room-full #where,body.room-full #nav,body.room-full #mini,body.room-full #tour{display:none}
