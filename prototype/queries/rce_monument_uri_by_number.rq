@@ -1,4 +1,0 @@
-# RCE Rijksmonumenten (schema.org view): monument number -> RCE linked-data URI (datalayer/fetch_v3.py, batches of 300)
-PREFIX schema: <https://schema.org/>
-SELECT ?nr ?mon WHERE { VALUES ?nr { "26483" "25772" } ?mon schema:identifier ?nr .
-  FILTER(STRSTARTS(STR(?mon), "https://linkeddata.cultureelerfgoed.nl/cho-kennis/id/rijksmonument/")) }
