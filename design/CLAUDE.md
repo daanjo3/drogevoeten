@@ -39,6 +39,7 @@ Navigatie gebruikt `go(key)`. Huiskamer en info worden samen gecentreerd, de tij
 - Kleuren: blauw `#0087D8`, lavendel `#D28AE1`, groen `#617E5A`, sunshade `#FFA654`, deep gray `#242424`. Blokken hebben zachte verlopen naar een lichtere tint.
 - Koppen in **Fraunces** (700, SOFT 100, WONK 1). Tekst in **Instrument Sans**. Labels, bronnen en tags in kapitalen met wat letterspatiëring.
 - Knoppen vallen op, informatie is subtiel.
+- **Informatie heeft scherpe hoeken, knoppen zijn afgerond.** Zo lijkt een informatiekaartje nooit op een knop. Geldt voor het rondleidingkaartje, de labels daarin en het straatnaamlabel bovenin (`#where`: witte achtergrond, zwarte outline, geen ronde hoeken).
 - Moeilijke woorden hebben een tooltip (`.tip.term`). Bronnen staan in een tooltip (`.tip.bron`).
 - Iconen zijn eigen lijntekeningen (svg `<symbol>`).
 
@@ -92,6 +93,10 @@ De Unity WebGL-build staat in `app/public/woonkamer/` en is bewust niet in git (
 ### Navigatie en afwerking
 
 Het canvas is 256vh hoog, zodat ook het onderste blok (gemalen) in het midden kan staan. Scrollt iemand tot vlak bij een blok (binnen 30% van het scherm), dan schuift `useCanvas` het blok af (`snap`, op `scrollend`); een lopende klik op de navigatie wordt daarbij met rust gelaten. De tijdlijnstappen schuiven één voor één in zodra het tijdreisblok het dichtstbijzijnde blok is (class `in` op `#p-tijd`). De lijst in het gemalenblok scrolt in zijn eigen kolom (`.buurt .side`). Alle blokken en vaste elementen hebben een zachte schaduw (`--shadow`); de knoppen "Over" en "Deel" zijn donker, de minimap ook.
+
+### Rondleiding
+
+Na elke zoekopdracht (en via "Rondleiding opnieuw" in de Over-kaart) verschijnt `Rondleiding.tsx`: één kaartje in vier stappen, kaart, tijdreis, gemalen, huiskamer. Elke stap scrolt het grid naar zijn blok via `useCanvas` en laat de menuknop oplichten; bij de laatste stap pulseert "Als het misgaat" en heet Verder "Zelf proberen", wat de misgaatstand aanzet. Terug, Verder, de tekstlink "Rondleiding overslaan", pijltjestoetsen, Enter en Escape. Op telefoons is het kaartje een balk onderaan: het menu is dan verborgen, de knoppen staan als labels in de tekst, met pijlknoppen en vier puntjes. Een klik op het menu stopt de rondleiding. Het kaartje meldt zijn hoogte aan het canvas (`setInset`), zodat het blok erboven in beeld komt.
 
 ### Copy
 

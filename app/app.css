@@ -148,7 +148,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .defaults button:hover{background:var(--dark);color:#fff}
 
 /* ===== FIXED ===== */
-#where{position:fixed;z-index:40;left:50%;top:16px;transform:translateX(-50%);text-align:center;background:#fff;border:1.5px solid var(--line);padding:8px 18px;border-radius:999px;color:var(--mute);box-shadow:var(--shadow)}
+/* information has sharp corners, buttons are round: the street label is information */
+#where{position:fixed;z-index:40;left:50%;top:16px;transform:translateX(-50%);text-align:center;background:#fff;border:1.5px solid var(--line);padding:8px 18px;border-radius:0;color:var(--mute);box-shadow:var(--shadow)}
 #where .where-lbl{font-family:var(--head),var(--font);font-weight:var(--headw);font-variation-settings:var(--headvar);font-size:var(--fs-p);text-transform:none;letter-spacing:0;color:var(--ink)}
 #where b{color:var(--ink);display:block;font:600 var(--fs-p) var(--font)}
 
