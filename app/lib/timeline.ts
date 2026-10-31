@@ -12,9 +12,12 @@
    - the 3 pumping stations nearest by (3 km), with their drive then and
      now (only those with a founding year);
    - dike-breach pools within 1 km;
-   - a gift house after the 1953 flood: the house itself, or those within 500 m.
-   Not here, because they are no linked data (yet): the Waterstaatskaart, the
-   1953 flood map of Noord-Brabant and the polder names map of Zeeland.
+   - a gift house after the 1953 flood: the house itself, or those within 500 m;
+   - the 1953 flood, only where the Noord-Brabant flood map says this place
+     flooded. Not from the linked data but from a static GeoJSON file
+     (flood1953.ts, DECISIONS §33); elsewhere no step at all.
+   Not here, because they are no linked data (yet): the Waterstaatskaart and
+   the polder names map of Zeeland.
 
    The queries are QLever versions of linkeddata/queries/timeline-*.rq
    (DECISIONS §31): QLever has geof:distance, but no geof:sf* inside OPTIONAL
@@ -24,6 +27,7 @@
 
 import { queryOptions } from "@tanstack/react-query";
 import type { TimelineStep } from "../data/place";
+import { findFlood1953, type Flood } from "./flood1953";
 import type { LocatieserverDoc } from "./locatieserver";
 import { select, type Row } from "./sparql";
 
@@ -605,6 +609,22 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
   return dated[0] ? [{ year: dated[0].label, sort: dated[0].sort, text, source: tip }] : [];
 }
 
+/* The 1953 flood, only when the map says this place flooded */
+function floodStep(f: Flood): Step {
+  const water =
+    f.salt === "zout"
+      ? " Zout zeewater stroomt het land in."
+      : f.salt === "zoet"
+        ? " Er staat zoet water."
+        : "";
+  return {
+    year: "1953",
+    sort: 1953,
+    text: `Bij de [watersnoodramp] loopt deze plek onder water.${water}`,
+    source: `Bron: Historische Inundatie Ramp 1953 (${f.publisher}), ${f.metadata}. De kaart dekt alleen Noord-Brabant.`,
+  };
+}
+
 /* Shown when the data has nothing for this address */
 export const UNKNOWN_STEP: TimelineStep = {
   year: "Onbekend",
@@ -615,11 +635,14 @@ export const UNKNOWN_STEP: TimelineStep = {
 /* The steps for a point, oldest first, steps without a year last. Throws
    when the endpoint fails. */
 export async function findTimeline(p: Point, address?: Address, signal?: AbortSignal): Promise<TimelineStep[]> {
+  // the flood map is a static file: when it fails to load, the step is left out
+  const flood = findFlood1953(p).catch(() => null);
   const [polders, lands, stations, dikes, mills, villages, pools, gifts] = await Promise.all(
     [polderQuery, landQuery, stationsQuery, dikesQuery, millsQuery, villagesQuery, poolsQuery, giftsQuery].map((q) =>
       select(q(p), signal),
     ),
   );
+  const flooded = await flood;
   const homeAreas = new Set(polders.map((r) => r.area).filter((a): a is string => !!a));
   // stations that drain the home polder first, then by distance (the query's order)
   const stationSteps = stations
@@ -645,6 +668,7 @@ export async function findTimeline(p: Point, address?: Address, signal?: AbortSi
     ...standing.map(standingMillStep).filter((s): s is Step => !!s).slice(0, MAX_STANDING_MILLS),
     ...stationSteps,
     ...poolSteps(pools),
+    ...(flooded ? [floodStep(flooded)] : []),
     ...giftSteps(gifts, address),
   ].filter((s): s is Step => !!s);
   if (!history.length) return [UNKNOWN_STEP];

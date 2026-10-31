@@ -71,7 +71,7 @@ export function InfoPanel({
       {flood.salt === "zout"
         ? "stroomde hier zout zeewater het land in."
         : flood.salt === "zoet"
-          ? "stond hier zoet water. Waar dat vandaan kwam, staat niet in de kaart."
+          ? "stond hier zoet water."
           : "stond hier water."}
     </>
   );
