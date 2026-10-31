@@ -189,7 +189,7 @@ export function HuiskamerPanel({
                   : `Dit is geen voorspelling. Zonder dijken staat de zee op gemiddeld zeeniveau, NAP 0 m. Je huiskamer ligt op ${ground ? `${nlSigned(ground.value)} m NAP` : "een onbekende hoogte"} (Actueel Hoogtebestand Nederland, AHN). Het verschil is de waterhoogte. Eb, vloed en storm rekenen we niet mee.`
               }
             >
-              hoe rekenen we dit?
+              hoe berekenen we dit?
             </Tip>
           </small>
         </div>
