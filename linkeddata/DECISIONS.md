@@ -389,3 +389,23 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
 - **Wat de app toont:** de indijking of droogmaking, hooguit 3 gemalen met een stichtingsjaar (eerst die volgens de bron jouw polder bemalen, dan de dichtstbijzijnde) en hooguit 3 dijken met een aanlegjaar, op jaar gesorteerd. Jaartekst en precisie uit de bron staan in de bron-tip. Niets gevonden: één stap "Onbekend". Endpoint onbereikbaar: het oude voorbeeld blijft staan, net als bij de Rijksmuseum-werken.
 - **De oorspronkelijke functie van een dijk staat niet in de tijdlijn:** bij de Ringwalburg geeft de bron "Straten" als oorspronkelijke en "ringwalburg" als latere functie (`oorsprfunc`/`naspfunc` lijken omgewisseld).
 - **Bekend:** de punt-in-vlakquery kost ca. 0,6 s (alle vlakken). De 1953-laag en de Waterstaatskaart zitten er nog niet in (§30).
+
+
+## 32. De tijdlijn in de app aangevuld tot die van het prototype (31-10-2026)
+
+**Vraag van Jari:** het prototype toont bij "Middenweg 68a, Middenbeemster" meer in de tijdlijn dan de app. Bepaal welke onderdelen van de prototype-tijdlijn (`prototype/app/timeline.js`) met de linked data kunnen, en bouw die.
+
+- **Erbij gekomen** (`app/lib/timeline.ts`), met de stralen en aantallen van het prototype:
+  - **droogmakerij:** het polderpeil (`dv:waterLevel`) in de tekst, de literatuur (`schema:citation`) in de bron-tip. De polderquery groepeert nu per gebeurtenis, anders geven twee citaten twee stappen;
+  - **landinrichting** waarin het adres ligt (punt-in-vlak, eigen query): vorm, uitvoeringsjaar als stap, akte en afsluiting in de tekst, status in de tip;
+  - **molens binnen 1 km:** het aantal verdwenen poldermolens met de oudste (bouwjaar), een stap voor de laatste die verdween, en hooguit 2 bestaande poldermolens. Geen poldermolens maar wel andere verdwenen molens: één stap zonder jaar. "Poldermolen" is `additionalType` `drainage-structure:poldermolen`; die term is gedeeld tussen hoofdcategorie en functie, dus hij telt een molen met poldermolen als functie ook mee (het prototype keek alleen naar de hoofdcategorie);
+  - **verdronken dorpen** binnen 3 km (hooguit 2), met de vroegste verdrinking en de andere namen;
+  - **wielen** binnen 1 km (hooguit 2). Wielen met dezelfde naam, soort en rivier worden één stap ("2× Wiel bij Krimpen aan de Lek (naam onbekend)"). Zonder doorbraakjaar: een stap zonder jaar;
+  - **geschenkwoningen:** de woning op het adres zelf (straat + huisnummer + huisletter/-toevoeging en woonplaats, gelijk aan `streetAddress` en `addressLocality`), anders één stap voor die binnen 500 m met de landen;
+  - **gemalen:** de aandrijving toen en nu, en ook gemalen zonder stichtingsjaar (als stap zonder jaar), zoals het prototype;
+  - **dijken:** de staat nu (`creativeWorkStatus`);
+  - zonder polder of droogmakerij de stap "weten we niet", zoals het prototype.
+- **Stappen zonder jaar** krijgen "Onbekend" en staan onderaan.
+- **Snelheid:** acht queries tegelijk, 0,7–1,2 s per adres op een lokale QLever. De puntqueries filteren eerst op een vak rond het adres, en rekenen pas daarna `geof:distance`.
+- **Niet mogelijk, want geen linked data:** de Waterstaatskaart, de 1953-inundatiekaart van Noord-Brabant en de melding "of deze plek in 1953 onderliep, weten we niet", de poldernamenkaart van Zeeland (§28). "Vandaag" en "Risico" komen uit live diensten (IMWA, LIWO), niet uit de tijdlijn.
+- **Getest** op de zeven demo-adressen naast het prototype: op de punten hierboven na dezelfde stappen. Bij Middelburg toont de app als derde gemaal Poppekinderen (bemaalt volgens de bron jouw polder, §31) in plaats van Veerse Watergang.

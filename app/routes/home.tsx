@@ -22,7 +22,7 @@ import type { SearchBarHandle } from "../components/SearchBar";
 import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 import { endpointImagesQueryOptions, locationOf, type RijksImage, type Theme } from "../lib/rijksmuseum";
-import { timelineQueryOptions } from "../lib/timeline";
+import { addressOf, timelineQueryOptions } from "../lib/timeline";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
    with a place show only when the address lies there; works without a
@@ -188,7 +188,7 @@ export default function Home() {
   
   /* The time line from the linked data at the endpoint. Empty while it
      answers; when it fails (or is not running), the hardcoded example. */
-  const timeline = useQuery(timelineQueryOptions(locationOf(locatie)));
+  const timeline = useQuery(timelineQueryOptions(locationOf(locatie), addressOf(locatie)));
   const steps =
     timeline.data ?? (timeline.fetchStatus === "fetching" ? [] : MIDDELBURG.timeline);
 
