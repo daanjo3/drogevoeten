@@ -270,10 +270,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 /* tijdlijn */
 .tl{display:grid;grid-template-columns:28px 1fr;gap:14px;height:calc(100% - 70px)}
 .tl .axis{position:relative}
-.tl .axis:before{content:"";position:absolute;left:12px;top:0;bottom:0;width:2px;background:var(--ink)}
-.tl ol{list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:1fr;gap:10px;height:100%}
+/* rows share the height when there are many steps, but never grow past 16vh,
+   so a short timeline keeps compact steps instead of stretched ones */
+.tl ol{list-style:none;margin:0;padding:0;display:grid;grid-auto-rows:minmax(auto,16vh);align-content:start;gap:10px;height:100%}
 .tl li{position:relative;background:rgba(255,255,255,.55);border-radius:14px;padding:12px 14px}
-.tl li:before{content:"";position:absolute;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
+.tl li:before{content:"";position:absolute;z-index:1;left:-36px;top:14px;width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
+/* the axis is drawn per step, down to the next dot, so it ends at the last step */
+.tl li:after{content:"";position:absolute;left:-30px;top:14px;bottom:-24px;width:2px;background:var(--ink)}
+.tl li:first-child:after{top:0}
+.tl li:last-child:after{bottom:auto;height:0}
 .tl li h3{margin-bottom:2px}
 .tl li{opacity:0}
 #p-tijd[data-seen] .tl li{animation:slidein .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(.35s + var(--i) * 90ms)}
