@@ -42,6 +42,9 @@ public class WaterHeight : MonoBehaviour
         UpdateVisibility();
     }
 
+    // Whether the water is drawn right now (see UpdateVisibility)
+    public bool IsVisible => waterRenderer != null && !waterRenderer.forceRenderingOff;
+
     // Draw nothing while the surface is at or under the floor (otherwise the wave displacement pokes through it) or
     // while the camera shows the other view. forceRenderingOff keeps the renderer's bounds valid (FishSpawner uses
     // them as the room's floor plan).
