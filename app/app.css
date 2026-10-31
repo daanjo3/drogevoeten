@@ -42,8 +42,8 @@ h2 svg{width:28px;height:28px;flex:none}
 svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
 /* vignet, deel 2: een lichte donkere rand over het hele scherm, boven het canvas en onder de knoppen */
-body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box-shadow:inset 0 0 22vmin rgba(36,36,36,.22)}
-@media (max-width:600px){body::after{box-shadow:inset 0 0 10vmin rgba(36,36,36,.16)}}
+body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box-shadow:inset 0 0 24vmin rgba(20,20,20,.42)}
+@media (max-width:600px){body::after{box-shadow:inset 0 0 12vmin rgba(20,20,20,.32)}}
 /* vignet: het hele canvas vaagt aan de randen weg in de achtergrond */
 #world{
   --fade:14vmin;
@@ -178,14 +178,15 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .panel[data-seen]{opacity:1;translate:none}
 @media (hover:hover){.panel:hover{scale:1.015}}
 @media (prefers-reduced-motion:reduce){.panel{transition:none;translate:none}}
-/* middelpunt canvas 120vw,120vh = midden van de huiskamer; 4vw tussen kolommen, 6vh tussen rijen */
+/* middelpunt canvas 120vw,120vh = midden van de huiskamer; 7vw tussen kolommen, 10vh tussen rijen.
+   Alleen de huiskamer en het scenariopaneel staan dichter bij elkaar (4vw): ze horen bij elkaar. */
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
 #p-info {left:152vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
-#p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue-deep); color:#fff}
+#p-map  {left:92vw; top:7vh;   width:30vw; height:68vh; background:linear-gradient(180deg,#D3E9F8 0%,#EEF5FA 100%)}
 /* as tall as the time line, up to 150vh: a place with few steps gets a short block */
-#p-tijd {left:52vw; top:45vh;  width:36vw; height:auto; min-height:60vh; max-height:150vh; background:var(--g-lavender)}
-#p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
-#p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:var(--g-lavender)}
+#p-tijd {left:49vw; top:45vh;  width:36vw; height:auto; min-height:60vh; max-height:150vh; background:var(--g-lavender)}
+#p-buurt{left:92vw; top:165vh; width:53vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
+#p-gemaal{left:152vw;top:165vh; width:28vw; height:70vh; background:var(--g-lavender)}
 /* rain sum next to the gemalen; height follows the content (two pumps, slider) */
 #p-gemaal p{margin:0 0 10px}
 #p-gemaal h2{margin:6px 0 12px}
@@ -207,20 +208,20 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .img{background:#fff;border:1.5px solid var(--line)}
 /* heights follow the content; only left, top and width are set */
 /* left of the Tijdreis, under the stadswallen; hangs from the bottom of the
-   Gemalen row (231vh), so it stays clear of the stadswallen whatever its height */
-#i-getijdenmolen{left:16vw;bottom:33vh;width:32vw}
-#i-nieuwerkerk  {left:184vw;top:85vh; width:24vw}
+   Gemalen row (235vh), so it stays clear of the stadswallen whatever its height */
+#i-getijdenmolen{left:10vw;bottom:29vh;width:32vw}
+#i-nieuwerkerk  {left:187vw;top:85vh; width:24vw}
 /* stadswallen and the Beemster medal share a spot: they never show together */
-#i-stadswallen,#i-beemster{left:16vw;top:45vh;width:32vw}
+#i-stadswallen,#i-beemster{left:10vw;top:45vh;width:32vw}
 /* featured works for every address, spread over the grid: three in the top
    row next to the map, one under the Tijdreis (right of Gemalen is the rain sum) */
-/* the two top tiles hang from the bottom of the top row (79vh, like the map), so the
-   gap to the living-room row stays 6vh whatever their height; canvas is 264vh */
-#i-cruquius     {left:126vw;bottom:185vh;width:22vw}
-#i-dongepolders {left:152vw;bottom:185vh;width:28vw}
-#i-keere        {left:184vw;bottom:185vh;width:30vw}
-/* under the Tijdreis, 6vh below it; --tijd-h is its measured height (TijdreisPanel) */
-#i-kinderdijk   {left:52vw; top:calc(51vh + var(--tijd-h, 150vh));width:36vw}
+/* the top tiles hang from the bottom of the top row (75vh, like the map), so the
+   gap to the living-room row stays 10vh whatever their height; canvas is 264vh */
+#i-cruquius     {left:129vw;bottom:189vh;width:16vw}
+#i-dongepolders {left:152vw;bottom:189vh;width:28vw}
+#i-keere        {left:187vw;bottom:189vh;width:30vw}
+/* under the Tijdreis, 10vh below it; --tijd-h is its measured height (TijdreisPanel) */
+#i-kinderdijk   {left:49vw; top:calc(55vh + var(--tijd-h, 150vh));width:36vw}
 
 /* kamers */
 .room{position:absolute;inset:0}
@@ -247,9 +248,7 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-map{display:flex;flex-direction:column}
 #p-map .kaartrij{flex:1;min-height:0;display:flex;margin:6px 0}
 #p-map .nl{flex:1;min-width:0;height:100%;stroke:none}
-#p-map .nl path{fill:#fff;stroke:none}
 #p-map .kaartcap{margin:0}
-#p-map .src .bron{color:#fff}
 #mapPin{transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
 .ping{animation:ping 2s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes ping{0%{transform:scale(1);opacity:1}100%{transform:scale(3);opacity:0}}
