@@ -181,7 +181,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-huis {left:92vw; top:85vh;  width:56vw; height:70vh; background:linear-gradient(170deg,#d3e9f8 0%,#f6efe8 100%); border:1.5px solid var(--line)}
 #p-info {left:152vw;top:85vh;  width:28vw; height:70vh; background:var(--g-sunshade); display:grid; transition:background .4s,color .4s,opacity .6s ease,translate .7s cubic-bezier(.2,.7,.2,1),scale .35s ease}
 #p-map  {left:92vw; top:11vh;  width:30vw; height:68vh; background:var(--blue-deep); color:#fff}
-#p-tijd {left:52vw; top:45vh;  width:36vw; height:150vh;background:var(--g-lavender)}
+/* as tall as the time line, up to 150vh: a place with few steps gets a short block */
+#p-tijd {left:52vw; top:45vh;  width:36vw; height:auto; min-height:60vh; max-height:150vh; background:var(--g-lavender)}
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 #p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:var(--g-lavender)}
 /* rain sum next to the gemalen; height follows the content (two pumps, slider) */
@@ -413,3 +414,38 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #about .card a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
 #about .card .colophon{margin:16px 0 0;color:var(--mute);font-size:var(--fs-label)}
 @media (max-width:600px){#about .card .sources li{grid-template-columns:1fr;gap:2px}}
+
+/* ===== RONDLEIDING ===== */
+#tour{position:fixed;z-index:45;left:50%;bottom:96px;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));box-sizing:border-box;background:#fff;color:var(--ink);border:1.5px solid var(--ink);border-radius:0;padding:16px 18px 14px;box-shadow:var(--shadow)}
+#tour .body{transition:opacity .3s ease}
+#tour.fading .body{opacity:0}
+#tour .count{display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font:500 var(--fs-label)/1.4 var(--font);opacity:.65}
+#tour p{margin:0 0 14px;font-size:var(--fs-p);line-height:1.45}
+#tour .dots,#tour .chip{display:none}
+#tour .acts{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#tour .acts button{display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:10px 18px;font:700 var(--fs-p) var(--font);cursor:pointer}
+#tour .skip{background:#ECE7E2;color:var(--ink)}
+#tour .skip svg{display:none}
+#tour .next{background:var(--dark);color:#fff}
+#tour .next:hover{background:#333}
+/* the menu button of the current step lights up; the last one (Als het misgaat) pulses softly */
+@keyframes tourpulse{50%{box-shadow:0 0 0 6px rgba(255,255,255,.35)}}
+#nav button.tour{background:#fff;color:var(--ink);animation:tourpulse 1.8s ease-in-out infinite}
+#nav button.tour.risk{background:var(--sun);color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#tour .body{transition:none}#nav button.tour{animation:none}}
+#about .card .tour-start{margin:4px 0 6px;border:0;border-radius:999px;padding:10px 18px;background:var(--dark);color:#fff;font:700 var(--fs-p) var(--font);cursor:pointer}
+@media (max-width:600px){
+  /* a bar fixed to the bottom; the menu is hidden while the tour runs, so the button shows as a label in the text */
+  #nav.touring{display:none}
+  #tour{left:0;right:0;bottom:0;transform:none;width:auto;border:0;border-top:1.5px solid var(--ink);box-shadow:none;padding:14px 16px calc(14px + env(safe-area-inset-bottom))}
+  #tour .count{display:none}
+  #tour .dots{display:flex;gap:6px;margin-bottom:10px}
+  #tour .dots span{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink);box-sizing:border-box}
+  #tour .dots span.on{background:var(--ink)}
+  #tour .chip{display:inline-flex;align-items:center;gap:6px;margin-bottom:8px;border:1.5px solid var(--ink);border-radius:0;padding:2px 8px;font:700 12px/1.4 var(--font)}
+  #tour .chip svg{width:16px;height:16px}
+  #tour .acts{display:block}
+  #tour .skip{position:absolute;top:8px;right:10px;background:transparent;padding:6px 8px}
+  #tour .skip svg{display:block;width:16px;height:16px}
+  #tour .next{width:100%;min-height:44px;justify-content:center}
+}

@@ -17,13 +17,14 @@ import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
+import { Rondleiding, TOUR_BUTTONS } from "../components/Rondleiding";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
 import { PLACE_FILTER, freeQueryOptions, useLookup, type LocatieserverDoc } from "../lib/locatieserver";
 import { useAddressHeight } from "../lib/ahn";
 import { endpointImagesQueryOptions, locationOf, type RijksImage, type Theme } from "../lib/rijksmuseum";
-import { addressOf, timelineQueryOptions } from "../lib/timeline";
+import { addressOf, drainedQueryOptions, timelineQueryOptions } from "../lib/timeline";
 import { useDrainage } from "../lib/drainage";
 
 /* Works from the Rijksmuseum, each next to the block it belongs to. Works
@@ -201,6 +202,8 @@ export default function Home() {
   /* the drainage area and the 1-2 pumps that drain it (IMWA) */
   const here = locationOf(locatie);
   const drainage = useDrainage(here?.lat, here?.lon);
+  /* when this land was reclaimed; the tour tells it (same cached query as the info panel) */
+  const drained = useQuery(drainedQueryOptions(here)).data;
 
   /* Rijksmuseum works: the local ones for this woonplaats, and the featured
      spots from the endpoint. While it answers the featured spots stay empty;
@@ -233,13 +236,44 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<Mode>("info");
   const [scenario, setScenario] = useState<Scenario>({ outside: "flood", liwoMap: 5 });
+  /* the tour after a search: run is the key (a restart remounts it), step lights up a menu button */
+  const [tour, setTour] = useState<{ run: number; step: number } | null>(null);
   const canvas = useCanvas();
   const woonplaats = locatie?.woonplaatsnaam;
   useEffect(() => {
     canvas.measure();
-  }, [woonplaats, canvas.measure]);
+  }, [woonplaats, steps.length, canvas.measure]);
+
+  function startTour() {
+    setTour({ run: performance.now(), step: 0 });
+  }
+
+  /* a click on a menu button, Begin or a new search: the tour just stops, wherever the grid is */
+  function stopTour() {
+    canvas.setInset(0);
+    setTour(null);
+  }
+
+  /* each step scrolls the grid to its block; the card covers `inset` px at the bottom */
+  function onTourStep(step: number, inset: number) {
+    canvas.setInset(inset);
+    setTour((t) => (t && t.step !== step ? { ...t, step } : t));
+    setMode("info");
+    if (step === 0) canvas.goPanel("p-map");
+    else if (step === 2) canvas.go("tijd");
+    else if (step === 3) canvas.go("buurt");
+    else canvas.go("huis");
+  }
+
+  function onTourEnd(how: "skip" | "try") {
+    canvas.setInset(0);
+    setTour(null);
+    setMode(how === "try" ? "risk" : "info");
+    canvas.go("huis");
+  }
 
   function onGo(t: NavTarget) {
+    if (tour) stopTour();
     if (t.mode) setMode(t.mode);
     canvas.go(t.key);
   }
@@ -301,6 +335,7 @@ export default function Home() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
       setPhase("hidden");
+      startTour();
       return;
     }
     setAway(true);
@@ -308,6 +343,7 @@ export default function Home() {
     window.setTimeout(() => {
       setPhase("hidden");
       setAway(false);
+      startTour();
     }, 1150);
   }
 
@@ -329,6 +365,7 @@ export default function Home() {
 
   /* Begin: back to the start screen without animation, field empty and focused */
   function onBack() {
+    stopTour();
     setStartKey((k) => k + 1);
     setPhase("idle");
     setSearchMsg(null);
@@ -360,7 +397,14 @@ export default function Home() {
         <Icon name="share" /> {copied ? "Link gekopieerd" : "Deel"}
       </button>
 
-      <FloatingNav active={canvas.active} mode={mode} onGo={onGo} onBack={onBack} />
+      <FloatingNav
+        active={canvas.active}
+        mode={mode}
+        onGo={onGo}
+        onBack={onBack}
+        touring={!!tour}
+        tourButton={tour ? TOUR_BUTTONS[tour.step] : undefined}
+      />
       <MiniMap panels={canvas.panels} canvas={canvas.canvasSize} worldRef={canvas.worldRef} onPick={canvas.goPanel} />
 
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
@@ -391,7 +435,24 @@ export default function Home() {
       </Canvas>
 
       <TooltipLayer scrollRef={canvas.worldRef} />
-      {about && <AboutCard onClose={() => setAbout(false)} />}
+      {tour && (
+        <Rondleiding
+          key={tour.run}
+          data={{ nap: height.data?.ground?.value, drained: drained ?? undefined }}
+          paused={about}
+          onChange={onTourStep}
+          onEnd={onTourEnd}
+        />
+      )}
+      {about && (
+        <AboutCard
+          onClose={() => setAbout(false)}
+          onTour={() => {
+            setAbout(false);
+            startTour();
+          }}
+        />
+      )}
     </>
   );
 }

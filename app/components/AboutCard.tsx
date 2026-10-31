@@ -41,7 +41,7 @@ function Ext({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-export function AboutCard({ onClose }: { onClose: () => void }) {
+export function AboutCard({ onClose, onTour }: { onClose: () => void; onTour: () => void }) {
   const card = useRef<HTMLDivElement>(null);
 
   /* focus moves into the card, stays inside while it is open (Tab wraps
@@ -96,6 +96,9 @@ export function AboutCard({ onClose }: { onClose: () => void }) {
           als het gemaal stilvalt.
         </p>
         <p>Wat we zelf aan elkaar knoopten, geven we open terug. Zo bouwt de volgende verder waar wij stopten.</p>
+        <button type="button" className="tour-start" onClick={onTour}>
+          Rondleiding
+        </button>
 
         <h3>Bronnen</h3>
         <ul className="sources">

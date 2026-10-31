@@ -56,6 +56,9 @@ export function useCanvas() {
   const [panels, setPanels] = useState<PanelBox[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [active, setActive] = useState<SectionKey>("huis");
+  /* height at the bottom that something covers (the tour card): blocks are
+     centred in what is left above it */
+  const inset = useRef(0);
 
   const measure = useCallback(() => {
     const canvas = canvasRef.current;
@@ -82,7 +85,7 @@ export function useCanvas() {
       const R = sectionRect(key);
       if (!world || !R) return null;
       const vw = world.clientWidth;
-      const vh = world.clientHeight;
+      const vh = world.clientHeight - inset.current;
       const left = (R.l + R.r) / 2 - vw / 2;
       const top = key === "tijd" ? R.t - TOP_OFFSET_TIJD : (R.t + R.b) / 2 - vh / 2;
       return { left, top };
@@ -147,7 +150,7 @@ export function useCanvas() {
     const world = worldRef.current;
     const el = canvasRef.current?.querySelector<HTMLElement>(`#${id}`);
     if (!world || !el) return;
-    scrollWorld(el.offsetLeft + el.offsetWidth / 2 - world.clientWidth / 2, el.offsetTop + el.offsetHeight / 2 - world.clientHeight / 2, true);
+    scrollWorld(el.offsetLeft + el.offsetWidth / 2 - world.clientWidth / 2, el.offsetTop + el.offsetHeight / 2 - (world.clientHeight - inset.current) / 2, true);
   }, [scrollWorld]);
 
   /* track the section closest to the centre. The viewport itself is tracked
@@ -229,7 +232,11 @@ export function useCanvas() {
     };
   }, [measure, onScroll, snap]);
 
-  return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel, measure };
+  const setInset = useCallback((px: number) => {
+    inset.current = px;
+  }, []);
+
+  return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel, measure, setInset };
 }
 
 /* The visible part of the canvas, updated on scroll and resize. Use it only
