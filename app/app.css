@@ -207,11 +207,13 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 .img .cap .context{margin:0 0 8px;font:400 var(--fs-p)/1.45 var(--font);text-transform:none;letter-spacing:0;color:var(--ink)}
 .img .cap .museum{display:block;color:var(--mute)}
 .img .cap a{color:inherit;text-decoration:underline;text-underline-offset:2px}
-/* works next to their block: getijdenmolen by Gemalen, stadswallen and the
-   Beemster medal by the Tijdreis, Nieuwerkerk by Als het misgaat */
+/* works next to their block: stadswallen, the Beemster medal and the
+   getijdenmolen by the Tijdreis, Nieuwerkerk by Als het misgaat */
 .img{background:#fff;border:1.5px solid var(--line)}
 /* heights follow the content; only left, top and width are set */
-#i-getijdenmolen{left:152vw;top:161vh;width:28vw}
+/* left of the Tijdreis, under the stadswallen; hangs from the bottom of the
+   Gemalen row (231vh), so it stays clear of the stadswallen whatever its height */
+#i-getijdenmolen{left:16vw;bottom:33vh;width:32vw}
 #i-nieuwerkerk  {left:184vw;top:85vh; width:24vw}
 /* stadswallen and the Beemster medal share a spot: they never show together */
 #i-stadswallen,#i-beemster{left:16vw;top:45vh;width:32vw}
