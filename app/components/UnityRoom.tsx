@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./Icons";
 
 /* The team's 3D living room, a Unity WebGL build served from
@@ -26,8 +26,9 @@ interface UnityEmbed {
 
 type State = "idle" | "loading" | "ready" | "failed";
 
-/* waterLevel: water in the room in meters above the floor, 0 is dry */
-export function UnityRoom({ active, waterLevel }: { active: boolean; waterLevel: number }) {
+/* waterLevel: water in the room in meters above the floor, 0 is dry.
+   overlay: shown on top of the room in fullscreen (the scenario panel). */
+export function UnityRoom({ active, waterLevel, overlay }: { active: boolean; waterLevel: number; overlay?: ReactNode }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   /* wrapper that goes fullscreen, so our own exit button can sit on top of the room */
   const wrap = useRef<HTMLDivElement>(null);
@@ -97,6 +98,12 @@ export function UnityRoom({ active, waterLevel }: { active: boolean; waterLevel:
     return () => document.removeEventListener("keydown", onKey);
   }, [faux]);
 
+  /* the window-filling fallback sits inside the grid, so the page's own buttons would float over it: hide them */
+  useEffect(() => {
+    document.body.classList.toggle("room-full", faux);
+    return () => document.body.classList.remove("room-full");
+  }, [faux]);
+
   /* stop the player when the panel goes away */
   useEffect(
     () => () => {
@@ -113,9 +120,12 @@ export function UnityRoom({ active, waterLevel }: { active: boolean; waterLevel:
       <div className={`scene-wrap${faux ? " faux" : ""}`} ref={wrap}>
         <canvas id="unity-canvas" className="scene-canvas" ref={canvas} aria-label="3D-huiskamer" style={{ opacity: ready ? 1 : 0 }} />
         {(full || faux) && (
-          <button type="button" className="fs exit" onClick={exitFullscreen}>
-            <Icon name="close" /> sluit volledig scherm
-          </button>
+          <>
+            <button type="button" className="fs exit" onClick={exitFullscreen}>
+              <Icon name="close" /> sluit volledig scherm
+            </button>
+            {overlay}
+          </>
         )}
       </div>
       {!ready && <img className="scene" src={PLACEHOLDER} alt="" />}

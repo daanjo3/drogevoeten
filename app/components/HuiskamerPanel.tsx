@@ -8,6 +8,7 @@ import { usePeilgebied } from "../lib/waterbeheergebieden";
 import { locationOf } from "../lib/rijksmuseum";
 import { liwoClass, useLiwo } from "../lib/liwo";
 import { Icon } from "./Icons";
+import { ScenarioControls } from "./ScenarioControls";
 import { Tip } from "./Tip";
 import { UnityRoom } from "./UnityRoom";
 import { TERMS } from "../data/place";
@@ -18,12 +19,15 @@ export function HuiskamerPanel({
   locatie,
   mode,
   scenario,
+  onScenario,
   loadRoom,
 }: {
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
   mode: Mode;
   scenario: Scenario;
+  /* the scenario buttons also live in the fullscreen view of the room */
+  onScenario: (s: Scenario) => void;
   /* start loading the 3D room (only after an address was chosen) */
   loadRoom: boolean;
 }) {
@@ -104,7 +108,31 @@ export function HuiskamerPanel({
     <section className={`panel${risk ? " risk" : ""}`} id="p-huis">
       <div className="room">
         {/* in info mode the room is dry */}
-        <UnityRoom active={loadRoom} waterLevel={risk ? r.level : 0} />
+        <UnityRoom
+          active={loadRoom}
+          waterLevel={risk ? r.level : 0}
+          overlay={
+            risk && (
+              <div className="fs-panel">
+                <strong className="fs-title">
+                  <Icon name="drop" /> Als het misgaat
+                </strong>
+                <ScenarioControls scenario={scenario} onChange={onScenario} />
+                <p className="fs-out" aria-live="polite">
+                  {scenario.outside === "flood" && liwo.isPending ? (
+                    "We kijken hoe hoog het water komt…"
+                  ) : r.depth ? (
+                    <>
+                      Water in je huiskamer: <b>{nl(r.depth)} meter</b>
+                    </>
+                  ) : (
+                    "Hier blijft het droog."
+                  )}
+                </p>
+              </div>
+            )
+          }
+        />
         <span className="tag" id="huisTag">{risk ? "WELKOM THUIS · als het misgaat" : "WELKOM THUIS"}</span>
         <Icon name="huis" className="icon" />
         <span className="meta">

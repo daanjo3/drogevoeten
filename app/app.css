@@ -187,13 +187,6 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #p-buurt{left:92vw; top:161vh; width:56vw; height:70vh; background:var(--g-olive); color:#fff; display:flex; flex-direction:column}
 #p-gemaal{left:152vw;top:161vh; width:28vw; height:70vh; background:var(--g-lavender)}
 /* rain sum next to the gemalen; height follows the content (two pumps, slider) */
-#p-regen{left:184vw;top:161vh; width:30vw; height:auto; min-height:70vh; background:var(--dark); color:#fff; display:flex; flex-direction:column}
-#p-regen h2{margin:6px 0 10px;padding-right:110px}
-#p-regen .hint .tip.term{color:#fff}
-#p-regen input.mm{width:100%;accent-color:var(--sun);margin:0}
-#p-regen .uitkomst{margin-top:auto;background:#fff;color:var(--ink);border-radius:16px;padding:14px;font-size:var(--fs-p)}
-#p-regen .uitkomst small{display:block;color:var(--mute);margin-top:6px}
-#p-regen .uitkomst small a{color:inherit}
 #p-gemaal p{margin:0 0 10px}
 #p-gemaal h2{margin:6px 0 12px}
 #p-gemaal .src-link{display:inline-block;margin-top:6px;font:500 var(--fs-label)/1.4 var(--font);color:var(--ink);opacity:.7}
@@ -432,7 +425,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #tour .back:hover{background:#ECE7E2}
 #tour .next{background:var(--dark);color:#fff;border:1.5px solid var(--dark)}
 #tour .next:hover{background:#333}
-#tour .skiplink{display:block;margin:10px auto 0;background:none;border:0;padding:4px 6px;color:var(--mute);font:500 var(--fs-label)/1.4 var(--font);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+#tour .mid{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 14px;min-width:0}
+#tour .acts button.skiplink{min-height:0;border-radius:0;padding:4px 6px;background:none;border:0;color:var(--mute);font:500 var(--fs-label)/1.4 var(--font);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 #tour .skiplink:hover{color:var(--ink)}
 /* the menu button of the current step lights up; Als het misgaat pulses softly on the last step */
 @keyframes tourpulse{50%{box-shadow:0 0 0 6px rgba(255,166,84,.45)}}
@@ -452,13 +446,27 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
   /* one row: arrow back, four dots, arrow on (or Zelf proberen on the last step) */
   #tour .acts{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:10px}
   #tour .acts:has(.try){grid-template-columns:44px 1fr auto}
-  #tour .acts button{padding:0;width:44px;height:44px;min-height:44px}
-  #tour .acts button span{display:none}
-  #tour .acts button svg{width:20px;height:20px}
+  #tour .acts>button{padding:0;width:44px;height:44px;min-height:44px}
+  #tour .acts>button span{display:none}
+  #tour .acts>button svg{width:20px;height:20px}
   #tour .next.try{width:auto;padding:0 18px;border-radius:999px}
   #tour .dots{display:flex;justify-content:center;gap:8px}
   #tour .dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink);box-sizing:border-box}
   #tour .dots i.on{background:var(--ink)}
-  #tour .skiplink{margin-top:8px}
+  #tour .long{display:none}
 }
+}
+
+/* fullscreen room: the scenario panel sits top left; on phones it sits at the bottom and the room shrinks to fit above it */
+body.room-full .corner,body.room-full #where,body.room-full #nav,body.room-full #mini,body.room-full #tour{display:none}
+body.room-full::after{display:none}
+body.room-full #world{-webkit-mask:none;mask:none}
+.fs-panel{position:absolute;left:16px;top:16px;z-index:4;width:min(360px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box;background:var(--dark);color:#fff;border-radius:22px;padding:16px 18px 6px}
+.fs-title{display:flex;align-items:center;gap:8px;margin-bottom:12px;font:700 var(--fs-p) var(--font)}
+.fs-title svg{width:20px;height:20px}
+.fs-out{margin:0 0 12px;font-size:var(--fs-p)}
+@media (max-width:600px){
+  .scene-wrap:fullscreen,.scene-wrap.faux{display:flex;flex-direction:column}
+  .scene-wrap:fullscreen .scene-canvas,.scene-wrap.faux .scene-canvas{position:relative;inset:auto;flex:1;min-height:0;height:auto}
+  .scene-wrap .fs-panel{position:relative;left:auto;top:auto;flex:none;width:auto;max-height:55%;border-radius:22px 22px 0 0;padding:14px 16px calc(6px + env(safe-area-inset-bottom))}
 }

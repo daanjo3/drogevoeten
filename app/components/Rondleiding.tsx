@@ -134,10 +134,15 @@ export function Rondleiding({
           <Icon name="terug" />
           <span>Terug</span>
         </button>
-        <span className="dots" aria-hidden="true">
-          {Array.from({ length: TOUR_STEPS }, (_, i) => (
-            <i key={i} className={i === step ? "on" : undefined} />
-          ))}
+        <span className="mid">
+          <span className="dots" aria-hidden="true">
+            {Array.from({ length: TOUR_STEPS }, (_, i) => (
+              <i key={i} className={i === step ? "on" : undefined} />
+            ))}
+          </span>
+          <button type="button" className="skiplink" onClick={() => onEnd("skip")}>
+            <span className="long">Rondleiding </span>overslaan
+          </button>
         </span>
         <button type="button" className={last ? "next try" : "next"} aria-label={last ? undefined : "Verder"} ref={nextBtn} onClick={advance}>
           {last ? (
@@ -150,9 +155,6 @@ export function Rondleiding({
           )}
         </button>
       </div>
-      <button type="button" className="skiplink" onClick={() => onEnd("skip")}>
-        Rondleiding overslaan
-      </button>
     </div>
   );
 }
