@@ -7,7 +7,7 @@ import { Icon } from "./Icons";
    it loads the render png stays in view with a progress bar. If loading
    fails the png simply stays. */
 
-const EMBED_URL = "/woonkamer/unity-embed.js";
+const EMBED_URL = `${import.meta.env.BASE_URL}woonkamer/unity-embed.js`;
 const PLACEHOLDER = `${import.meta.env.BASE_URL}img/huiskamer-3d.png`;
 
 /* the part of the api of unity-embed.js we use */
