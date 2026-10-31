@@ -50,9 +50,17 @@ export const DS = "urn:drogevoeten:dataset:";
 
 export const wkt = ({ lat, lon }: Point) => `"POINT(${Number(lon)} ${Number(lat)})"^^geo:wktLiteral`;
 
-/* The name of a dataset's source, from the catalog */
+/* The source layer of ?ds, from the catalog: its name as ?src and its
+   record in the Nationaal Georegister (a web page) as ?srcPage */
+export const sourceLayer = `OPTIONAL { ?ds schema:isBasedOn ?srcPage . OPTIONAL { ?srcPage schema:name ?src } }`;
+
+/* The name and page of a dataset's source, from the catalog */
 export const sourceOf = (ds: string) => `VALUES ?ds { <${DS}${ds}> }
-  OPTIONAL { ?ds schema:isBasedOn/schema:name ?src }`;
+  ${sourceLayer}`;
+
+/* The value of an identifier of ?subject with the given propertyID, as ?v */
+export const identifier = (subject: string, propertyID: string, v: string) =>
+  `OPTIONAL { ?${subject} schema:identifier [ schema:propertyID "${propertyID}" ; schema:value ?${v} ] }`;
 
 /* ?pt (schema:latitude/longitude) within `km` of p, as ?d in km. The box
    first, so geof:distance only runs on the points close by. */

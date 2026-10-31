@@ -26,10 +26,10 @@
    Every step only says what the data says; nothing is filled in. */
 
 import { queryOptions } from "@tanstack/react-query";
-import type { TimelineStep } from "../data/place";
+import type { StepLink, TimelineStep } from "../data/place";
 import { findFlood1953, type Flood } from "./flood1953";
 import type { LocatieserverDoc } from "./locatieserver";
-import { DS, PREFIXES, select, sourceOf, within, wkt, type Point, type Row } from "./sparql";
+import { DS, identifier, PREFIXES, select, sourceLayer, sourceOf, within, wkt, type Point, type Row } from "./sparql";
 
 export type { Point };
 
@@ -76,7 +76,7 @@ export function polderQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?area ?event (SAMPLE(?n) AS ?name) (SAMPLE(?et) AS ?eventType) (SAMPLE(?s) AS ?start) (SAMPLE(?e) AS ?end)
        (SAMPLE(?t) AS ?dateText) (SAMPLE(?pr) AS ?precision) (SAMPLE(?wl) AS ?waterLevel)
-       (GROUP_CONCAT(DISTINCT ?c; separator="; ") AS ?citations) (SAMPLE(?src) AS ?source) WHERE {
+       (GROUP_CONCAT(DISTINCT ?c; separator="; ") AS ?citations) (SAMPLE(?ru) AS ?report) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   VALUES ?ds { <${DS}zeeland-polders> <${DS}drained-lakes> }
   # drained-lakes also holds the pumping installations: only the areas
   VALUES ?type { <urn:drogevoeten:term:object-type:polder> <urn:drogevoeten:term:object-type:drained-lake> }
@@ -94,7 +94,8 @@ SELECT ?area ?event (SAMPLE(?n) AS ?name) (SAMPLE(?et) AS ?eventType) (SAMPLE(?s
   OPTIONAL { ?event dv:datePrecision ?pr }
   OPTIONAL { ?area dv:waterLevel ?wl }
   OPTIONAL { ?area schema:citation ?c }
-  OPTIONAL { ?ds schema:isBasedOn/schema:name ?src }
+  OPTIONAL { ?area schema:subjectOf/schema:url ?ru }
+  ${sourceLayer}
 }
 GROUP BY ?area ?event`;
 }
@@ -103,7 +104,7 @@ GROUP BY ?area ?event`;
 export function landQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?area (SAMPLE(?n) AS ?name) (SAMPLE(?f) AS ?form) (SAMPLE(?st) AS ?status)
-       ${eventVars("exec")} ${eventVars("deed")} ${eventVars("done")} (SAMPLE(?src) AS ?source) WHERE {
+       ${eventVars("exec")} ${eventVars("deed")} ${eventVars("done")} (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   ?area schema:isPartOf <${DS}land-consolidation> ;
     schema:name ?n ;
     geo:hasGeometry/geo:asWKT ?shape .
@@ -127,7 +128,8 @@ export function stationsQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?station (SAMPLE(?n) AS ?name) (SAMPLE(?f) AS ?founded) (SAMPLE(?s) AS ?status) (MIN(?d) AS ?km)
        (SAMPLE(?od) AS ?driveThen) (SAMPLE(?cd) AS ?driveNow)
-       (GROUP_CONCAT(DISTINCT STR(?drains); separator=" ") AS ?drainsAreas) (SAMPLE(?src) AS ?source) WHERE {
+       (GROUP_CONCAT(DISTINCT STR(?drains); separator=" ") AS ?drainsAreas)
+       (SAMPLE(?u) AS ?url) (SAMPLE(?rm) AS ?monument) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   ?station schema:isPartOf <${DS}pumping-stations> ;
     schema:name ?n ;
     schema:locationCreated/schema:geo ?pt .
@@ -137,6 +139,8 @@ SELECT ?station (SAMPLE(?n) AS ?name) (SAMPLE(?f) AS ?founded) (SAMPLE(?s) AS ?s
   OPTIONAL { ?station dv:originalDrive/schema:name ?od . FILTER(LANG(?od) = "nl") }
   OPTIONAL { ?station dv:currentDrive/schema:name ?cd . FILTER(LANG(?cd) = "nl") }
   OPTIONAL { ?station dv:drainsArea ?drains }
+  OPTIONAL { ?station schema:url ?u }
+  ${identifier("station", "rijksmonumentnummer", "rm")}
   ${sourceOf("pumping-stations")}
 }
 GROUP BY ?station
@@ -150,7 +154,7 @@ export function dikesQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?dike (SAMPLE(?n) AS ?name) (SAMPLE(?b) AS ?built) (SAMPLE(?s) AS ?start) (SAMPLE(?e) AS ?end)
        (SAMPLE(?p) AS ?precision) (SAMPLE(?st) AS ?status) (MIN(?d) AS ?m)
-       (GROUP_CONCAT(DISTINCT STR(?polder); separator=" ") AS ?polders) (SAMPLE(?src) AS ?source) WHERE {
+       (GROUP_CONCAT(DISTINCT STR(?polder); separator=" ") AS ?polders) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   ?dike schema:isPartOf <${DS}zeeland-dikes> ;
     schema:name ?n ;
     schema:locationCreated/geo:hasGeometry/geo:asWKT ?line .
@@ -178,7 +182,7 @@ export function millsQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?mill ?ds (SAMPLE(?n) AS ?name) (SAMPLE(?pm) AS ?polderMill) (SAMPLE(?b) AS ?built)
        ${eventVars("built")} ${eventVars("gone")}
-       (SAMPLE(?st) AS ?status) (SAMPLE(?u) AS ?url) (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) WHERE {
+       (SAMPLE(?st) AS ?status) (SAMPLE(?u) AS ?url) (SAMPLE(?rm) AS ?monument) (SAMPLE(?tb) AS ?tbNumber) (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   VALUES ?ds { <${DS}lost-windmills> <${DS}windmills> }
   ?mill schema:isPartOf ?ds ;
     schema:name ?n ;
@@ -190,7 +194,9 @@ SELECT ?mill ?ds (SAMPLE(?n) AS ?name) (SAMPLE(?pm) AS ?polderMill) (SAMPLE(?b) 
   ${event("mill", "disappearance", "gone")}
   OPTIONAL { ?mill schema:creativeWorkStatus/schema:name ?st . FILTER(LANG(?st) = "nl") }
   OPTIONAL { ?mill schema:url ?u }
-  OPTIONAL { ?ds schema:isBasedOn/schema:name ?src }
+  ${identifier("mill", "rijksmonumentnummer", "rm")}
+  ${identifier("mill", "Ten Bruggencate-nummer", "tb")}
+  ${sourceLayer}
 }
 GROUP BY ?mill ?ds
 ORDER BY ?km`;
@@ -201,7 +207,7 @@ export function villagesQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?village ?event (SAMPLE(?n) AS ?name) (GROUP_CONCAT(DISTINCT ?alt; separator=", ") AS ?altNames)
        (SAMPLE(?s) AS ?start) (SAMPLE(?e) AS ?end) (SAMPLE(?pr) AS ?precision) (SAMPLE(?t) AS ?dateText)
-       (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) WHERE {
+       (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   ?village schema:isPartOf <${DS}drowned-villages> ;
     schema:name ?n ;
     schema:geo ?pt .
@@ -224,7 +230,7 @@ ORDER BY ?km`;
 export function poolsQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?pool (SAMPLE(?n) AS ?name) (SAMPLE(?t) AS ?type) (SAMPLE(?r) AS ?river)
-       ${eventVars("breach")} (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) WHERE {
+       ${eventVars("breach")} (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   ?pool schema:isPartOf <${DS}breach-pools> ;
     schema:name ?n ;
     schema:geo ?pt .
@@ -247,7 +253,7 @@ export function giftsQuery(p: Point): string {
   return `${PREFIXES}
 SELECT ?house (SAMPLE(?n) AS ?name) (SAMPLE(?sa) AS ?street) (SAMPLE(?lo) AS ?locality)
        (GROUP_CONCAT(DISTINCT ?c; separator=", ") AS ?countries) (SAMPLE(?b) AS ?built)
-       ${eventVars("built")} (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) WHERE {
+       ${eventVars("built")} (MIN(?d) AS ?km) (SAMPLE(?src) AS ?source) (SAMPLE(?srcPage) AS ?sourcePage) WHERE {
   ?house schema:isPartOf <${DS}gift-houses-1953> ;
     schema:name ?n ;
     schema:locationCreated ?loc .
@@ -320,6 +326,27 @@ function sourceTip(source: string | undefined, precision?: string, text?: string
   return parts.join(" ");
 }
 
+/* Web pages for a step. The object's own page where the data has one; else
+   the record of its source layer in the Nationaal Georegister, which is about
+   the whole layer, not about this object. Lost mills link to allemolens.nl by
+   their Ten Bruggencate number: their schema:url (molendatabase.org) did not
+   answer when this was built. */
+const monumentPage = (nr: string) =>
+  `https://monumentenregister.cultureelerfgoed.nl/monumenten/${encodeURIComponent(nr.trim())}`;
+const allemolensPage = (tb: string) => `https://zoeken.allemolens.nl/tenbruggencatenummer/${encodeURIComponent(tb.trim())}`;
+
+function links(r: Row | undefined, own: (StepLink | false | undefined)[] = []): StepLink[] {
+  const found = own.filter((l): l is StepLink => !!l && /^https?:\/\//.test(l.href));
+  if (found.length) return found;
+  return r?.sourcePage ? [{ label: "Over deze bron", href: r.sourcePage }] : [];
+}
+const monumentLink = (r: Row) => !!r.monument && { label: "Monumentenregister", href: monumentPage(r.monument) };
+function millLink(r: Row): StepLink | undefined {
+  if (r.ds === `${DS}windmills` && r.url) return { label: "allemolens.nl", href: r.url };
+  if (r.tbNumber) return { label: "allemolens.nl", href: allemolensPage(r.tbNumber) };
+  return r.url ? { label: "Meer over deze molen", href: r.url } : undefined;
+}
+
 const distance = (km: number) =>
   km < 1
     ? `${Math.max(10, Math.round((km * 1000) / 10) * 10)} m`
@@ -389,7 +416,8 @@ function polderStep(r: Row): Step | undefined {
         : `${capital(r.eventType ?? "gebeurtenis")}: ${r.name}. Je huis staat in dit gebied.`;
   if (r.waterLevel) text += ` Tegenwoordig ${polderLevel(r.waterLevel)}.`;
   const literature = r.citations ? `Literatuur: ${r.citations}.` : undefined;
-  return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.precision, r.dateText, literature) };
+  const report = !!r.report && { label: "Rapport van de provincie (pdf)", href: r.report };
+  return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.precision, r.dateText, literature), links: links(r, [report]) };
 }
 
 function landStep(r: Row): Step | undefined {
@@ -402,7 +430,7 @@ function landStep(r: Row): Step | undefined {
   const later = [deed && `in ${deed} volgt de akte`, done && `in ${done} is het project afgerond`].filter(Boolean);
   if (later.length) text += ` ${capital(list(later as string[]))}.`;
   const tip = sourceTip(r.source, r.execPrecision, undefined, r.status ? `Status: ${r.status}.` : undefined);
-  return w ? { year: w.label, sort: w.sort, text, source: tip } : undefined;
+  return w ? { year: w.label, sort: w.sort, text, source: tip, links: links(r) } : undefined;
 }
 
 function stationStep(r: Row, homeAreas: Set<string>): Step | undefined {
@@ -428,7 +456,8 @@ function stationStep(r: Row, homeAreas: Set<string>): Step | undefined {
   else if (status === "niet werkend" && !(then && noDrive)) text += " Het werkt niet meer.";
   else if (gone) text += " Inmiddels is het gesloopt.";
   if (!w) return undefined;
-  return { year: w.label, sort: w.sort, text, source: sourceTip(r.source) };
+  const site = !!r.url && { label: "gemalen.nl", href: r.url };
+  return { year: w.label, sort: w.sort, text, source: sourceTip(r.source), links: links(r, [site, monumentLink(r)]) };
 }
 
 function dikeStep(r: Row, homeAreas: Set<string>): Step | undefined {
@@ -447,7 +476,7 @@ function dikeStep(r: Row, homeAreas: Set<string>): Step | undefined {
   else if (status === "relict") text += " Hij ligt er nog, maar keert geen water meer.";
   else if (status === "geslecht") text += " Later is hij afgegraven.";
   else if (status === "verdwenen") text += " Hij is verdwenen.";
-  return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.built ? undefined : r.precision) };
+  return { year: w.label, sort: w.sort, text, source: sourceTip(r.source, r.built ? undefined : r.precision), links: links(r) };
 }
 
 function villageStep(r: Row): Step | undefined {
@@ -460,7 +489,7 @@ function villageStep(r: Row): Step | undefined {
     : `Een dorp op ${dist} van je huis verdrinkt: de zee neemt het land terug. Hoe het heette, weten we niet.`;
   if (r.altNames) text += ` Het heette ook ${r.altNames.split(/,\s*/).join(" of ")}.`;
   const tip = sourceTip(r.source, r.precision, r.dateText);
-  return w ? { year: w.label, sort: w.sort, text, source: tip } : undefined;
+  return w ? { year: w.label, sort: w.sort, text, source: tip, links: links(r) } : undefined;
 }
 
 /* The lost polder mills: how many, the oldest, and the last one to go.
@@ -490,7 +519,9 @@ function lostMillSteps(rows: Row[]): Step[] {
   if (other) text += ` Ook ${other === 1 ? "een andere molen" : `${other} andere molens`} (voor bijvoorbeeld graan, olie of hout) ${other === 1 ? "is" : "zijn"} verdwenen.`;
   const first = oldest ? oldest.r : undefined;
   const tip = sourceTip(source, first && precisionOf(first, first.built, "built"), first?.builtText);
-  const steps: Step[] = oldest ? [{ year: oldest.w.label, sort: oldest.w.sort, text, source: tip }] : [];
+  const steps: Step[] = oldest
+    ? [{ year: oldest.w.label, sort: oldest.w.sort, text, source: tip, links: links(oldest.r, [millLink(oldest.r)]) }]
+    : [];
   const last = gone[0];
   if (last) {
     const lastName = named(last.r.name);
@@ -502,6 +533,7 @@ function lostMillSteps(rows: Row[]): Step[] {
         ? `De laatste [poldermolen] in de buurt verdwijnt: ${lastName}, op ${where}.`
         : `De laatste [poldermolen] in de buurt verdwijnt, op ${where}.`,
       source: sourceTip(source, last.r.gonePrecision, last.r.goneText),
+      links: links(last.r, [millLink(last.r)]),
     });
   }
   return steps;
@@ -522,7 +554,7 @@ function standingMillStep(r: Row): Step | undefined {
   else if (status === "restant") text += " Er staat nog een stuk van.";
   else if (status === "in aanbouw") text += " Op dit moment wordt er aan hem gebouwd.";
   const tip = sourceTip(r.source, precisionOf(r, r.built, "built"), r.built ? undefined : r.builtText);
-  return w ? { year: w.label, sort: w.sort, text, source: tip } : undefined;
+  return w ? { year: w.label, sort: w.sort, text, source: tip, links: links(r, [millLink(r), monumentLink(r)]) } : undefined;
 }
 
 /* Pools with the same name, type and river ("Wiel bij Krimpen aan de Lek
@@ -547,7 +579,7 @@ function poolSteps(rows: Row[]): Step[] {
     else text += `${name ? ` Ze heten allemaal ${name}.` : ""} De dichtstbijzijnde ligt op ${where}.`;
     if (maybe) text += " Of het echt een wiel is, is niet zeker.";
     const tip = sourceTip(r.source, r.breachPrecision, r.breachText);
-    return { year: w.label, sort: w.sort, text, source: tip };
+    return { year: w.label, sort: w.sort, text, source: tip, links: links(r) };
   }).filter((s): s is Step => !!s).slice(0, MAX_POOLS);
 }
 
@@ -565,7 +597,7 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
     const from = own.countries ? ` uit ${list(own.countries.split(", "))}` : "";
     const text = `Je huis is een [geschenkwoning]${from}. Na de watersnoodramp van 1953 gaven andere landen huizen aan mensen die alles kwijt waren.`;
     const tip = sourceTip(own.source, precisionOf(own, own.built, "built"), own.built ? undefined : own.builtText);
-    return w ? [{ year: w.label, sort: w.sort, text, source: tip }] : [];
+    return w ? [{ year: w.label, sort: w.sort, text, source: tip, links: links(own) }] : [];
   }
   const countries = [...new Set(rows.flatMap((r) => (r.countries ? r.countries.split(", ") : [])))];
   const dated = rows
@@ -579,7 +611,7 @@ function giftSteps(rows: Row[], address?: Address): Step[] {
       : `Binnen ${distance(GIFT_KM)} van je huis staan ${n} [geschenkwoningen]: huizen die andere landen gaven na de watersnoodramp van 1953.`;
   if (countries.length) text += ` ${n === 1 ? "Het komt" : "Ze komen"} uit ${list(countries)}.`;
   const tip = sourceTip(rows[0].source, undefined, undefined, "Het jaar is dat van de oudste woning.");
-  return dated[0] ? [{ year: dated[0].label, sort: dated[0].sort, text, source: tip }] : [];
+  return dated[0] ? [{ year: dated[0].label, sort: dated[0].sort, text, source: tip, links: links(rows[0]) }] : [];
 }
 
 /* The 1953 flood, only when the map says this place flooded */
@@ -595,6 +627,7 @@ function floodStep(f: Flood): Step {
     sort: 1953,
     text: `Bij de [watersnoodramp] loopt deze plek onder water.${water}`,
     source: `Bron: Historische Inundatie Ramp 1953 (${f.publisher}), ${f.metadata}. De kaart dekt alleen Noord-Brabant.`,
+    links: links(undefined, [{ label: "Over deze bron", href: f.metadata }]),
   };
 }
 

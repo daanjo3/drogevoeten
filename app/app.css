@@ -286,7 +286,10 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 @keyframes slidein{from{opacity:0;transform:translateX(36px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.tl li{opacity:1}#p-tijd[data-seen] .tl li{animation:none}}
 .tl li p{margin:4px 0}
-.tl li .src{margin-top:6px!important}
+.tl li .src{margin-top:6px!important;display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;line-height:1.4}
+/* a web page about the step, next to the source pill */
+.tl li .step-link{font:500 var(--fs-label)/1.4 var(--font);color:var(--ink);opacity:.75;text-underline-offset:2px}
+.tl li .step-link:hover,.tl li .step-link:focus-visible{opacity:1}
 
 /* buurt */
 /* the map and list fill whatever the heading and lead leave over */

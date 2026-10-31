@@ -44,6 +44,12 @@ export function TijdreisPanel({ place }: { place: PlaceData }) {
                 <Tip kind="bron" tip={step.source}>
                   bron
                 </Tip>
+                {/* one link per step: the object's own page first, else its source layer */}
+                {step.links?.[0] && (
+                  <a className="step-link" href={step.links[0].href} target="_blank" rel="noreferrer">
+                    Link ↗
+                  </a>
+                )}
               </p>
             </li>
           ))}

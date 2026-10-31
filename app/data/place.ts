@@ -4,10 +4,17 @@
 
 export type Mode = "info" | "risk";
 
+/* A web page about a step: the object itself, or else its source layer */
+export interface StepLink {
+  label: string;
+  href: string;
+}
+
 export interface TimelineStep {
   year: string;
   text: string;
   source: string;
+  links?: StepLink[];
 }
 
 export interface NearbyWork {

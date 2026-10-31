@@ -435,3 +435,17 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
 - **Endpoint onbereikbaar:** het blok meldt dat de bronnen geen antwoord gaven, zoals eerst bij de live diensten. Geen terugval op de live API's.
 - **Niet veranderd:** het peilgebied op de kaart en het gemaal in het adresblok en bij "Als het hard regent" (`app/lib/drainage.ts`) komen nog live uit IMWA, net als LIWO (§32).
 - **Getest** tegen een tijdelijke QLever-index van `droge-voeten.nt.gz`: Middelburg (Boreel, Sint Laurense Watergang, Domburgse Watergang gekoppeld), Heijningen (Geluk, Oude Prinslandse Polder) en Lemmer (Buma).
+
+## 35. Links naar webpagina's onder de stappen van de tijdlijn (31-10-2026)
+
+**Vraag van Jari:** kan onder elke stap van de tijdlijn een link staan naar een webpagina?
+
+- **Een pagina over het object zelf, als de data die heeft.** De queries in `app/lib/timeline.ts` halen ze uit de linked data:
+  - gemaal: `schema:url` → gemalen.nl (alle 2.663);
+  - bestaande molen: `schema:url` → allemolens.nl (alle 1.872);
+  - verdwenen molen: het Ten Bruggencate-nummer → `https://zoeken.allemolens.nl/tenbruggencatenummer/<nr>`. Niet de `schema:url` naar molendatabase.org: die site gaf bij de bouw geen antwoord (IPv4 en IPv6), allemolens.nl toont dezelfde verdwenen molens. Bij de stap met de oudste molen is dat de oudste, bij "de laatste poldermolen verdwijnt" de laatste;
+  - molen of gemaal met een rijksmonumentnummer: ook `https://monumentenregister.cultureelerfgoed.nl/monumenten/<nr>`;
+  - Zeeuwse polder: `schema:subjectOf/schema:url` → het cultuurhistorische rapport van de provincie (pdf).
+- **Anders de bronlaag.** Droogmakerijen, landinrichting, dijken, verdronken dorpen, wielen en geschenkwoningen hebben geen pagina per object; `prov:wasDerivedFrom` wijst naar een WFS-antwoord (XML), niet geschikt voor gebruikers. Die stappen linken naar het record van de bronlaag in het Nationaal Georegister (`schema:isBasedOn`; de API-URL stuurt een browser door naar de leesbare pagina). Het label is "Over deze bron", omdat de pagina over de hele laag gaat, niet over dit object. De 1953-stap linkt zo naar de metadata van de inundatiekaart.
+- **Hoe in de app:** `TimelineStep` heeft een optioneel veld `links` (`label`, `href`); `TijdreisPanel` toont alleen de eerste, als "Link" naast de bronpil, in een nieuw tabblad (op verzoek van Jari). Een gemaal of molen die ook rijksmonument is, linkt dus naar gemalen.nl of allemolens.nl, niet naar het Monumentenregister. Een stap zonder link ("Onbekend") krijgt geen link. `sourceOf` in `app/lib/sparql.ts` geeft nu ook `?srcPage`; `identifier()` haalt een nummer uit `schema:identifier` op `propertyID`.
+- **Getest** tegen het endpoint uit `app/.env` op de zes demo-adressen: elke stap heeft een link, en een steekproef van de pagina's (gemalen.nl, allemolens.nl, Monumentenregister, rapport-pdf, Georegister) geeft HTTP 200.
