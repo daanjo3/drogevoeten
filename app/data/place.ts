@@ -27,8 +27,6 @@ export interface PlaceData {
   nap: number;
   /* the year the land was drained, roughly */
   drainedYear: number;
-  /* rain options in mm (KNMI, Vlissingen) */
-  rain: { normal: number; heavy: number; record: number };
   timeline: TimelineStep[];
   nearby: NearbyWork[];
 }
@@ -37,7 +35,6 @@ export const MIDDELBURG: PlaceData = {
   address: "Abdij 4, Middelburg",
   nap: 2.0,
   drainedYear: 1200,
-  rain: { normal: 10, heavy: 31.8, record: 80.9 },
   timeline: [
     {
       year: "Rond 1200",
@@ -122,5 +119,6 @@ export const TERMS: Record<string, string> = {
   geschenkwoningen: "Huizen die andere landen gaven na de watersnoodramp van 1953.",
   sluis: "Een soort deur in het water. Gaat hij open, dan kan water of een boot erdoor.",
   mm: "1 millimeter regen betekent 1 liter water op elke vierkante meter grond.",
+  kans: "Hoe waarschijnlijk het is dat iets in een jaar gebeurt. Bij een kans van 1 op 300 per jaar gebeurt het gemiddeld eens in de 300 jaar. Het kan dit jaar gebeuren, of eeuwenlang niet.",
   kuub: "Een kubieke meter. Een bak van 1 bij 1 bij 1 meter. Daar past 1000 liter water in.",
 };

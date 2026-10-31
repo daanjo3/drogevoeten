@@ -1,6 +1,5 @@
-import type { PlaceData } from "../data/place";
-import type { Drainage } from "../lib/drainage";
-import type { Dike, Scenario } from "../lib/scenario";
+import type { Outside, Scenario } from "../lib/scenario";
+import { LIWO_CLASSES, liwoClass, type LiwoMap } from "../lib/liwo";
 
 interface Option<T> {
   label: string;
@@ -48,71 +47,39 @@ function Segment<T extends string | number>({
   );
 }
 
-/* Segment buttons, one choice per row. The calculation updates at once. */
-export function ScenarioControls({
-  place,
-  drainage,
-  scenario,
-  onChange,
-}: {
-  place: PlaceData;
-  /* the 1-2 pumps that drain the area of the address */
-  drainage: Drainage;
-  scenario: Scenario;
-  onChange: (s: Scenario) => void;
-}) {
-  const mm = (n: number) => `${Math.round(n)} mm`;
+/* Segment buttons, one choice per row. The water in the room follows at once. */
+export function ScenarioControls({ scenario, onChange }: { scenario: Scenario; onChange: (s: Scenario) => void }) {
+  const odds = liwoClass(scenario.liwoMap).odds;
   return (
     <>
       <Segment
-        label="regen"
-        value={scenario.rain}
-        onPick={(rain) => onChange({ ...scenario, rain })}
+        label="wat als…"
+        value={scenario.outside}
+        onPick={(outside: Outside) => onChange({ ...scenario, outside })}
         options={[
-          { label: "Gewone dag", sub: mm(place.rain.normal), value: place.rain.normal },
-          { label: "Flinke bui", sub: mm(place.rain.heavy), value: place.rain.heavy },
-          { label: "Wolkbreuk", sub: mm(place.rain.record), value: place.rain.record },
+          { label: "Overstroming", value: "flood" },
+          { label: "Geen dijken", sub: "zeeniveau", value: "nodikes" },
         ]}
       />
-      {drainage.pumps.map((p) => (
-        <Segment
-          key={p.id}
-          label={`gemaal ${p.name}`}
-          value={scenario.pumpsOff.includes(p.id) ? 0 : 1}
-          onPick={(on) =>
-            onChange({
-              ...scenario,
-              pumpsOff: on ? scenario.pumpsOff.filter((id) => id !== p.id) : [...scenario.pumpsOff, p.id],
-            })
-          }
-          options={[
-            { label: "Aan", sub: `${Math.round(p.capacity)} kuub/min`, value: 1 },
-            { label: "Valt uit", value: 0 },
-          ]}
-        />
-      ))}
-      {drainage.pumps.length === 0 && (
-        <div className="row">
-          <small>gemaal</small>
-          <p>
-            {drainage.isPending
-              ? "We zoeken welk gemaal hier het water wegpompt…"
-              : drainage.isError
-                ? "Het waterschapsregister gaf geen antwoord. Probeer het later nog eens."
-                : "We vonden geen gemaal dat water uit jouw gebied wegpompt."}
+      {scenario.outside === "flood" && (
+        <>
+          <Segment
+            label="kans per jaar"
+            value={scenario.liwoMap}
+            onPick={(liwoMap: LiwoMap) => onChange({ ...scenario, liwoMap })}
+            options={LIWO_CLASSES.map((c) => ({
+              label: c.label,
+              sub: c.map === 1 ? `meer dan 1 op ${c.odds}` : c.odds ? `1 op ${c.odds}` : "nog kleiner",
+              value: c.map,
+            }))}
+          />
+          <p className="hint">
+            {odds
+              ? `Elk jaar is er een kans van ${scenario.liwoMap === 1 ? "meer dan " : ""}1 op ${odds} op zo'n overstroming. Gemiddeld komt die eens in de ${odds} jaar${scenario.liwoMap === 1 ? " of vaker" : ""} voor, maar hij kan ook twee keer kort na elkaar komen, of eeuwenlang niet.`
+              : "De kans is kleiner dan 1 op 30.000 per jaar. Zo'n overstroming komt bijna nooit voor. Dit is dezelfde kaart als op overstroomik.nl."}
           </p>
-        </div>
+        </>
       )}
-      <Segment
-        label="dijk"
-        value={scenario.dike}
-        onPick={(dike: Dike) => onChange({ ...scenario, dike })}
-        options={[
-          { label: "Houdt", value: "holds" },
-          { label: "Breekt", value: "breaks" },
-          { label: "Geen dijk", sub: "zee komt binnen", value: "none" },
-        ]}
-      />
     </>
   );
 }

@@ -231,11 +231,7 @@ export default function Home() {
   const [about, setAbout] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mode, setMode] = useState<Mode>("info");
-  const [scenario, setScenario] = useState<Scenario>({
-    rain: place.rain.record,
-    pumpsOff: [],
-    dike: "holds",
-  });
+  const [scenario, setScenario] = useState<Scenario>({ outside: "flood", liwoMap: 5 });
   const canvas = useCanvas();
   const woonplaats = locatie?.woonplaatsnaam;
   useEffect(() => {
@@ -369,7 +365,6 @@ export default function Home() {
       <Canvas worldRef={canvas.worldRef} canvasRef={canvas.canvasRef} away={away}>
         <HuiskamerPanel
           locatie={locatie}
-          drainage={drainage}
           mode={mode}
           scenario={scenario}
           loadRoom={phase !== "idle"}

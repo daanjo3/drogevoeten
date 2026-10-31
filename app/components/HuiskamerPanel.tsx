@@ -1,13 +1,12 @@
 import type { ReactNode } from "react";
 import type { Mode } from "../data/place";
 import type { Scenario } from "../lib/scenario";
-import { calcScenario, nl, nlRaw, nlSigned } from "../lib/scenario";
+import { nl, nlSigned, waterInRoom } from "../lib/scenario";
 import { useAddressHeight } from "../lib/ahn";
 import type { LocatieserverDoc } from "../lib/locatieserver";
-import type { Drainage } from "../lib/drainage";
 import { usePeilgebied } from "../lib/waterbeheergebieden";
 import { locationOf } from "../lib/rijksmuseum";
-import { useLiwo } from "../lib/liwo";
+import { liwoClass, useLiwo } from "../lib/liwo";
 import { Icon } from "./Icons";
 import { Tip } from "./Tip";
 import { UnityRoom } from "./UnityRoom";
@@ -17,65 +16,64 @@ import { TERMS } from "../data/place";
    room rises to the scenario's level and the explanation card appears. */
 export function HuiskamerPanel({
   locatie,
-  drainage,
   mode,
   scenario,
   loadRoom,
 }: {
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
-  /* the drainage area and its 1-2 pumps; the scenario uses their capacity */
-  drainage: Drainage;
   mode: Mode;
   scenario: Scenario;
   /* start loading the 3D room (only after an address was chosen) */
   loadRoom: boolean;
 }) {
   const risk = mode === "risk";
-  const running = drainage.pumps.filter((p) => !scenario.pumpsOff.includes(p.id));
-  const known = !!drainage.area && drainage.pumps.length > 0;
-  const capacity = running.reduce((sum, p) => sum + p.capacity, 0);
   const here = locationOf(locatie);
   const height = useAddressHeight(locatie);
   const ground = height.data?.ground;
-  // the extreme LIWO map: the dike-break button
-  const liwo = useLiwo(here?.lat, here?.lon);
+  // the LIWO map for the chosen probability class
+  const liwo = useLiwo(scenario.liwoMap, here?.lat, here?.lon);
+  const kans = liwoClass(scenario.liwoMap);
   const outside =
-    scenario.dike === "breaks" ? (liwo.data ?? null) : scenario.dike === "none" && ground ? -ground.value : null;
-  const r = calcScenario(scenario, {
-    areaM2: known ? drainage.area!.areaM2 : null,
-    capacity: known ? capacity : null,
-    outside,
-  });
+    scenario.outside === "flood" ? (liwo.data ?? null) : scenario.outside === "nodikes" && ground ? -ground.value : null;
+  const r = waterInRoom(outside);
   const { peilgebied } = usePeilgebied(here?.lat, here?.lon);
   const pg = peilgebied?.properties;
   const pgName = pg ? pg.code || pg.naam || "zonder naam" : here ? "onbekend" : "…";
-  const names = (ps: { name: string }[]) => ps.map((p) => p.name).join(" en ");
   const nap = ground ? `${nlSigned(ground.value)} m` : height.isError || height.isSuccess ? "onbekend" : "…";
 
   let explanation: ReactNode;
   const deep = (
     <>
-      <b>{nl(r.depth)} meter</b> hoog.{r.depth > r.level && " Dat is hoger dan je huiskamer!"}
+      <b>{nl(r.depth)} meter</b> hoog{r.depth > r.level ? ", hoger dan het plafond van de huiskamer" : ""}.
     </>
   );
-  if (scenario.dike === "breaks") {
+  if (scenario.outside === "flood") {
+    const chance = (
+      <Tip kind="term" tip={TERMS.kans}>
+        kans
+      </Tip>
+    );
+    const which = kans.odds ? (
+      <>
+        Bij overstromingen met een {chance} van {kans.map === 1 ? "meer dan " : ""}1 op {kans.odds} per jaar
+        {kans.map === 1 ? "" : " of groter"}
+      </>
+    ) : (
+      <>Bij alle overstromingen die hier kunnen voorkomen, ook die met de kleinste {chance},</>
+    );
     if (liwo.isPending) explanation = <>We kijken op de overstromingskaart hoe hoog het water komt…</>;
     else if (liwo.isError) explanation = <>De overstromingskaart gaf geen antwoord. Probeer het later nog eens.</>;
     else if (!r.depth)
-      explanation = (
-        <>
-          De dijk breekt. Toch komt het water niet tot hier. Volgens de overstromingskaart blijft jouw huis droog, ook als het
-          heel erg misgaat.
-        </>
-      );
+      explanation = <>{which} blijft het hier volgens de overstromingskaart droog.</>;
     else
       explanation = (
         <>
-          De dijk breekt en het water stroomt de polder in. In de huiskamer staat het {deep} Een gemaal helpt dan niet meer.
+          {which} staat het water volgens de overstromingskaart in je huiskamer {deep} Zo'n overstroming kan ontstaan door
+          een zware storm, een hoge rivier of een dijkdoorbraak.
         </>
       );
-  } else if (scenario.dike === "none") {
+  } else if (scenario.outside === "nodikes") {
     const sea = (
       <Tip kind="term" tip={TERMS.zeeniveau}>
         zeeniveau
@@ -85,51 +83,21 @@ export function HuiskamerPanel({
       explanation = height.isPending ? (
         <>We zoeken op hoe hoog je huiskamer ligt…</>
       ) : (
-        <>We weten niet hoe hoog je huiskamer ligt. Daarom weten we niet hoe hoog de zee hier zou komen.</>
+        <>De hoogte van je huiskamer is niet bekend. Daarom kunnen we niet laten zien hoe hoog het water zonder dijken zou komen.</>
       );
     else if (r.depth > 0)
       explanation = (
         <>
-          Stel dat er geen dijken zijn. Dan komt de zee tot {sea}. Je huiskamer ligt lager, dus het water staat {deep}
+          Zonder dijken komt het water tot {sea}. Je huiskamer ligt lager, dus het water staat daar {deep}
         </>
       );
     else
       explanation = (
         <>
-          Stel dat er geen dijken zijn. Je huiskamer ligt hoger dan {sea}, dus je voeten blijven droog. Bij storm kan de zee
-          wel hoger komen.
+          Zonder dijken komt het water tot {sea}. Je huiskamer ligt hoger en blijft dus droog. Bij storm kan het water wel
+          hoger komen.
         </>
       );
-  } else if (!known) {
-    explanation = drainage.isPending ? (
-      <>We zoeken welk gemaal hier het water wegpompt…</>
-    ) : (
-      <>
-        We weten niet welk gemaal het water hier wegpompt. Daarom rekenen we niet uit wat de regen doet.
-      </>
-    );
-  } else if (!running.length) {
-    explanation = (
-      <>
-        {drainage.pumps.length > 1 ? "De gemalen vallen uit" : "Het gemaal valt uit"}. Er valt {nlRaw(scenario.rain)} mm regen en niets pompt het weg. Het water in de polder stijgt. In
-        de huiskamer staat het op <b>{nl(r.level)} meter</b>.
-      </>
-    );
-  } else {
-    explanation = (
-      <>
-        Er valt {nlRaw(scenario.rain)}{" "}
-        <Tip kind="term" tip={TERMS.mm}>
-          mm
-        </Tip>{" "}
-        regen. {running.length > 1 ? "De gemalen" : "Gemaal"} {names(running)}{" "}
-        {running.length > 1 ? "pompen samen" : "pompt"} {Math.round(capacity)}{" "}
-        <Tip kind="term" tip={TERMS.kuub}>
-          kuub
-        </Tip>{" "}
-        per minuut. Na ongeveer <b>{nl(r.hours)} uur</b> is alles weg. Jouw voeten blijven droog.
-      </>
-    );
   }
 
   return (
@@ -156,15 +124,9 @@ export function HuiskamerPanel({
             <Tip
               kind="bron"
               tip={
-                scenario.dike === "breaks"
-                  ? "Dit is geen voorspelling. De hoogte komt van de overstromingskaart LIWO van Rijkswaterstaat (gemaakt door Deltares): de grootste waterdiepte hier bij een dijkdoorbraak, uit veel doorgerekende doorbraken die nooit allemaal tegelijk gebeuren. We nemen de kaart voor de zwaarste overstromingen, met een kans van minder dan 1 op 30.000 per jaar (dezelfde kaart als overstroomik.nl). We rekenen vanaf de grond; je drempel ligt vaak iets hoger."
-                  : scenario.dike === "none"
-                    ? `Dit is geen voorspelling. Zonder dijken staat de zee op gemiddeld zeeniveau, NAP 0 m. Je huiskamer ligt op ${ground ? `${nlSigned(ground.value)} m NAP` : "een onbekende hoogte"} (Actueel Hoogtebestand Nederland, AHN). Het verschil is de waterhoogte. Eb, vloed en storm rekenen we niet mee.`
-                    : `Dit is een rekensom, geen voorspelling. Regen: KNMI, weerstation Vlissingen. ${
-                        known
-                          ? `De regen valt op ${drainage.area!.kind === "peilgebied" ? "peilgebied" : "afwateringsgebied"} ${drainage.area!.naam || drainage.area!.code || "zonder naam"} (${nl(drainage.area!.areaM2 / 1e6)} km²). We tellen ${drainage.pumps.length > 1 ? "de twee grootste gemalen" : "het gemaal"} die water uit dit gebied afvoeren, in het gebied of op de rand${drainage.pumpsFound > drainage.pumps.length ? ` (er staan er ${drainage.pumpsFound})` : ""}. Dat een gemaal bij het gebied hoort, leiden wij af: het register legt dat niet vast.`
-                          : "Voor dit adres vonden we geen gebied met een gemaal dat het water afvoert."
-                      } Pompkracht en gebied: waterschapsregister (IMWA, PDOK).`
+                scenario.outside === "flood"
+                  ? `Dit is geen voorspelling. De hoogte komt van de overstromingskaart LIWO van Rijkswaterstaat (gemaakt door Deltares), kaart "${kans.name}" (${kans.probability}). Die kaart toont de grootste waterdiepte boven de grond uit alle doorgerekende overstromingen met deze kans of een grotere: door storm of hoog water buiten de dijken, een dijk die doorbreekt, of sloten en kanalen die overlopen. Die gebeuren nooit allemaal tegelijk. Het water kan hoger komen dan zeeniveau, want bij storm of een hoge rivier staat het water buiten de dijk veel hoger dan normaal. De kaart geldt voor nu; klimaatverandering zit er niet in. Je drempel ligt vaak iets hoger dan de grond.`
+                  : `Dit is geen voorspelling. Zonder dijken staat de zee op gemiddeld zeeniveau, NAP 0 m. Je huiskamer ligt op ${ground ? `${nlSigned(ground.value)} m NAP` : "een onbekende hoogte"} (Actueel Hoogtebestand Nederland, AHN). Het verschil is de waterhoogte. Eb, vloed en storm rekenen we niet mee.`
               }
             >
               hoe rekenen we dit?
