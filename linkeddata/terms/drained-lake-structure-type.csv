@@ -1,6 +1,6 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
-verbeterde poldermolen,,verbeterde poldermolen,,,,,twijfel,aat? poldermolens <http://vocab.getty.edu/aat/300411372>
-poldermolen,,poldermolen,https://data.cultureelerfgoed.nl/term/id/cht/c2b4b24a-2fef-40dc-afe4-4baceed83a35,http://vocab.getty.edu/aat/300411372,,,voorstel,cht: poldermolens; aat: poldermolens
-stoomgemaal,,stoomgemaal,https://data.cultureelerfgoed.nl/term/id/cht/9bb23066-e5ed-4368-9548-05b8c3cc2b4d,,,,voorstel,cht: stoomgemalen
-electrisch gemaal,,electrisch gemaal,,,,,twijfel,aat? gemalen <http://vocab.getty.edu/aat/300386271>
-motorgemaal,,motorgemaal,https://data.cultureelerfgoed.nl/term/id/cht/16622d44-02a3-41b2-bc85-0f4b1ff8dfac,,,,voorstel,cht: motorgemalen
+verbeterde poldermolen,,verbeterde poldermolen,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? poldermolens <http://vocab.getty.edu/aat/300411372>
+poldermolen,,poldermolen,https://data.cultureelerfgoed.nl/term/id/cht/c2b4b24a-2fef-40dc-afe4-4baceed83a35,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
+stoomgemaal,,stoomgemaal,https://data.cultureelerfgoed.nl/term/id/cht/9bb23066-e5ed-4368-9548-05b8c3cc2b4d,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder gemalen
+electrisch gemaal,,electrisch gemaal,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? gemalen <http://vocab.getty.edu/aat/300386271>
+motorgemaal,,motorgemaal,https://data.cultureelerfgoed.nl/term/id/cht/16622d44-02a3-41b2-bc85-0f4b1ff8dfac,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder gemalen

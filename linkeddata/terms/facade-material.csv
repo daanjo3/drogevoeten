@@ -1,20 +1,20 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
-Hout,,Hout,,,,,twijfel,cht? abachihout <https://data.cultureelerfgoed.nl/term/id/cht/16f756f8-17ef-4f9a-b891-189afc60a30e>; aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
-Versteend geheel,,Versteend geheel,,,,,twijfel,aat? geheel <http://vocab.getty.edu/aat/300404389>
-Kunststof,,Kunststof,https://data.cultureelerfgoed.nl/term/id/cht/923ba596-bc30-44f5-a26c-cac680e3808d,,,,voorstel,cht: kunststoffen; aat? gelamineerde kunststof <http://vocab.getty.edu/aat/300256237>
-Versteend deels,,Versteend deels,,,,,twijfel,aat? delen <http://vocab.getty.edu/aat/300386479>
-Kunststof en shingles,,Kunststof en shingles,,,,,,
-Hout en shingles,,Hout en shingles,,,,,twijfel,aat? Amerikaans-Engels <http://vocab.getty.edu/aat/300387822>
-Stuc,,Stuc,https://data.cultureelerfgoed.nl/term/id/cht/efcaec99-e9aa-4846-8663-bea0b501cd25,http://vocab.getty.edu/aat/300014966,,,voorstel,cht: stuc; aat: stucwerk
-Kunststof planken,,Kunststof planken,,,,,twijfel,aat? planken kisten <http://vocab.getty.edu/aat/300139728>
-Hout en metselwerk,,Hout en metselwerk,,,,,twijfel,aat? Amerikaans-Engels <http://vocab.getty.edu/aat/300387822>
-Stucwerk,,Stucwerk,https://data.cultureelerfgoed.nl/term/id/cht/97bb1910-812c-4107-9833-3a9c496a515a,http://vocab.getty.edu/aat/300014966,,,voorstel,cht: pleisterwerk; aat: stucwerk
-"Stucwerk deels, deels  hout",,"Stucwerk deels, deels  hout",,,,,twijfel,aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
-Renovatie in uitvoering,,Renovatie in uitvoering,,,,,twijfel,aat? uitvoering <http://vocab.getty.edu/aat/300069715>
-Pleisterwerk,,Pleisterwerk,https://data.cultureelerfgoed.nl/term/id/cht/97bb1910-812c-4107-9833-3a9c496a515a,http://vocab.getty.edu/aat/300015343,,,voorstel,cht: pleisterwerk; aat: pleisterwerk
-Nieuw hout,,Nieuw hout,,,,,twijfel,aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
-Hout vernieuwd,,Hout vernieuwd,,,,,twijfel,aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
-Kunststof boards horizontaal,,Kunststof boards horizontaal,,,,,twijfel,aat? achterplanken (meubelonderdelen) <http://vocab.getty.edu/aat/300040418>
-Keralit,,Keralit,,,,,,
-Steen en houten latten,,Steen en houten latten,,,,,twijfel,aat? Alberene steen <http://vocab.getty.edu/aat/300011666>
-Hout/ metselwerk,,Hout/ metselwerk,,,,,twijfel,aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
+Hout,,Hout,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: cht? abachihout <https://data.cultureelerfgoed.nl/term/id/cht/16f756f8-17ef-4f9a-b891-189afc60a30e>; aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
+Versteend geheel,,Versteend geheel,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? geheel <http://vocab.getty.edu/aat/300404389>
+Kunststof,,Kunststof,https://data.cultureelerfgoed.nl/term/id/cht/923ba596-bc30-44f5-a26c-cac680e3808d,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder materialen
+Versteend deels,,Versteend deels,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? delen <http://vocab.getty.edu/aat/300386479>
+Kunststof en shingles,,Kunststof en shingles,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+Hout en shingles,,Hout en shingles,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? Amerikaans-Engels <http://vocab.getty.edu/aat/300387822>
+Stuc,,Stuc,https://data.cultureelerfgoed.nl/term/id/cht/efcaec99-e9aa-4846-8663-bea0b501cd25,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder materialen
+Kunststof planken,,Kunststof planken,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? planken kisten <http://vocab.getty.edu/aat/300139728>
+Hout en metselwerk,,Hout en metselwerk,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? Amerikaans-Engels <http://vocab.getty.edu/aat/300387822>
+Stucwerk,,Stucwerk,,,,,afgewezen,"afgewezen (Claude 31-10-2026): CHT-kandidaat valt buiten het domein (breder: bebouwde omgeving, bouwelementen, objecten)"
+"Stucwerk deels, deels  hout",,"Stucwerk deels, deels  hout",,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
+Renovatie in uitvoering,,Renovatie in uitvoering,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? uitvoering <http://vocab.getty.edu/aat/300069715>
+Pleisterwerk,,Pleisterwerk,,,,,afgewezen,"afgewezen (Claude 31-10-2026): CHT-kandidaat valt buiten het domein (breder: bebouwde omgeving, bouwelementen, objecten)"
+Nieuw hout,,Nieuw hout,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
+Hout vernieuwd,,Hout vernieuwd,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>
+Kunststof boards horizontaal,,Kunststof boards horizontaal,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? achterplanken (meubelonderdelen) <http://vocab.getty.edu/aat/300040418>
+Keralit,,Keralit,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+Steen en houten latten,,Steen en houten latten,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? Alberene steen <http://vocab.getty.edu/aat/300011666>
+Hout/ metselwerk,,Hout/ metselwerk,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? natuurlijk gedroogd hout <http://vocab.getty.edu/aat/300012807>

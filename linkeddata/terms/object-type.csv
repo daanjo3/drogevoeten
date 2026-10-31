@@ -1,14 +1,14 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
-pumping-station,,gemaal,https://data.cultureelerfgoed.nl/term/id/cht/63e3cea6-22d0-4d8a-b79b-2b8c3d049587,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT 'gemalen' klopt. AAT 300386271 'gemalen' betekent huwelijkspartners (prins-gemaal): verwijderd
-weir,,weir,,,,,twijfel,aat? waterkeringen (dammen) <http://vocab.getty.edu/aat/300006101>
-windmill,,windmill,,,,,twijfel,cht? achtkante bovenkruier <https://data.cultureelerfgoed.nl/term/id/cht/f6d4c2ad-7bf6-431a-a33a-464bb80967d1>; aat? Windmill Hill <http://vocab.getty.edu/aat/300019349>
-dike,,dike,,,,,twijfel,cht? dijkhuizen <https://data.cultureelerfgoed.nl/term/id/cht/7de491a3-798b-4b24-832b-e4d177f09cba>; aat? defensive dikes <http://vocab.getty.edu/aat/300456652>
-breach-pool,,breach-pool,,,,,twijfel,aat? badhuizen <http://vocab.getty.edu/aat/300007347>
-lock,,lock,,,,,twijfel,cht? katrollen <https://data.cultureelerfgoed.nl/term/id/cht/97c5763d-1e8f-45ba-a80c-16f6b520af8a>
-land-consolidation-project,,land-consolidation-project,,,,,twijfel,aat? platteland <http://vocab.getty.edu/aat/300008631>
-drained-lake-structure,,drained-lake-structure,,,,,,
-polder,,polder,https://data.cultureelerfgoed.nl/term/id/cht/57fc851e-b0b1-45c5-8226-5e9cd60537a5,http://vocab.getty.edu/aat/300006163,,,voorstel,cht: polders; aat: polders
-gift-house,,gift-house,,,,,twijfel,aat? schepenhuizen <http://vocab.getty.edu/aat/300449032>
-drained-lake,,drained-lake,,,,,twijfel,aat? alizarien meekraprood <http://vocab.getty.edu/aat/300013658>
-drowned-village,,drowned-village,,,,,twijfel,aat? Alaska Native village statistical areas <http://vocab.getty.edu/aat/300456762>
-delta-work,,delta-work,,,,,twijfel,aat? aggetti <http://vocab.getty.edu/aat/300219638>
+pumping-station,,gemaal,https://data.cultureelerfgoed.nl/term/id/cht/63e3cea6-22d0-4d8a-b79b-2b8c3d049587,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'gemalen' gecontroleerd op scopeNote en broader
+weir,,stuw,https://data.cultureelerfgoed.nl/term/id/cht/30a6488b-e695-48a0-b361-bd48fb4ae340,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'stuwen' gecontroleerd op scopeNote en broader
+windmill,,molen,https://data.cultureelerfgoed.nl/term/id/cht/0198a25a-3469-469e-8103-a613e32fcdc6,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'molens' gecontroleerd op scopeNote en broader
+dike,,dijk,https://data.cultureelerfgoed.nl/term/id/cht/c615eaa4-85a7-4f2b-9a96-02aa766e8331,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'dijken' gecontroleerd op scopeNote en broader
+breach-pool,,wiel,,,,,afgewezen,afgewezen (Claude 31-10-2026): eigen term; geen passende CHT-term gevonden
+lock,,sluis,https://data.cultureelerfgoed.nl/term/id/cht/88326f50-39d4-42c8-bec3-28a44ff3e472,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'sluizen' gecontroleerd op scopeNote en broader
+land-consolidation-project,,landinrichtingsproject,,,,,afgewezen,afgewezen (Claude 31-10-2026): eigen term; geen passende CHT-term gevonden
+drained-lake-structure,,maalinrichting van een droogmakerij,,,,,afgewezen,afgewezen (Claude 31-10-2026): eigen term; geen passende CHT-term gevonden
+polder,,polder,https://data.cultureelerfgoed.nl/term/id/cht/57fc851e-b0b1-45c5-8226-5e9cd60537a5,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'polders' gecontroleerd op scopeNote en broader
+gift-house,,geschenkwoning,,,,,afgewezen,afgewezen (Claude 31-10-2026): eigen term; geen passende CHT-term gevonden
+drained-lake,,droogmakerij,https://data.cultureelerfgoed.nl/term/id/cht/ff8e83fe-8c42-450a-ad53-f71b399f00c5,,,,aangenomen,aangenomen (Claude 31-10-2026): eigen term; CHT 'droogmakerijen (landschapszone)' gecontroleerd op scopeNote en broader
+drowned-village,,verdronken dorp,,,,,afgewezen,afgewezen (Claude 31-10-2026): eigen term; geen passende CHT-term gevonden
+delta-work,,Deltawerk,,,,,afgewezen,afgewezen (Claude 31-10-2026): eigen term; geen passende CHT-term gevonden

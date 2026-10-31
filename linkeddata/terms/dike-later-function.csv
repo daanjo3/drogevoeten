@@ -1,26 +1,26 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
-polderdijk aan- of opwas,,polderdijk aan- of opwas,,,,,twijfel,aat? vakgebieden gerelateerd aan kunst <http://vocab.getty.edu/aat/300054232>
-polderdijk oude land,,polderdijk oude land,,,,,twijfel,aat? platteland <http://vocab.getty.edu/aat/300008631>
-inlaagdijk,,inlaagdijk,https://data.cultureelerfgoed.nl/term/id/cht/fdb8bf42-bb1b-4f78-90d8-3b03fc7068ef,,,,voorstel,cht: inlaagdijken
-dam in (voormalige) getijdegeul of zeearm,,dam in (voormalige) getijdegeul of zeearm,,,,,twijfel,aat? boogdammen <http://vocab.getty.edu/aat/300006086>
-wal,,wal,,,,,twijfel,cht? aardwallen <https://data.cultureelerfgoed.nl/term/id/cht/40ffd2e2-e0d4-4ce0-8696-ba8fe5abb70d>; aat? wallen (ophogingen) <http://vocab.getty.edu/aat/300008023>
-duin,,duin,,http://vocab.getty.edu/aat/300008750,,,voorstel,cht? Balegemse steen <https://data.cultureelerfgoed.nl/term/id/cht/94a7a34e-e20d-4cb5-b23d-3fda697d2565>; aat: duinen
-schenkel- of dwarsdijk,,schenkel- of dwarsdijk,,,,,twijfel,aat? schenkels <http://vocab.getty.edu/aat/300001840>
-"havendijk, -dam of -kade",,"havendijk, -dam of -kade",,,,,,
-havendam,,havendam,,http://vocab.getty.edu/aat/300006155,,,voorstel,aat: havendammen
-vijfzodendijk,,vijfzodendijk,https://data.cultureelerfgoed.nl/term/id/cht/bc585dfe-386c-484c-8d7a-820c6fe5361f,,,,voorstel,cht: vijfzodendijken
-vingerling,,vingerling,https://data.cultureelerfgoed.nl/term/id/cht/8312e5dd-bad2-465a-ab99-fe3d750d19ef,,,,voorstel,cht: inlagen
-boezemkade,,boezemkade,,,,,,
-vestingwal,,vestingwal,https://data.cultureelerfgoed.nl/term/id/cht/303b2c1f-9989-4eea-ac23-6defd8b67a54,,,,voorstel,cht: vestingwallen
-ringwalburg,,ringwalburg,https://data.cultureelerfgoed.nl/term/id/cht/f4bafee8-ac5f-4d92-b14d-5fbb032d2f27,,,,voorstel,cht: ringwalburchten
-liniedijk,,liniedijk,https://data.cultureelerfgoed.nl/term/id/cht/80129377-535b-443d-96f2-e71544d4ecc7,,,,voorstel,cht: liniedijken
-steilrand,,steilrand,https://data.cultureelerfgoed.nl/term/id/cht/4ee6130f-9a07-4128-8d3e-dfeacf14ba55,,,,voorstel,cht: steilranden
-strekdam,,strekdam,https://data.cultureelerfgoed.nl/term/id/cht/600b4ffe-1c95-4357-833e-fc83c32a6e4c,http://vocab.getty.edu/aat/300411466,,,voorstel,cht: strekdammen; aat: strekdammen
-zomerkade,,zomerkade,https://data.cultureelerfgoed.nl/term/id/cht/5c43ef06-580d-4f2f-9a2d-88230771cc6a,,,,voorstel,cht: zomerkades
-nol,,nol,,,,,twijfel,cht? keerklossen <https://data.cultureelerfgoed.nl/term/id/cht/19344979-7bed-450d-bfa7-6f79e2aa12e5>
-Dit dijkdeel is aangebracht tijdens de aanleg van de Oost-Westweg tussen 1973 en 1974,,Dit dijkdeel is aangebracht tijdens de aanleg van de Oost-Westweg tussen 1973 en 1974,,,,,,
-zaaidijk,,zaaidijk,,,,,,
-"dam in (voormalige) zee-arm, -inbraak of getijdegeul",,"dam in (voormalige) zee-arm, -inbraak of getijdegeul",,,,,twijfel,aat? ángxíng shuǎtóu <http://vocab.getty.edu/aat/300456788>
-kade langs kanaal of vaart,,kade langs kanaal of vaart,,,,,twijfel,aat? kanalen <http://vocab.getty.edu/aat/300006075>
-dijk of dam sluizencomplex,,dijk of dam sluizencomplex,,,,,twijfel,aat? boogdammen <http://vocab.getty.edu/aat/300006086>
-kade vestinggracht,,kade vestinggracht,,,,,twijfel,aat? dokken <http://vocab.getty.edu/aat/300120801>
+polderdijk aan- of opwas,,polderdijk aan- of opwas,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? vakgebieden gerelateerd aan kunst <http://vocab.getty.edu/aat/300054232>
+polderdijk oude land,,polderdijk oude land,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? platteland <http://vocab.getty.edu/aat/300008631>
+inlaagdijk,,inlaagdijk,https://data.cultureelerfgoed.nl/term/id/cht/fdb8bf42-bb1b-4f78-90d8-3b03fc7068ef,,,,aangenomen,"aangenomen (Claude 31-10-2026): CHT-term onder dijken, waterkeringen"
+dam in (voormalige) getijdegeul of zeearm,,dam in (voormalige) getijdegeul of zeearm,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? boogdammen <http://vocab.getty.edu/aat/300006086>
+wal,,wal,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: cht? aardwallen <https://data.cultureelerfgoed.nl/term/id/cht/40ffd2e2-e0d4-4ce0-8696-ba8fe5abb70d>; aat? wallen (ophogingen) <http://vocab.getty.edu/aat/300008023>
+duin,,duin,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: cht? Balegemse steen <https://data.cultureelerfgoed.nl/term/id/cht/94a7a34e-e20d-4cb5-b23d-3fda697d2565>; aat: duinen
+schenkel- of dwarsdijk,,schenkel- of dwarsdijk,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? schenkels <http://vocab.getty.edu/aat/300001840>
+"havendijk, -dam of -kade",,"havendijk, -dam of -kade",,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+havendam,,havendam,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat: havendammen
+vijfzodendijk,,vijfzodendijk,https://data.cultureelerfgoed.nl/term/id/cht/bc585dfe-386c-484c-8d7a-820c6fe5361f,,,,aangenomen,"aangenomen (Claude 31-10-2026): CHT-term onder dijken, waterkeringen"
+boezemkade,,boezemkade,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+liniedijk,,liniedijk,https://data.cultureelerfgoed.nl/term/id/cht/80129377-535b-443d-96f2-e71544d4ecc7,,,,aangenomen,"aangenomen (Claude 31-10-2026): CHT-term onder dijken, waterkeringen"
+strekdam,,strekdam,https://data.cultureelerfgoed.nl/term/id/cht/600b4ffe-1c95-4357-833e-fc83c32a6e4c,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder waterkeringen
+nol,,nol,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: cht? keerklossen <https://data.cultureelerfgoed.nl/term/id/cht/19344979-7bed-450d-bfa7-6f79e2aa12e5>
+Dit dijkdeel is aangebracht tijdens de aanleg van de Oost-Westweg tussen 1973 en 1974,,Dit dijkdeel is aangebracht tijdens de aanleg van de Oost-Westweg tussen 1973 en 1974,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+zaaidijk,,zaaidijk,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+"dam in (voormalige) zee-arm, -inbraak of getijdegeul",,"dam in (voormalige) zee-arm, -inbraak of getijdegeul",,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? ángxíng shuǎtóu <http://vocab.getty.edu/aat/300456788>
+kade langs kanaal of vaart,,kade langs kanaal of vaart,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? kanalen <http://vocab.getty.edu/aat/300006075>
+dijk of dam sluizencomplex,,dijk of dam sluizencomplex,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? boogdammen <http://vocab.getty.edu/aat/300006086>
+kade vestinggracht,,kade vestinggracht,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? dokken <http://vocab.getty.edu/aat/300120801>
+vingerling,,vingerling,,,,,afgewezen,"afgewezen (Claude 31-10-2026): CHT-kandidaat <https://data.cultureelerfgoed.nl/term/id/cht/8312e5dd-bad2-465a-ab99-fe3d750d19ef> valt buiten het domein (breder: bebouwde omgeving, landschapselementen, objecten)"
+vestingwal,,vestingwal,https://data.cultureelerfgoed.nl/term/id/cht/303b2c1f-9989-4eea-ac23-6defd8b67a54,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder wallen (verdedigingswerk)
+ringwalburg,,ringwalburg,,,,,afgewezen,"afgewezen (Claude 31-10-2026): CHT-kandidaat <https://data.cultureelerfgoed.nl/term/id/cht/f4bafee8-ac5f-4d92-b14d-5fbb032d2f27> valt buiten het domein (breder: gebouwen, kastelen (versterkte woning), woningen)"
+steilrand,,steilrand,,,,,afgewezen,"afgewezen (Claude 31-10-2026): CHT-kandidaat <https://data.cultureelerfgoed.nl/term/id/cht/4ee6130f-9a07-4128-8d3e-dfeacf14ba55> valt buiten het domein (breder: bebouwde omgeving, landschapselementen, objecten)"
+zomerkade,,zomerkade,,,,,afgewezen,"afgewezen (Claude 31-10-2026): CHT-kandidaat <https://data.cultureelerfgoed.nl/term/id/cht/5c43ef06-580d-4f2f-9a2d-88230771cc6a> valt buiten het domein (breder: bouwwerken, kaden, waterbouwkundige werken)"

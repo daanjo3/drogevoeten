@@ -1,12 +1,12 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
-disappearance,,disappearance,,,,,,
-construction,,construction,,,,,twijfel,cht? toeslag <https://data.cultureelerfgoed.nl/term/id/cht/25417007-935b-4cc3-9e9c-3eb52ef97e9b>
-execution,,execution,,,,,twijfel,aat? terechtstellen <http://vocab.getty.edu/aat/300137798>
-completion,,completion,,,,,twijfel,aat? voltooiing <http://vocab.getty.edu/aat/300390560>
-embankment,,embankment,,,,,twijfel,aat? aarden dammen <http://vocab.getty.edu/aat/300006107>
-deed,,deed,,,,,twijfel,aat? kopieboeken <http://vocab.getty.edu/aat/300163644>
-reclamation,,reclamation,,,,,twijfel,aat? polderwerken <http://vocab.getty.edu/aat/300006162>
-drowning,,drowning,,,,,,
-preparation,,preparation,,,,,twijfel,cht? grondering (schilderkunst) <https://data.cultureelerfgoed.nl/term/id/cht/40a2c1cd-d9a2-4f4c-b3c6-32c68d45afbe>; aat? voorbereiden <http://vocab.getty.edu/aat/300077565>
-approval,,approval,,,,,twijfel,aat? approval plans <http://vocab.getty.edu/aat/300311630>
-dike-breach,,dike-breach,,,,,twijfel,aat? bressen <http://vocab.getty.edu/aat/300386068>
+disappearance,,verdwijning,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+construction,,aanleg of bouw,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+execution,,uitvoering,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+completion,,afsluiting,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+embankment,,indijking,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+deed,,akte,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+reclamation,,droogmaking,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+drowning,,verdrinking,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+preparation,,voorbereiding,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+approval,,goedkeuring,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld
+dike-breach,,dijkdoorbraak,,,,,afgewezen,afgewezen (Claude 31-10-2026): statussen en eigen gebeurtenissoorten worden niet gekoppeld

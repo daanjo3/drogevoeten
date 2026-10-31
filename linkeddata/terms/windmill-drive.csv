@@ -1,14 +1,14 @@
 brontekst,context,label_nl,cht,aat,wikidata,geonames,status,opmerking
-windmolen,,windmolen,https://data.cultureelerfgoed.nl/term/id/cht/0d4bd09f-e7e6-44b1-8939-e6f65d3cf47a,http://vocab.getty.edu/aat/300006273,,,voorstel,cht: windmolens; aat: windmolens
-rosmolen,,rosmolen,https://data.cultureelerfgoed.nl/term/id/cht/e4ed082e-0493-43e1-9a53-69e00632deb1,,,,voorstel,cht: rosmolens
-watermolen,,watermolen,https://data.cultureelerfgoed.nl/term/id/cht/a59e8ce3-df4c-4415-928a-18348dfcc7e5,http://vocab.getty.edu/aat/300006270,,,voorstel,cht: watermolens; aat: waterradmolens
-tredmolen,,tredmolen,https://data.cultureelerfgoed.nl/term/id/cht/8dc42601-f385-46a9-9de6-28bc46d93bf8,http://vocab.getty.edu/aat/300024611,,,voorstel,cht: tredmolens; aat: tredmolens
-wind- en watermolen,,wind- en watermolen,,,,,twijfel,aat? luchtgeweren <http://vocab.getty.edu/aat/300203836>
-wind- en rosmolen,,wind- en rosmolen,,,,,,
-hondekarn,,hondekarn,,,,,,
-ros- en watermolen,,ros- en watermolen,,,,,,
-getijdemolen,,getijdemolen,https://data.cultureelerfgoed.nl/term/id/cht/a0703d1a-4120-4f52-bb48-7f24674e51d5,,,,voorstel,cht: getijdenmolens
-hondenkarn,,hondenkarn,,,,,,
-watervluchtmolen,,watervluchtmolen,https://data.cultureelerfgoed.nl/term/id/cht/86b557bb-ad41-4f13-94cf-74d276935372,,,,voorstel,cht: watervluchtmolens
-koemolen,,koemolen,,,,,,
-stoommolen,,stoommolen,https://data.cultureelerfgoed.nl/term/id/cht/fef6233c-60a0-4855-ad97-f02a639c31df,,,,voorstel,cht: stoommolens
+windmolen,,windmolen,https://data.cultureelerfgoed.nl/term/id/cht/0d4bd09f-e7e6-44b1-8939-e6f65d3cf47a,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
+rosmolen,,rosmolen,https://data.cultureelerfgoed.nl/term/id/cht/e4ed082e-0493-43e1-9a53-69e00632deb1,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
+watermolen,,watermolen,https://data.cultureelerfgoed.nl/term/id/cht/a59e8ce3-df4c-4415-928a-18348dfcc7e5,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
+tredmolen,,tredmolen,https://data.cultureelerfgoed.nl/term/id/cht/8dc42601-f385-46a9-9de6-28bc46d93bf8,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
+wind- en watermolen,,wind- en watermolen,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term; eerdere hint: aat? luchtgeweren <http://vocab.getty.edu/aat/300203836>
+wind- en rosmolen,,wind- en rosmolen,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+hondekarn,,hondekarn,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+ros- en watermolen,,ros- en watermolen,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+getijdemolen,,getijdemolen,https://data.cultureelerfgoed.nl/term/id/cht/a0703d1a-4120-4f52-bb48-7f24674e51d5,,,,aangenomen,"aangenomen (Claude 31-10-2026): CHT-term onder molens, watermolens"
+hondenkarn,,hondenkarn,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+watervluchtmolen,,watervluchtmolen,https://data.cultureelerfgoed.nl/term/id/cht/86b557bb-ad41-4f13-94cf-74d276935372,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
+koemolen,,koemolen,,,,,afgewezen,afgewezen (Claude 31-10-2026): geen exacte passende term
+stoommolen,,stoommolen,https://data.cultureelerfgoed.nl/term/id/cht/fef6233c-60a0-4855-ad97-f02a639c31df,,,,aangenomen,aangenomen (Claude 31-10-2026): CHT-term onder molens
