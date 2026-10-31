@@ -4,10 +4,20 @@ using UnityEngine;
 // Spawns fish along the walls of the room once the water is deep enough, heading roughly away from their wall.
 // The rate grows linearly from minRate at minHeight to maxRate at maxHeight, and stays at maxRate above that.
 // Only fish that fit between the floor and the water surface are picked, so bigger fish appear as the water rises.
+// Among the fish that fit, each spawn picks one at random in proportion to its weight.
 // The room's floor plan is the horizontal extent of the water's renderer.
 public class FishSpawner : MonoBehaviour
 {
-    public GameObject[] fishPrefabs = new GameObject[0];
+    [System.Serializable]
+    public class FishEntry
+    {
+        public GameObject prefab;
+        [Tooltip("Relative chance of being picked among the fish that fit the water. 0 = never.")]
+        [Min(0f)]
+        public float weight = 1f;
+    }
+
+    public FishEntry[] fish = new FishEntry[0];
 
     [Tooltip("Defaults to the first WaterHeight in the scene.")]
     public WaterHeight water;
@@ -39,6 +49,7 @@ public class FishSpawner : MonoBehaviour
     {
         public GameObject prefab;
         public Bounds body;
+        public float weight;
     }
 
     private readonly List<FishType> fishTypes = new List<FishType>();
@@ -63,11 +74,11 @@ public class FishSpawner : MonoBehaviour
             return;
         }
 
-        foreach (GameObject prefab in fishPrefabs)
+        foreach (FishEntry entry in fish)
         {
-            if (prefab != null)
+            if (entry != null && entry.prefab != null && entry.weight > 0f)
             {
-                fishTypes.Add(new FishType { prefab = prefab, body = MeasureBody(prefab) });
+                fishTypes.Add(new FishType { prefab = entry.prefab, body = MeasureBody(entry.prefab), weight = entry.weight });
             }
         }
         spawnBudget = NextBudget();
@@ -95,18 +106,32 @@ public class FishSpawner : MonoBehaviour
     private void Spawn(float surface)
     {
         fitting.Clear();
+        float totalWeight = 0f;
         foreach (FishType type in fishTypes)
         {
             if (surface >= MinSurfaceFor(type.body))
             {
                 fitting.Add(type);
+                totalWeight += type.weight;
             }
         }
         if (fitting.Count == 0)
         {
             return;
         }
-        FishType fish = fitting[Random.Range(0, fitting.Count)];
+
+        // Weighted pick: walk the fitting fish until the random point falls inside one's share
+        float pick = Random.value * totalWeight;
+        FishType chosen = fitting[fitting.Count - 1];
+        foreach (FishType type in fitting)
+        {
+            pick -= type.weight;
+            if (pick < 0f)
+            {
+                chosen = type;
+                break;
+            }
+        }
 
         // Try a few spots; skip this spawn if they're all inside furniture
         Vector3 position = Vector3.zero;
@@ -114,18 +139,18 @@ public class FishSpawner : MonoBehaviour
         bool found = false;
         for (int attempt = 0; attempt < 5 && !found; attempt++)
         {
-            PickSpawn(fish, surface, out position, out rotation);
-            found = !Physics.CheckBox(position + rotation * fish.body.center, fish.body.extents, rotation, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+            PickSpawn(chosen, surface, out position, out rotation);
+            found = !Physics.CheckBox(position + rotation * chosen.body.center, chosen.body.extents, rotation, Physics.AllLayers, QueryTriggerInteraction.Ignore);
         }
         if (!found)
         {
             return;
         }
 
-        GameObject instance = Instantiate(fish.prefab, position, rotation);
+        GameObject instance = Instantiate(chosen.prefab, position, rotation);
         if (instance.TryGetComponent(out FishController controller))
         {
-            controller.SetArea(this, fish.body);
+            controller.SetArea(this, chosen.body);
         }
         alive.Add(instance);
     }

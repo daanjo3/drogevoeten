@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0, g: 0, b: 0, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: b3bda36558a8349a69023b2d215a8a6b, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 3eb56d90215434420a1505237bae5512, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -1190,7 +1190,7 @@ Camera:
   m_TargetEye: 3
   m_HDR: 1
   m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
+  m_AllowDynamicResolution: 1
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
@@ -1287,14 +1287,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b95371dd6b96c4f52b878853a89f1c5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  fishPrefabs:
-  - {fileID: 8100641943237514566, guid: 1a16a20ba92364502a8439c2ba0e0401, type: 3}
-  - {fileID: 6471133438769411650, guid: 373f6d4d61f7742d9bb7158288c1aacc, type: 3}
-  - {fileID: 2548643106890190793, guid: fdfbe5e903769427f8e926a40b97e5d7, type: 3}
-  - {fileID: 135597257686866883, guid: 3cd616ca539f342d7a288418da23889f, type: 3}
-  - {fileID: 7126853543136563385, guid: ba396e7b809724a24aa99dcf2b6d7e55, type: 3}
-  - {fileID: 4444753632728433444, guid: f143daa60b5724147ad13ef840c1ac27, type: 3}
-  - {fileID: 5920389794382689200, guid: 52ffa4b144a7440fba00b72224e5b4a2, type: 3}
+  fish:
+  - prefab: {fileID: 8100641943237514566, guid: 1a16a20ba92364502a8439c2ba0e0401, type: 3}
+    weight: 1
+  - prefab: {fileID: 6471133438769411650, guid: 373f6d4d61f7742d9bb7158288c1aacc, type: 3}
+    weight: 5
+  - prefab: {fileID: 2548643106890190793, guid: fdfbe5e903769427f8e926a40b97e5d7, type: 3}
+    weight: 3
+  - prefab: {fileID: 135597257686866883, guid: 3cd616ca539f342d7a288418da23889f, type: 3}
+    weight: 3
+  - prefab: {fileID: 7126853543136563385, guid: ba396e7b809724a24aa99dcf2b6d7e55, type: 3}
+    weight: 2
+  - prefab: {fileID: 4444753632728433444, guid: f143daa60b5724147ad13ef840c1ac27, type: 3}
+    weight: 0.7
+  - prefab: {fileID: 5920389794382689200, guid: 52ffa4b144a7440fba00b72224e5b4a2, type: 3}
+    weight: 0.4
   water: {fileID: 161945107}
   floorHeight: 0.1
   minHeight: 0.3
@@ -1780,7 +1787,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &531038296
 Transform:
@@ -1791,8 +1798,8 @@ Transform:
   m_GameObject: {fileID: 531038295}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -5.32, y: -0, z: -0}
-  m_LocalScale: {x: 1.23, y: 1, z: 2.4}
+  m_LocalPosition: {x: -3.84, y: 0, z: -0}
+  m_LocalScale: {x: 0.93, y: 1, z: 0.9}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 470376827}
@@ -1822,7 +1829,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 1e3ec4a719c014796bdc606ce78ed4c4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
