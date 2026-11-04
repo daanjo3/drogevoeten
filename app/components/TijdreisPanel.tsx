@@ -29,7 +29,10 @@ export function TijdreisPanel({ place }: { place: PlaceData }) {
         <Icon name="tijd" />
         Tijdreis
       </h2>
-      <p className="lead">Hoe werd dit land droog? Lees van boven naar beneden.</p>
+      <p className="lead">
+        Dat je hier droge voeten hebt, ging niet vanzelf. Zo werd deze plek droog, van de eerste stap tot nu. Lees van boven naar
+        beneden.
+      </p>
       <div className="tl">
         <div className="axis" />
         <ol>

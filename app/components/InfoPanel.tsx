@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Mode, PlaceData } from "../data/place";
+import type { Mode } from "../data/place";
 import { TERMS } from "../data/place";
 import { useAddressHeight } from "../lib/ahn";
 import type { LocatieserverDoc } from "../lib/locatieserver";
@@ -10,24 +10,26 @@ import { locationOf } from "../lib/rijksmuseum";
 import { drainedQueryOptions } from "../lib/timeline";
 import { nl, nlSigned, type Scenario } from "../lib/scenario";
 import { Icon } from "./Icons";
-import { ScenarioControls, Segment } from "./ScenarioControls";
+import { ScenarioControls, ViewSegment } from "./ScenarioControls";
 import { Tip } from "./Tip";
+import { NlOutline } from "./NlMap";
 import type { RoomView } from "./UnityRoom";
+import { usePeilgebied } from "../lib/waterbeheergebieden";
 
 /* Panel next to the living room. Mode "info" tells the story of the address,
+   with a small map of the Netherlands, the height (NAP) and the peilgebied;
    mode "risk" shows the scenario buttons. The css crossfades between them. */
 export function InfoPanel({
-  place,
   locatie,
   drainage,
   mode,
   scenario,
   onScenario,
   onClose,
+  onTijdreis,
   view,
   onView,
 }: {
-  place: PlaceData;
   /* the chosen address; its height comes from the AHN */
   locatie?: LocatieserverDoc;
   /* the drainage area and its 1-2 pumps (IMWA) */
@@ -37,14 +39,22 @@ export function InfoPanel({
   onScenario: (s: Scenario) => void;
   /* the cross on the scenario panel: back to info mode */
   onClose: () => void;
-  /* TEMPORARY: camera view in the 3D room, to test the house view */
+  /* the link to the time travel */
+  onTijdreis: () => void;
+  /* camera view in the 3D room: the room or the whole house */
   view: RoomView;
   onView: (v: RoomView) => void;
 }) {
   const height = useAddressHeight(locatie);
   const ground = height.data?.ground;
+  const here = locationOf(locatie);
+  const { peilgebied } = usePeilgebied(here?.lat, here?.lon);
+  const pg = peilgebied?.properties;
+  const pgName = pg ? pg.naam?.trim() || pg.code || "zonder naam" : undefined;
 
+  /* the height as the heading of the panel, NAP and peilgebied in a sentence under it */
   let heightText: ReactNode;
+  let heightMore: ReactNode = null;
   if (ground) {
     const m = Math.round(Math.abs(ground.value) * 10) / 10;
     heightText = (
@@ -54,6 +64,25 @@ export function InfoPanel({
           zeeniveau
         </Tip>
         .
+      </>
+    );
+    heightMore = (
+      <>
+        Dat is {nlSigned(ground.value).replace("+", "")} meter{" "}
+        <Tip kind="term" tip={TERMS.NAP}>
+          NAP
+        </Tip>
+        .
+        {pgName && (
+          <>
+            {" "}
+            Je woont in{" "}
+            <Tip kind="term" tip={TERMS.peilgebied}>
+              peilgebied
+            </Tip>{" "}
+            {pgName}.
+          </>
+        )}
       </>
     );
   } else if (height.isError) {
@@ -93,8 +122,11 @@ export function InfoPanel({
   const drained = useQuery(drainedQueryOptions(locationOf(locatie))).data;
   const drainedText = drained && (
     <>
-      Dit land werd {drained.when} {drained.kind === "indijking" ? "ingedijkt" : "drooggemaakt"}. In de tijdreis zie je
-      hoe.
+      Dit land werd {drained.when} {drained.kind === "indijking" ? "ingedijkt" : "drooggemaakt"}.{" "}
+      <button type="button" className="textlink" onClick={onTijdreis}>
+        In de tijdreis
+      </button>{" "}
+      zie je hoe.
     </>
   );
   const drainedSource = drained ? ` Jaartal: ${drained.source}` : "";
@@ -159,8 +191,11 @@ export function InfoPanel({
   return (
     <section className="panel" id="p-info" data-mode={mode}>
       <div className="mode m-info" aria-hidden={mode !== "info"}>
-        <h2 id="huisAdres">{place.address}</h2>
-        <p>{heightText}</p>
+        <div className="nlmini">
+          <NlOutline centroide={locatie?.centroide_ll} />
+        </div>
+        <h2 className="hoogte">{heightText}</h2>
+        {heightMore && <p>{heightMore}</p>}
         <p>{pumpText}</p>
         {drainedText && <p>{drainedText}</p>}
         {floodText && <p>{floodText}</p>}
@@ -178,18 +213,9 @@ export function InfoPanel({
           <Icon name="drop" />
           Als het misgaat
         </h2>
-        <p className="lead">Kies een overstroming of kijk wat er zonder dijken gebeurt. Je ziet dan hoe hoog het water in je huiskamer kan komen.</p>
+        <p className="lead">Kies wat er gebeurt en zie hoe hoog het water in je huiskamer komt.</p>
+        <ViewSegment view={view} onView={onView} />
         <ScenarioControls scenario={scenario} onChange={onScenario} />
-        {/* TEMPORARY: switch the 3D room's camera between the room and the house, for testing */}
-        <Segment
-          label="Camera"
-          options={[
-            { label: "Kamer", value: "room" },
-            { label: "Huis", value: "house" },
-          ]}
-          value={view}
-          onPick={onView}
-        />
       </div>
     </section>
   );

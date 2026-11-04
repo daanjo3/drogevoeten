@@ -12,12 +12,11 @@ import type { RoomView } from "../components/UnityRoom";
 import { TijdreisPanel } from "../components/TijdreisPanel";
 import { BuurtPanel } from "../components/BuurtPanel";
 import { GemaalPanel } from "../components/GemaalPanel";
-import { NlMap } from "../components/NlMap";
 import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
-import { Rondleiding, TOUR_BUTTONS, TOUR_PULSE } from "../components/Rondleiding";
+import { Rondleiding, TOUR_BUTTONS, TOUR_PULSE, type TourInset } from "../components/Rondleiding";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
@@ -235,9 +234,12 @@ export default function Home() {
   const [mode, setMode] = useState<Mode>("info");
   /* TEMPORARY: camera view in the 3D room, switched in the risk panel */
   const [view, setView] = useState<RoomView>("room");
+  /* phones: Als het misgaat opens the room fullscreen */
+  const [fullRequest, setFullRequest] = useState(0);
   const [scenario, setScenario] = useState<Scenario>({ outside: "flood", liwoMap: 5 });
   /* the tour after a search: run is the key (a restart remounts it), step lights up a menu button */
-  const [tour, setTour] = useState<{ run: number; step: number } | null>(null);
+  /* it always starts: after a search, and when the page opens with an address in the url */
+  const [tour, setTour] = useState<{ run: number; step: number } | null>(id ? { run: 0, step: 0 } : null);
   const canvas = useCanvas();
   const woonplaats = locatie?.woonplaatsnaam;
   useEffect(() => {
@@ -250,23 +252,24 @@ export default function Home() {
 
   /* a click on a menu button, Begin or a new search: the tour just stops, wherever the grid is */
   function stopTour() {
-    canvas.setInset(0);
+    canvas.setInset({ top: 0, bottom: 0 });
     setTour(null);
   }
 
-  /* each step scrolls the grid to its block; the card covers `inset` px at the bottom */
-  function onTourStep(step: number, inset: number) {
+  /* each step scrolls the grid to its block: living room, time travel,
+     pumping stations, and the living room again for Als het misgaat.
+     The card covers `inset` at the top (larger screens) or bottom (phones). */
+  function onTourStep(step: number, inset: TourInset) {
     canvas.setInset(inset);
     setTour((t) => (t && t.step !== step ? { ...t, step } : t));
     setMode("info");
-    if (step === 0) canvas.goPanel("p-map");
-    else if (step === 1) canvas.go("tijd");
+    if (step === 1) canvas.go("tijd");
     else if (step === 2) canvas.go("buurt");
     else canvas.go("huis");
   }
 
   function onTourEnd(how: "skip" | "try") {
-    canvas.setInset(0);
+    canvas.setInset({ top: 0, bottom: 0 });
     setTour(null);
     setMode(how === "try" ? "risk" : "info");
     canvas.go("huis");
@@ -276,6 +279,7 @@ export default function Home() {
     if (tour) stopTour();
     if (t.mode) setMode(t.mode);
     canvas.go(t.key);
+    if (t.mode === "risk" && window.matchMedia("(max-width: 600px)").matches) setFullRequest((n) => n + 1);
   }
 
   /* a shared link with an id that no longer exists (or a failed lookup):
@@ -285,9 +289,11 @@ export default function Home() {
     if (lookup.isError) {
       setSearchMsg("De adreszoeker gaf geen antwoord. Probeer het later nog eens.");
       setPhase("idle");
+      setTour(null);
     } else if (lookup.isSuccess && !locatie) {
       setSearchMsg("Deze plek is niet (meer) te vinden. Typ hem opnieuw.");
       setPhase("idle");
+      setTour(null);
       setParams({}, { replace: true });
     }
   }, [id, lookup.isError, lookup.isSuccess, locatie, setParams]);
@@ -390,7 +396,7 @@ export default function Home() {
       <button type="button" className="corner" id="infoBtn" aria-label="Over" onClick={() => setAbout(true)}>
         <Icon name="info" /> <span className="corner-txt">Over</span>
       </button>
-      <div id="where">
+      <div id="where" className={tour ? "touring" : undefined}>
         <span className="where-lbl">jouw locatie</span> <b id="whereTxt">{place.address}</b>
       </div>
       <button type="button" className="corner" id="shareBtn" aria-label={copied ? "Link gekopieerd" : "Deel"} onClick={share}>
@@ -418,19 +424,19 @@ export default function Home() {
           loadRoom={phase !== "idle"}
           view={view}
           onView={setView}
+          fullRequest={fullRequest}
         />
         <InfoPanel
-          place={place}
           locatie={locatie}
           drainage={drainage}
           mode={mode}
           scenario={scenario}
           onScenario={setScenario}
           onClose={() => setMode("info")}
+          onTijdreis={() => onGo({ key: "tijd" })}
           view={view}
           onView={setView}
         />
-        <NlMap centroide={locatie?.centroide_ll} nap={height.data?.ground?.value} />
         <TijdreisPanel place={place} />
         <BuurtPanel place={locatie} />
         <GemaalPanel />
@@ -444,19 +450,14 @@ export default function Home() {
       {tour && (
         <Rondleiding
           key={tour.run}
+          nap={height.data?.ground?.value}
           paused={about}
           onChange={onTourStep}
           onEnd={onTourEnd}
         />
       )}
       {about && (
-        <AboutCard
-          onClose={() => setAbout(false)}
-          onTour={() => {
-            setAbout(false);
-            startTour();
-          }}
-        />
+        <AboutCard onClose={() => setAbout(false)} />
       )}
     </>
   );

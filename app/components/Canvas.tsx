@@ -27,6 +27,10 @@ const SECTION_IDS: Record<SectionKey, string[]> = {
 };
 
 const TOP_OFFSET_TIJD = 90;
+/* narrow screens: room above a block for the location label and the round buttons */
+const TOP_CLEAR_NARROW = 84;
+/* space kept free between a block and whatever covers the screen (the tour card) */
+const CLEAR = 24;
 /* how close (as a share of the viewport) a section must be to snap into place */
 const SNAP_REACH = 0.3;
 
@@ -56,9 +60,21 @@ export function useCanvas() {
   const [panels, setPanels] = useState<PanelBox[]>([]);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
   const [active, setActive] = useState<SectionKey>("huis");
-  /* height at the bottom that something covers (the tour card): blocks are
-     centred in what is left above it */
-  const inset = useRef(0);
+  /* what something covers at the top and bottom (the tour card): blocks stay
+     centred on the screen when they fit next to it, else they are centred in
+     what is left */
+  const inset = useRef({ top: 0, bottom: 0 });
+
+  /* the scroll top that puts a block (canvas y from t to b) in the middle of the screen, clear of the inset */
+  const centreTop = useCallback((t: number, b: number, vh: number): number => {
+    const { top: it, bottom: ib } = inset.current;
+    const centred = (t + b) / 2 - vh / 2;
+    if (!it && !ib) return centred;
+    const lo = b - (vh - ib - CLEAR); // the block's bottom stays above the bottom inset
+    const hi = t - (it + CLEAR); // the block's top stays below the top inset
+    if (lo <= hi) return Math.min(Math.max(centred, lo), hi);
+    return (t + b) / 2 - (it + (vh - it - ib) / 2);
+  }, []);
 
   const measure = useCallback(() => {
     const canvas = canvasRef.current;
@@ -85,12 +101,14 @@ export function useCanvas() {
       const R = sectionRect(key);
       if (!world || !R) return null;
       const vw = world.clientWidth;
-      const vh = world.clientHeight - inset.current;
+      const vh = world.clientHeight;
       const left = (R.l + R.r) / 2 - vw / 2;
-      const top = key === "tijd" ? R.t - TOP_OFFSET_TIJD : (R.t + R.b) / 2 - vh / 2;
+      /* a single column (narrow screens): the block starts just under the location label */
+      if (vw <= 900) return { left, top: R.t - Math.max(TOP_CLEAR_NARROW, inset.current.top + CLEAR) };
+      const top = key === "tijd" ? R.t - Math.max(TOP_OFFSET_TIJD, inset.current.top + CLEAR) : centreTop(R.t, R.b, vh);
       return { left, top };
     },
-    [sectionRect],
+    [sectionRect, centreTop],
   );
 
   /* a programmatic scroll that is still on its way; the snap leaves it alone
@@ -150,8 +168,12 @@ export function useCanvas() {
     const world = worldRef.current;
     const el = canvasRef.current?.querySelector<HTMLElement>(`#${id}`);
     if (!world || !el) return;
-    scrollWorld(el.offsetLeft + el.offsetWidth / 2 - world.clientWidth / 2, el.offsetTop + el.offsetHeight / 2 - (world.clientHeight - inset.current) / 2, true);
-  }, [scrollWorld]);
+    scrollWorld(
+      el.offsetLeft + el.offsetWidth / 2 - world.clientWidth / 2,
+      centreTop(el.offsetTop, el.offsetTop + el.offsetHeight, world.clientHeight),
+      true,
+    );
+  }, [scrollWorld, centreTop]);
 
   /* track the section closest to the centre. The viewport itself is tracked
      by useView in the minimap only: it changes every scroll frame, and as
@@ -232,8 +254,8 @@ export function useCanvas() {
     };
   }, [measure, onScroll, snap]);
 
-  const setInset = useCallback((px: number) => {
-    inset.current = px;
+  const setInset = useCallback((v: { top: number; bottom: number }) => {
+    inset.current = v;
   }, []);
 
   return { worldRef, canvasRef, panels, canvasSize, active, go, goPanel, measure, setInset };

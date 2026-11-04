@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./Icons";
 
 /* The team's 3D living room, a Unity WebGL build served from
    /woonkamer/ (public, not in git). It is about 88 MB, so loading starts
    only when `active` becomes true: after someone chose an address. While
-   it loads the render png stays in view with a progress bar. If loading
-   fails the png simply stays. */
+   it loads a drop fills up with the progress. If loading fails the render
+   png shows instead. */
 
 const EMBED_URL = `${import.meta.env.BASE_URL}woonkamer/unity-embed.js`;
 const PLACEHOLDER = `${import.meta.env.BASE_URL}img/huiskamer-3d.png`;
@@ -36,8 +36,11 @@ export function UnityRoom({
   waterLevel,
   view,
   overlay,
+  fullRequest = 0,
 }: {
   active: boolean;
+  /* goes up by one when the page asks for fullscreen (Als het misgaat on phones) */
+  fullRequest?: number;
   waterLevel: number;
   view: RoomView;
   overlay?: ReactNode;
@@ -109,6 +112,14 @@ export function UnityRoom({
     setFaux(false);
   }
 
+  /* the page asks for fullscreen; the room must be ready, else nothing happens */
+  const lastRequest = useRef(fullRequest);
+  useEffect(() => {
+    if (fullRequest === lastRequest.current) return;
+    lastRequest.current = fullRequest;
+    if (state === "ready") enterFullscreen();
+  }, [fullRequest, state]);
+
   /* Escape also leaves the window-filling fallback */
   useEffect(() => {
     if (!faux) return;
@@ -135,6 +146,8 @@ export function UnityRoom({
   );
 
   const ready = state === "ready";
+  const pct = Math.round(progress * 100);
+  const clip = useId();
   return (
     <>
       {/* pointer events stay off so the grid keeps scrolling over the room */}
@@ -149,11 +162,18 @@ export function UnityRoom({
           </>
         )}
       </div>
-      {!ready && <img className="scene" src={PLACEHOLDER} alt="" />}
-      {state === "loading" && (
-        <div className="loadbar" role="progressbar" aria-valuenow={Math.round(progress * 100)} aria-valuemin={0} aria-valuemax={100}>
-          <i style={{ width: `${Math.round(progress * 100)}%` }} />
-          <span className="label">huiskamer laden · {Math.round(progress * 100)}%</span>
+      {state === "failed" && <img className="scene" src={PLACEHOLDER} alt="" />}
+      {(state === "idle" || state === "loading") && (
+        <div className="room-loader" role="progressbar" aria-label="Huiskamer laden" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <clipPath id={clip}>
+              <path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z" />
+            </clipPath>
+            {/* the water in the drop rises with the progress */}
+            <rect className="fill" clipPath={`url(#${CSS.escape(clip)})`} x="0" y={3 + 17 * (1 - progress)} width="24" height="24" />
+            <path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z" />
+          </svg>
+          <span className="label">huiskamer laden{state === "loading" ? ` · ${pct}%` : ""}</span>
         </div>
       )}
       {ready && (

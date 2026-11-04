@@ -5,7 +5,6 @@ import { useView, type Rect } from "./Canvas";
 const NAMES: Record<string, string> = {
   "p-huis": "Huiskamer",
   "p-info": "Uitleg en scenario",
-  "p-map": "Kaart",
   "p-tijd": "Tijdreis",
   "p-buurt": "Gemalen",
 };
@@ -13,9 +12,8 @@ const NAMES: Record<string, string> = {
 const COLORS: Record<string, string> = {
   "p-huis": "#9fcdee",
   "p-info": "#F8BD83",
-  "p-map": "#0074BA",
   "p-tijd": "#D28AE1",
-  "p-buurt": "#657546",
+  "p-buurt": "#D28AE1",
 };
 
 /* Small overview at the bottom right: every block to scale, plus a frame

@@ -54,7 +54,10 @@ export function StartScreen({
           gebeurt als het misgaat.
         </p>
         <SearchBar onSearch={onSearch} onPick={onPick} handle={searchHandle} busy={busy} message={message} />
-        <div className="defaults">
+        <p className="defaults-lbl" id="defaultsLbl">
+          Of kies een van deze voorbeelden
+        </p>
+        <div className="defaults" role="group" aria-labelledby="defaultsLbl">
           {EXAMPLES.map((x) => (
             <button key={x.label} type="button" disabled={busy} onClick={() => onSearch(x.address)}>
               {x.label}

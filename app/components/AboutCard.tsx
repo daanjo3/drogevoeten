@@ -90,11 +90,12 @@ const SOURCES: { label: string; datasets: { name: string; href: string }[]; by: 
   },
 ];
 
-const TEAM: { role: string; name: string }[] = [
-  { role: "design", name: "Wendy van der Waal" },
-  { role: "development", name: "Daan Meijers" },
-  { role: "development", name: "Jari Maijenburg" },
-  { role: "3D-development", name: "Wouter de Bruijn" },
+/* linkedin: a profile url; the name links to it when set */
+const TEAM: { role: string; name: string; linkedin?: string }[] = [
+  { role: "design", name: "Wendy van der Waal", linkedin: "https://www.linkedin.com/in/anewstudio/" },
+  { role: "development", name: "Daan Meijers", linkedin: "https://www.linkedin.com/in/daan-meijers-23930b180/" },
+  { role: "development", name: "Jari Maijenburg", linkedin: "https://www.linkedin.com/in/jari-maijenburg/" },
+  { role: "3D-development", name: "Wouter de Bruijn", linkedin: "https://www.linkedin.com/in/wouter-de-bruijn-7a5825151/" },
 ];
 
 function Ext({ href, children }: { href: string; children: ReactNode }) {
@@ -105,7 +106,7 @@ function Ext({ href, children }: { href: string; children: ReactNode }) {
   );
 }
 
-export function AboutCard({ onClose, onTour }: { onClose: () => void; onTour: () => void }) {
+export function AboutCard({ onClose }: { onClose: () => void }) {
   const card = useRef<HTMLDivElement>(null);
 
   /* focus moves into the card, stays inside while it is open (Tab wraps
@@ -160,9 +161,23 @@ export function AboutCard({ onClose, onTour }: { onClose: () => void; onTour: ()
           als het gemaal stilvalt.
         </p>
         <p>Wat we zelf aan elkaar knoopten, geven we open terug. Zo bouwt de volgende verder waar wij stopten.</p>
-        <button type="button" className="tour-start" onClick={onTour}>
-          Rondleiding opnieuw
-        </button>
+        <p className="note">
+          We maakten dit in 24 uur, dus niet alles zit erin. Bij geen dijken rekenen we alleen met de zee. Rivieren, regen, eb en
+          vloed laten we daar weg. De overstromingskaart van Rijkswaterstaat telt rivieren wel mee.
+        </p>
+
+        <h3>Gemaakt door</h3>
+        <ul className="sources">
+          {TEAM.map((t) => (
+            <li key={t.name}>
+              <span className="label">{t.role}</span>
+              <span>{t.linkedin ? <Ext href={t.linkedin}>{t.name}</Ext> : t.name}</span>
+            </li>
+          ))}
+        </ul>
+        <p className="mail">
+          Wil je ons hierover mailen? Dat kan via <a href="mailto:hi@thatnew.studio">hi@thatnew.studio</a>.
+        </p>
 
         <h3>Bronnen</h3>
         <ul className="sources">
@@ -178,16 +193,6 @@ export function AboutCard({ onClose, onTour }: { onClose: () => void; onTour: ()
                 ))}
                 . {s.by}
               </span>
-            </li>
-          ))}
-        </ul>
-
-        <h3>Gemaakt door</h3>
-        <ul className="sources">
-          {TEAM.map((t) => (
-            <li key={t.name}>
-              <span className="label">{t.role}</span>
-              <span>{t.name}</span>
             </li>
           ))}
         </ul>
