@@ -44,14 +44,18 @@ svg{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-l
 /* vignet, deel 2: een lichte donkere rand over het hele scherm, boven het canvas en onder de knoppen */
 body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;box-shadow:inset 0 0 20vmin 2vmin rgba(34,10,52,.55)}
 @media (max-width:600px){body::after{display:none}}
-/* vignet: het hele canvas vaagt aan de randen weg in de achtergrond */
-#world{
-  --fade:14vmin;
-  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%),linear-gradient(to bottom,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%);
-  -webkit-mask-composite:source-in;
-  mask-image:linear-gradient(to right,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%),linear-gradient(to bottom,transparent 0,#000 var(--fade),#000 calc(100% - var(--fade)),transparent 100%);
-  mask-composite:intersect;
-}
+/* vignette: the whole canvas fades into the background at its edges. Drawn as
+   a still overlay in the background colour on top of the canvas, not as a mask
+   on it: a mask on the scrolling canvas is applied again for every frame while
+   scrolling. Over the plain background colour the result is the same per
+   pixel: two stacked gradients in that colour (across and down) give exactly
+   what the two intersected mask gradients did. */
+body{--fade:14vmin}
+body::before{content:"";position:fixed;inset:0;z-index:20;pointer-events:none;
+  background:linear-gradient(to right,var(--bg) 0,transparent var(--fade),transparent calc(100% - var(--fade)),var(--bg) 100%),linear-gradient(to bottom,var(--bg) 0,transparent var(--fade),transparent calc(100% - var(--fade)),var(--bg) 100%)}
+/* the mask also made #world a stacking context: keep that, so nothing inside
+   it (map controls with a high z-index) rises above the overlay or the bar */
+#world{isolation:isolate}
 
 /* tooltips */
 .term{border-bottom:1.5px dotted currentColor;cursor:help}
@@ -136,6 +140,8 @@ button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{ou
 #start:before{content:"";position:absolute;left:-10vw;top:-16vh;width:30vw;height:30vw;border-radius:50%;background:var(--g-bluepink);opacity:.45;pointer-events:none}
 #start:after{content:"";position:absolute;right:-10vw;bottom:-25vh;width:55vw;height:55vw;border-radius:50%;background:var(--g-amber);pointer-events:none}
 #start.hide{opacity:0;visibility:hidden}
+/* hidden, the landscape's animations stop instead of running unseen */
+#start.hide .land *{animation-play-state:paused}
 .startbox{position:relative;z-index:2;width:min(760px,90vw);text-align:center}
 .startbox h1{margin:0 0 14px;font-size:clamp(40px,6.2vw,84px);line-height:1.02}
 .startbox .lead{color:var(--ink);opacity:1;margin:0 0 28px;font-size:clamp(18px,1.55vw,23px);line-height:1.45}
@@ -389,7 +395,7 @@ input.size::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background
 /* phone: the bar sticks to the bottom with only the titles, the street
    name sits just above it, no minimap, a lighter vignette */
 @media (max-width:600px){
-  #world{--fade:6vmin}
+  body{--fade:6vmin}
   #canvas{padding:16px 0 150px}
   /* the bar runs edge to edge, like an app tab bar; Begin is an icon only */
   #nav{bottom:0;left:0;right:0;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
@@ -552,7 +558,10 @@ input.size::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background
 /* fullscreen room: the scenario panel sits top left; on phones it sits at the bottom and the room shrinks to fit above it */
 body.room-full .corner,body.room-full #where,body.room-full #nav,body.room-full #mini,body.room-full #tour{display:none}
 body.room-full::after{display:none}
-body.room-full #world{-webkit-mask:none;mask:none}
+/* no vignette over the window-filling room; and #world must not be a stacking
+   context then, so the room (z-index 90) can rise above the page's bars */
+body.room-full::before{display:none}
+body.room-full #world{isolation:auto}
 .fs-panel{position:absolute;left:16px;top:16px;z-index:4;width:min(360px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;box-sizing:border-box;background:var(--dark);color:#fff;border-radius:22px;padding:16px 18px 6px}
 .fs-title{display:flex;align-items:center;gap:8px;margin-bottom:12px;font:700 var(--fs-p) var(--font)}
 .fs-title svg{width:20px;height:20px}

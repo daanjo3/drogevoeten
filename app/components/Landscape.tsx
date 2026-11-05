@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, Ref } from "react";
 
 /* The landscape on the start screen: three svg layers (sea higher than the
    polder, dike, mill, pumping station) with parallax and subtle animations.
@@ -10,10 +10,13 @@ export type LandscapePhase = "idle" | "going";
 const ZOOM = [1.3, 2, 3];
 const SHIFT = [4, 10, 18];
 
-export function Landscape({ phase, dx }: { phase: LandscapePhase; dx: number }) {
+/* The parallax follows the CSS variable --dx on the root (the pointer
+   position from -0.5 to 0.5), which the start screen sets directly on `ref`.
+   A CSS variable instead of a prop, so moving the pointer doesn't re-render
+   the start screen and this landscape on every move. */
+export function Landscape({ phase, ref }: { phase: LandscapePhase; ref?: Ref<HTMLDivElement> }) {
   let i = 0;
-  /* dx is the pointer position from -0.5 to 0.5; each layer moves at most
-     24px times its own factor */
+  /* each layer moves at most 24px times its own factor */
   function layerStyle(factor: number): CSSProperties {
     const n = i++;
     if (phase === "going") {
@@ -23,11 +26,11 @@ export function Landscape({ phase, dx }: { phase: LandscapePhase; dx: number }) 
         transform: `scale(${ZOOM[n]}) translateY(${SHIFT[n]}%)`,
       };
     }
-    return { transform: `translateX(${dx * -24 * factor}px)` };
+    return { transform: `translateX(calc(var(--dx, 0) * ${-24 * factor}px))` };
   }
 
   return (
-    <div className="land" aria-hidden="true">
+    <div className="land" aria-hidden="true" ref={ref}>
       <svg className="lyr" style={layerStyle(0.25)} viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice">
         <g className="drift" fill="#fff" opacity=".85">
           <rect x="170" y="104" width="230" height="40" rx="20"/><circle cx="235" cy="104" r="34"/><circle cx="300" cy="94" r="44"/><circle cx="360" cy="110" r="26"/>

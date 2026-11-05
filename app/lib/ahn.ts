@@ -34,10 +34,10 @@ export interface HeightSample {
 }
 
 export interface Height {
-  /* ground level (maaiveld) nearest to the point, null if none within ~14 m */
+  /* ground level (maaiveld) nearest to the point, null if none within ~14 m.
+     (The surface model, dsm_05m, isn't asked for: nothing in the app shows
+     it, and its request could fail the whole height.) */
   ground: HeightSample | null;
-  /* surface at the point, e.g. the roof for an address; null if no data */
-  surface: HeightSample | null;
 }
 
 export interface HeightParams {
@@ -50,20 +50,14 @@ export interface HeightParams {
    found. With a ~3 px window: 2 -> ±6.5 m (~100 cells, ~20-80 KB),
    4.5 -> ±14 m (~1100 cells, ~200-350 KB, only for large buildings). */
 const GROUND_STEPS = [2, 4.5];
-/* the surface should be at the point itself: ±1.5 m */
-const SURFACE_STEPS = [0.5];
 const IMAGE_PX = 51;
 
 export function heightQueryOptions({ x, y }: HeightParams) {
   return queryOptions({
     queryKey: ["ahn", "height", { x, y }],
-    queryFn: async ({ signal }): Promise<Height> => {
-      const [ground, surface] = await Promise.all([
-        nearestSample("dtm_05m", x!, y!, GROUND_STEPS, signal),
-        nearestSample("dsm_05m", x!, y!, SURFACE_STEPS, signal),
-      ]);
-      return { ground, surface };
-    },
+    queryFn: async ({ signal }): Promise<Height> => ({
+      ground: await nearestSample("dtm_05m", x!, y!, GROUND_STEPS, signal),
+    }),
     enabled: x !== undefined && y !== undefined,
     // the AHN is updated once every few years
     staleTime: Infinity,

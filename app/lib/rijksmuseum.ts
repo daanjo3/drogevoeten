@@ -4,9 +4,7 @@
    - our QLever endpoint (qlever/compose.sh), used by the app;
    - Comunica over a local N-Triples file, used by the test page. */
 
-import { QueryEngine } from "@comunica/query-sparql-rdfjs-lite";
 import { queryOptions } from "@tanstack/react-query";
-import { Parser, Store } from "n3";
 import { wktPoint, type LocatieserverDoc } from "./locatieserver";
 import { select } from "./sparql";
 
@@ -195,21 +193,8 @@ GROUP BY ?object ?theme ?rank ?km ?title ?year ?image ?page ?license ?number
 ORDER BY ?theme ?rank ?km`;
 }
 
-let storePromise: Promise<Store> | undefined;
-
-/* Parse the N-Triples file once per page load. */
-export function loadStore(text?: string): Promise<Store> {
-  storePromise ??= (async () => {
-    const body = text ?? (await (await fetch(DATA_URL)).text());
-    return new Store(new Parser({ format: "N-Triples" }).parse(body));
-  })();
-  return storePromise;
-}
-
-const engine = new QueryEngine();
-
 /* One result row, given a lookup of its variables. */
-function toImage(v: (name: string) => string | undefined): RijksImage {
+export function toImage(v: (name: string) => string | undefined): RijksImage {
   const km = Number(v("km"));
   return {
     object: v("object")!,
@@ -226,15 +211,8 @@ function toImage(v: (name: string) => string | undefined): RijksImage {
   };
 }
 
-/* Comunica over the local N-Triples file. */
-export async function findImages(loc: Location, options?: ImagesOptions): Promise<RijksImage[]> {
-  const store = await loadStore();
-  const stream = await engine.queryBindings(imagesQuery(loc, options), { sources: [store] });
-  const rows = await stream.toArray();
-  return rows.map((b) => toImage((name) => b.get(name)?.value));
-}
-
-/* The same query at the SPARQL endpoint. Throws when the endpoint is down,
+/* The images query at the SPARQL endpoint (the test page can also run it on
+   the local file, see rijksmuseum-local.ts). Throws when the endpoint is down,
    slow or answers with an error, so callers can fall back. */
 export async function findImagesAtEndpoint(
   loc: Location,

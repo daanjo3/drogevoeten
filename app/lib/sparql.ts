@@ -17,19 +17,31 @@ interface SparqlResults {
    Throws when the endpoint is down, slow or answers with an error, so
    callers can fall back. */
 export async function select(query: string, signal?: AbortSignal): Promise<Row[]> {
-  const timeout = AbortSignal.timeout(ENDPOINT_TIMEOUT_MS);
-  // form-encoded POST: a "simple" CORS request, so no preflight
-  const res = await fetch(SPARQL_URL, {
-    method: "POST",
-    headers: { Accept: "application/sparql-results+json" },
-    body: new URLSearchParams({ query }),
-    signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
-  });
-  if (!res.ok) {
-    throw new Error(`SPARQL failed: ${res.status} ${res.statusText}`);
+  // Abort on the caller's signal or after the timeout. Done by hand instead
+  // of with AbortSignal.any/timeout, which older browsers (e.g. school iPads
+  // on Safari before 17.4) don't have: there every query would throw.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new DOMException("SPARQL timed out", "TimeoutError")), ENDPOINT_TIMEOUT_MS);
+  const onAbort = () => controller.abort(signal?.reason);
+  if (signal?.aborted) onAbort();
+  else signal?.addEventListener("abort", onAbort, { once: true });
+  try {
+    // form-encoded POST: a "simple" CORS request, so no preflight
+    const res = await fetch(SPARQL_URL, {
+      method: "POST",
+      headers: { Accept: "application/sparql-results+json" },
+      body: new URLSearchParams({ query }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw new Error(`SPARQL failed: ${res.status} ${res.statusText}`);
+    }
+    const json = (await res.json()) as SparqlResults;
+    return json.results.bindings.map((b) => Object.fromEntries(Object.entries(b).map(([k, v]) => [k, v?.value])));
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
   }
-  const json = (await res.json()) as SparqlResults;
-  return json.results.bindings.map((b) => Object.fromEntries(Object.entries(b).map(([k, v]) => [k, v?.value])));
 }
 
 /* Shared pieces for queries on the Droge Voeten linked data */

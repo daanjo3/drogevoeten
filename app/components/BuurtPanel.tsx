@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { CircleMarker, Polygon, Tooltip } from "react-leaflet";
 import { Icon } from "./Icons";
 import { Tip } from "./Tip";
@@ -136,6 +136,8 @@ export function BuurtPanel({ place }: Props) {
 
   // the area around the address where one water level is kept
   const { peilgebied } = usePeilgebied(lat, lon);
+  // computed once per area: a new array on every render makes the map redraw the whole outline
+  const peilgebiedLatLngs = useMemo(() => (peilgebied ? toLatLngs(peilgebied.geometry) : undefined), [peilgebied]);
   const pg = peilgebied?.properties;
   const pgName = pg?.naam?.trim() || pg?.code || "zonder naam";
 
@@ -178,10 +180,10 @@ export function BuurtPanel({ place }: Props) {
       <div className="buurt">
         <div className="map" id="map">
           <LeafletMap center={here ?? FALLBACK} zoom={13} style={{}}>
-            {peilgebied && (
+            {peilgebied && peilgebiedLatLngs && (
               <Polygon
                 key={peilgebied.id}
-                positions={toLatLngs(peilgebied.geometry)}
+                positions={peilgebiedLatLngs}
                 pathOptions={{ color: "#16324f", weight: 3, dashArray: "6 6", fillColor: "#16324f", fillOpacity: 0.08 }}
               >
                 <Tooltip sticky>

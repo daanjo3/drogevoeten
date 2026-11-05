@@ -5,7 +5,8 @@ import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { freeQueryOptions } from "../lib/locatieserver";
-import { DATA_URL, findImages, imagesQuery, loadStore, locationOf, RANK_LABELS } from "../lib/rijksmuseum";
+import { DATA_URL, imagesQuery, locationOf, RANK_LABELS } from "../lib/rijksmuseum";
+import { findImages, loadStore } from "../lib/rijksmuseum-local";
 
 const DEMO_ADDRESSES = [
   "Abdij 4, Middelburg",

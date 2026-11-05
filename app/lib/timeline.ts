@@ -638,16 +638,36 @@ export const UNKNOWN_STEP: TimelineStep = {
   source: "Bron: Droge Voeten linked data (polders, droogmakerijen, landinrichting, dijken, molens, gemalen, wielen).",
 };
 
+/* The polders and drained lakes at a point. Both the time line and the
+   address panel (findDrained) need them for every address, and the query is
+   one of the heavier ones (a polygon test over all areas), so the two share
+   one request per point. Not tied to either caller's abort signal, because
+   the other may still need the answer; select's own timeout still applies. A
+   failed request isn't kept, so the next try asks again. */
+const polderRequests = new Map<string, Promise<Row[]>>();
+
+function polderRows(p: Point): Promise<Row[]> {
+  const key = `${p.lat},${p.lon}`;
+  let request = polderRequests.get(key);
+  if (!request) {
+    request = select(polderQuery(p));
+    request.catch(() => polderRequests.delete(key));
+    polderRequests.set(key, request);
+  }
+  return request;
+}
+
 /* The steps for a point, oldest first, steps without a year last. Throws
    when the endpoint fails. */
 export async function findTimeline(p: Point, address?: Address, signal?: AbortSignal): Promise<TimelineStep[]> {
   // the flood map is a static file: when it fails to load, the step is left out
   const flood = findFlood1953(p).catch(() => null);
-  const [polders, lands, stations, dikes, mills, villages, pools, gifts] = await Promise.all(
-    [polderQuery, landQuery, stationsQuery, dikesQuery, millsQuery, villagesQuery, poolsQuery, giftsQuery].map((q) =>
+  const [polders, lands, stations, dikes, mills, villages, pools, gifts] = await Promise.all([
+    polderRows(p),
+    ...[landQuery, stationsQuery, dikesQuery, millsQuery, villagesQuery, poolsQuery, giftsQuery].map((q) =>
       select(q(p), signal),
     ),
-  );
+  ]);
   const flooded = await flood;
   const homeAreas = new Set(polders.map((r) => r.area).filter((a): a is string => !!a));
   // stations that drain the home polder first, then by distance (the query's order)
@@ -728,8 +748,8 @@ function whenPhrase(start?: string, end?: string, precision?: string, text?: str
   return `in ${sort}`;
 }
 
-export async function findDrained(p: Point, signal?: AbortSignal): Promise<Drained | null> {
-  const rows = await select(polderQuery(p), signal);
+export async function findDrained(p: Point): Promise<Drained | null> {
+  const rows = await polderRows(p);
   let best: (Drained & { sort: number }) | undefined;
   for (const r of rows) {
     if ((r.eventType !== "indijking" && r.eventType !== "droogmaking") || !r.name) continue;
@@ -751,7 +771,7 @@ export async function findDrained(p: Point, signal?: AbortSignal): Promise<Drain
 export function drainedQueryOptions(p: Point | undefined) {
   return queryOptions({
     queryKey: ["drained", p],
-    queryFn: ({ signal }) => findDrained(p!, signal),
+    queryFn: () => findDrained(p!),
     enabled: !!p,
     retry: false,
     staleTime: Infinity,

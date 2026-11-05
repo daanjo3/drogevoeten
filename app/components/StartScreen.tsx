@@ -1,4 +1,4 @@
-import { useState, type Ref } from "react";
+import { useRef, type Ref } from "react";
 import { Landscape } from "./Landscape";
 import { SearchBar, type SearchBarHandle } from "./SearchBar";
 import type { LocatieserverDoc } from "../lib/locatieserver";
@@ -30,8 +30,9 @@ export function StartScreen({
   busy?: boolean;
   message?: string | null;
 }) {
-  /* pointer position from -0.5 to 0.5, for the parallax */
-  const [dx, setDx] = useState(0);
+  /* the landscape; the pointer position (-0.5 to 0.5) goes straight into its
+     --dx variable for the parallax, without a React re-render per move */
+  const land = useRef<HTMLDivElement>(null);
   const className = phase === "idle" ? undefined : phase === "going" ? "going" : "going hide";
 
   return (
@@ -39,10 +40,10 @@ export function StartScreen({
       id="start"
       className={className}
       onPointerMove={(e) => {
-        if (phase === "idle") setDx(e.clientX / window.innerWidth - 0.5);
+        if (phase === "idle") land.current?.style.setProperty("--dx", String(e.clientX / window.innerWidth - 0.5));
       }}
     >
-      <Landscape phase={phase === "idle" ? "idle" : "going"} dx={dx} />
+      <Landscape phase={phase === "idle" ? "idle" : "going"} ref={land} />
       <svg id="drop" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 22s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" fill="#FFA654" />
       </svg>
