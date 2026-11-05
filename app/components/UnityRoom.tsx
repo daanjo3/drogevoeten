@@ -1,14 +1,37 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./Icons";
 
-/* The team's 3D living room, a Unity WebGL build served from
-   /woonkamer/ (public, not in git). It is about 88 MB, so loading starts
-   only when `active` becomes true: after someone chose an address. While
-   it loads a drop fills up with the progress. If loading fails the render
-   png shows instead. */
+/* The team's 3D living room, a Unity WebGL build (public, not in git). There
+   are two builds: /woonkamer-desktop/ for desktops and /woonkamer-mobile/ for phones
+   and tablets, with lighter graphics and smaller textures. They are tens of
+   MB, so loading starts only when `active` becomes true: after someone chose
+   an address. While it loads a drop fills up with the progress. If loading
+   fails the render png shows instead. */
 
-const EMBED_URL = `${import.meta.env.BASE_URL}woonkamer/unity-embed.js`;
+const DESKTOP_EMBED_URL = `${import.meta.env.BASE_URL}woonkamer-desktop/unity-embed.js`;
+const MOBILE_EMBED_URL = `${import.meta.env.BASE_URL}woonkamer-mobile/unity-embed.js`;
 const PLACEHOLDER = `${import.meta.env.BASE_URL}img/huiskamer-3d.png`;
+
+/* Phones render at most at this many pixels per css pixel: at a phone's
+   native 3x the room is far too slow, at 1.5x it runs smoothly */
+const MOBILE_MAX_PIXEL_RATIO = 1.5;
+
+/* Phones and tablets get the mobile build. ?kamer=mobiel or ?kamer=desktop
+   forces one, for testing. iPads ask for desktop sites by default and then
+   look like a Mac, except that a Mac has no touchscreen. */
+function wantsMobileBuild(): boolean {
+  const forced = new URLSearchParams(window.location.search).get("kamer");
+  if (forced === "mobiel") return true;
+  if (forced === "desktop") return false;
+  const ua = navigator.userAgent;
+  return /iPhone|iPad|iPod|Android/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+}
+
+/* the module lives in public/, so Vite must not bundle or rewrite it: a full
+   url with origin makes the browser import it as is */
+function importEmbed(url: string): Promise<UnityEmbed> {
+  return import(/* @vite-ignore */ new URL(url, window.location.origin).href) as Promise<UnityEmbed>;
+}
 
 /* the part of the api of unity-embed.js we use */
 interface UnityPlayer {
@@ -20,7 +43,7 @@ interface UnityPlayer {
 interface UnityEmbed {
   mount: (
     canvas: HTMLCanvasElement,
-    options?: { onProgress?: (p: number) => void; fullscreenElement?: HTMLElement },
+    options?: { onProgress?: (p: number) => void; fullscreenElement?: HTMLElement; devicePixelRatio?: number },
   ) => Promise<UnityPlayer>;
 }
 
@@ -28,7 +51,8 @@ type State = "idle" | "loading" | "ready" | "failed";
 
 export type RoomView = "room" | "house";
 
-/* waterLevel: water in the room in meters above the floor, 0 is dry.
+/* waterLevel: water in meters above the floor, 0 is dry. Not capped at the
+   ceiling: Unity does that for the room view, the house view shows it all.
    view: camera view in Unity (temporary, for testing the house view).
    overlay: shown on top of the room in fullscreen (the scenario panel). */
 export function UnityRoom({
@@ -65,11 +89,22 @@ export function UnityRoom({
     setState("loading");
     (async () => {
       try {
-        /* the module lives in public/, so Vite must not bundle or rewrite
-           it: a full url with origin makes the browser import it as is */
-        const url = new URL(EMBED_URL, window.location.origin).href;
-        const embed = (await import(/* @vite-ignore */ url)) as UnityEmbed;
-        const unity = await embed.mount(canvas.current!, { onProgress: setProgress, fullscreenElement: wrap.current ?? undefined });
+        /* when this deploy has no mobile build, phones fall back to the desktop one */
+        let mobile = wantsMobileBuild();
+        let embed: UnityEmbed;
+        try {
+          embed = await importEmbed(mobile ? MOBILE_EMBED_URL : DESKTOP_EMBED_URL);
+        } catch (err) {
+          if (!mobile) throw err;
+          console.warn("[woonkamer] no mobile build, using the desktop build", err);
+          mobile = false;
+          embed = await importEmbed(DESKTOP_EMBED_URL);
+        }
+        const unity = await embed.mount(canvas.current!, {
+          onProgress: setProgress,
+          fullscreenElement: wrap.current ?? undefined,
+          devicePixelRatio: mobile ? Math.min(window.devicePixelRatio, MOBILE_MAX_PIXEL_RATIO) : undefined,
+        });
         player.current = unity;
         setState("ready");
       } catch (err) {
@@ -92,6 +127,12 @@ export function UnityRoom({
     sentView.current = view;
   }, [state, view]);
 
+  /* Unity only lets you look around while the room fills the screen. It sees the
+     browser's fullscreen itself, but not our window-filling fallback, so tell it */
+  useEffect(() => {
+    if (state === "ready") player.current?.send("SetLookEnabled", full || faux ? 1 : 0);
+  }, [state, full, faux]);
+
   useEffect(() => {
     const onChange = () => setFull(document.fullscreenElement === wrap.current);
     document.addEventListener("fullscreenchange", onChange);
@@ -112,13 +153,32 @@ export function UnityRoom({
     setFaux(false);
   }
 
-  /* the page asks for fullscreen; the room must be ready, else nothing happens */
+  /* the page asks for fullscreen. While the room is still loading the request
+     waits, and the room opens fullscreen as soon as it is ready; it's not
+     dropped. Browsers only allow real fullscreen right after a tap, so a
+     late request falls back to filling the window. */
   const lastRequest = useRef(fullRequest);
   useEffect(() => {
-    if (fullRequest === lastRequest.current) return;
+    if (fullRequest === lastRequest.current || state !== "ready") return;
     lastRequest.current = fullRequest;
-    if (state === "ready") enterFullscreen();
+    enterFullscreen();
   }, [fullRequest, state]);
+
+  /* Pause the room while nobody can see it, so it doesn't take the phone's
+     GPU from the rest of the page: scrolled away, or behind the start screen
+     (then `active` is false; the start screen covers the room, which the
+     observer can't see). Fullscreen always counts as visible. */
+  const [onScreen, setOnScreen] = useState(true);
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  useEffect(() => {
+    if (state === "ready") player.current?.send("SetPaused", (active && onScreen) || full || faux ? 0 : 1);
+  }, [state, active, onScreen, full, faux]);
 
   /* Escape also leaves the window-filling fallback */
   useEffect(() => {

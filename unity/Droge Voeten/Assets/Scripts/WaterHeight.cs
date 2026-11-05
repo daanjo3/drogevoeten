@@ -5,14 +5,16 @@ public class WaterHeight : MonoBehaviour
     float targetHeight;
     bool hasLevel;
     Renderer waterRenderer;
-    CameraController cameraController;
+    // The ShowInView on a parent says which camera view this water belongs to (none: shown in both)
+    ShowInView showInView;
 
     // World height of the floor's top. SetLevel measures from here.
     public float floorHeight = 0.1f;
-    [Tooltip("The camera view this water belongs to; it's hidden while the other view is on screen.")]
-    public CameraController.View view = CameraController.View.Room;
     // How fast the surface moves to a new height, in meters per second
     public float riseSpeed = 0.2f;
+
+    [Tooltip("Highest level SetLevel goes to, in meters above the floor: the room's ceiling. 0 for no limit, e.g. for the house view, which shows the water's full height.")]
+    public float maxLevel = 2.4f;
 
     // Height over which a camera goes from fully above water to fully under it, centred on the surface.
     // Keep it larger than the surface's wave displacement and the camera's near clip distance.
@@ -21,7 +23,7 @@ public class WaterHeight : MonoBehaviour
     private void Awake()
     {
         waterRenderer = GetComponent<Renderer>();
-        cameraController = FindAnyObjectByType<CameraController>();
+        showInView = GetComponentInParent<ShowInView>(true);
     }
 
     private void OnEnable()
@@ -46,13 +48,13 @@ public class WaterHeight : MonoBehaviour
     public bool IsVisible => waterRenderer != null && !waterRenderer.forceRenderingOff;
 
     // Draw nothing while the surface is at or under the floor (otherwise the wave displacement pokes through it) or
-    // while the camera shows the other view. forceRenderingOff keeps the renderer's bounds valid (FishSpawner uses
-    // them as the room's floor plan).
+    // while the camera shows the other view (see ShowInView). forceRenderingOff keeps the renderer's bounds valid
+    // (FishSpawner uses them as the room's floor plan).
     private void UpdateVisibility()
     {
         if (waterRenderer != null)
         {
-            bool otherView = cameraController != null && cameraController.ShownView != view;
+            bool otherView = showInView != null && !showInView.IsShown;
             waterRenderer.forceRenderingOff = transform.position.y <= floorHeight || otherView;
         }
     }
@@ -62,11 +64,16 @@ public class WaterHeight : MonoBehaviour
         targetHeight = meters;
     }
 
-    // Water level in meters above the floor, as the web page's scenario computes it. The first level jumps there
-    // directly so the room doesn't start by draining or filling; later ones move at riseSpeed. At 0 the surface
-    // goes just under the floor, where it isn't drawn.
+    // Water level in meters above the floor, as the web page's scenario computes it (not capped), limited to
+    // maxLevel. The first level jumps there directly so the room doesn't start by draining or filling; later ones
+    // move at riseSpeed. At 0 the surface goes just under the floor, where it isn't drawn.
     public void SetLevel(float metersAboveFloor)
     {
+        if (maxLevel > 0f)
+        {
+            metersAboveFloor = Mathf.Min(metersAboveFloor, maxLevel);
+        }
+
         SetHeight(metersAboveFloor > 0f ? floorHeight + metersAboveFloor : floorHeight - 0.05f);
         if (!hasLevel)
         {

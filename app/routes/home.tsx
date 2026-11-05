@@ -384,7 +384,7 @@ export default function Home() {
       <SvgSymbols />
 
       <StartScreen
-        key={startKey}
+        key={`start-${startKey}`}
         phase={phase}
         onSearch={begin}
         onPick={pick}
@@ -449,7 +449,7 @@ export default function Home() {
       <TooltipLayer scrollRef={canvas.worldRef} />
       {tour && (
         <Rondleiding
-          key={tour.run}
+          key={`tour-${tour.run}`}
           nap={height.data?.ground?.value}
           paused={about}
           onChange={onTourStep}

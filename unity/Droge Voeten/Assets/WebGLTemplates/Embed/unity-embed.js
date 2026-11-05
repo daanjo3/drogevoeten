@@ -66,12 +66,41 @@ export async function mount(canvas, { baseUrl, fullscreenElement, devicePixelRat
   if (!canvas.hasAttribute("tabindex")) {
     canvas.tabIndex = -1;
   }
-  canvas.addEventListener("pointerdown", () => canvas.focus());
+  // preventScroll: tapping a room that is partly off-screen must not make the page jump
+  canvas.addEventListener("pointerdown", () => canvas.focus({ preventScroll: true }));
+
+  // Unity's loader listens to every error on the page and takes it as its own: while starting, any error aborts
+  // the load, and later it shows Unity's error message. Errors from other scripts on the page (the host app, a
+  // browser extension such as a password manager) must not do that. This listener runs before Unity's, because it
+  // is added first, and stops errors that don't come from this build's files. They still show in the console.
+  const fromThisBuild = (event) => {
+    const error = event.error || event.reason;
+    const where = [event.filename, error && error.stack, error && (error.fileName || error.sourceURL)].filter(Boolean).join("\n");
+    // the build's own files, the blob: scripts the loader makes from them, and stack traces through its WebAssembly
+    return where.includes(base.href) || where.includes("blob:") || where.includes("wasm");
+  };
+  const shield = (event) => {
+    if (!fromThisBuild(event)) {
+      event.stopImmediatePropagation();
+    }
+  };
+  window.addEventListener("error", shield);
+  window.addEventListener("unhandledrejection", shield);
+  const removeShield = () => {
+    window.removeEventListener("error", shield);
+    window.removeEventListener("unhandledrejection", shield);
+  };
 
   const ready = new Promise((resolve) => canvas.addEventListener(eventPrefix + "ready", resolve, { once: true }));
-  await loadScript(buildUrl(loaderFile));
-  const instance = await createUnityInstance(canvas, config, onProgress);
-  await ready;
+  let instance;
+  try {
+    await loadScript(buildUrl(loaderFile));
+    instance = await createUnityInstance(canvas, config, onProgress);
+    await ready;
+  } catch (error) {
+    removeShield();
+    throw error;
+  }
 
   return {
     instance,
@@ -98,6 +127,7 @@ export async function mount(canvas, { baseUrl, fullscreenElement, devicePixelRat
     },
 
     quit() {
+      removeShield();
       return instance.Quit();
     },
   };

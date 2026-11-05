@@ -88,6 +88,12 @@ public class FishSpawner : MonoBehaviour
     {
         alive.RemoveAll(fish => fish == null);
 
+        // No new fish while the room's water isn't on screen (the house view)
+        if (!water.IsVisible)
+        {
+            return;
+        }
+
         float surface = Surface;
         if (surface < minHeight || alive.Count >= maxFish)
         {

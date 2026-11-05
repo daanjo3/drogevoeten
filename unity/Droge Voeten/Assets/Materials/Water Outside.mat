@@ -43,9 +43,11 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
-    - _Detail_Normal_Strength: 0.1
-    - _Detail_Tiling: 0.1
+    - _Detail_Normal_Strength: 0.015
+    - _Detail_Tiling: 0.16
+    - _Wave_Height: 0.06
+    - _Wave_Speed: 0.75
     m_Colors:
-    - _Detail_Scroll: {r: 0.02, g: 0.02, b: 0, a: 0}
+    - _Detail_Scroll: {r: 0.06, g: 0.06, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

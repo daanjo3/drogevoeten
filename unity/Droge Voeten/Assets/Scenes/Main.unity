@@ -362,7 +362,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
   m_UsePipelineSettings: 1
-  m_AdditionalLightsShadowResolutionTier: 0
+  m_AdditionalLightsShadowResolutionTier: 1
   m_CustomShadowLayers: 0
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
@@ -771,8 +771,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   floorHeight: 0.1
-  view: 0
   riseSpeed: 0.4
+  maxLevel: 2.4
   transitionHeight: 0.4
 --- !u!1001 &178109865
 PrefabInstance:
@@ -1756,7 +1756,7 @@ Light:
   m_InnerSpotAngle: 21.802082
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -1891,7 +1891,10 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 62a53a13c1e2f4c2b964fa8b2e8454e5, type: 3}
       insertIndex: -1
       addedObject: {fileID: 607926743}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 62a53a13c1e2f4c2b964fa8b2e8454e5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1550360850}
   m_SourcePrefab: {fileID: 100100000, guid: 62a53a13c1e2f4c2b964fa8b2e8454e5, type: 3}
 --- !u!4 &470376827 stripped
 Transform:
@@ -1926,7 +1929,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -3.84, y: 0, z: -0}
-  m_LocalScale: {x: 0.93, y: 1, z: 0.9}
+  m_LocalScale: {x: 3.69, y: 1, z: 3.5709677}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 470376827}
@@ -2023,8 +2026,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: -0.5, z: -0.5, w: 0.5}
   m_LocalPosition: {x: -4.404, y: 0, z: 0.251}
-  m_LocalScale: {x: 22.952541, y: 1.0400002, z: 23.277502}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 37.8, y: 1, z: 38.33517}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 470376827}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: -90}
@@ -2041,8 +2044,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   floorHeight: 0
-  view: 1
   riseSpeed: 0.4
+  maxLevel: 0
   transitionHeight: 0.48
 --- !u!114 &547855080
 MonoBehaviour:
@@ -2056,7 +2059,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3acfbc29cbf5e4452add36b71ad4380c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DynamicPlane
-  gridSize: 160
+  gridSize: 180
 --- !u!23 &547855081
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2280,6 +2283,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 734553212}
+  - component: {fileID: 734553213}
   m_Layer: 0
   m_Name: House
   m_TagString: Untagged
@@ -2325,6 +2329,19 @@ Transform:
   - {fileID: 161945105}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &734553213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734553211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f144e9c8ee15b4d518feeedb0b6468ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShowInView
+  view: 0
 --- !u!1 &769464601
 GameObject:
   m_ObjectHideFlags: 0
@@ -2404,7 +2421,7 @@ Light:
   m_InnerSpotAngle: 21.802082
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -3805,6 +3822,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1493437355}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1550360847 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 62a53a13c1e2f4c2b964fa8b2e8454e5, type: 3}
+  m_PrefabInstance: {fileID: 470376826}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1550360850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1550360847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f144e9c8ee15b4d518feeedb0b6468ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ShowInView
+  view: 1
 --- !u!1 &1585442734
 GameObject:
   m_ObjectHideFlags: 0

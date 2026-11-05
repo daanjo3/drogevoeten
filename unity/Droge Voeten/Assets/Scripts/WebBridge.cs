@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -52,6 +53,61 @@ public class WebBridge : MonoBehaviour
         if(cameraController != null)
         {
             cameraController.SetView(view);
+        }
+    }
+
+    // True while the page shows the player fullscreen in a way the browser doesn't report, such as a
+    // window-filling fallback on phones without element fullscreen. See SetLookEnabled.
+    public static bool PageLookEnabled { get; private set; }
+
+    // unity.send("SetLookEnabled", 1 | 0): the page says whether looking around should be on, because the
+    // room fills the screen (real fullscreen or its own fallback). A number, as SendMessage passes it as a float.
+    public void SetLookEnabled(float on)
+    {
+        PageLookEnabled = on > 0.5f;
+    }
+
+    // Cameras switched off by SetPaused, to switch back on when it resumes
+    private readonly List<Camera> pausedCameras = new List<Camera>();
+
+    // unity.send("SetPaused", 1 | 0): the page says nobody can see the player (scrolled away, or behind another
+    // screen). Paused, the cameras are off, so nothing is rendered and the GPU is left to the rest of the page; the
+    // scene itself keeps running, so the water and fish are where you'd expect them when it resumes.
+    public void SetPaused(float paused)
+    {
+        if (paused > 0.5f)
+        {
+            if (pausedCameras.Count > 0)
+            {
+                return;
+            }
+
+            foreach (Camera cam in Camera.allCameras)
+            {
+                cam.enabled = false;
+                pausedCameras.Add(cam);
+            }
+
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log($"[WebBridge] Rendering paused: {pausedCameras.Count} camera(s) off");
+            }
+        }
+        else if (pausedCameras.Count > 0)
+        {
+            foreach (Camera cam in pausedCameras)
+            {
+                if (cam != null)
+                {
+                    cam.enabled = true;
+                }
+            }
+
+            if (Debug.isDebugBuild)
+            {
+                Debug.Log($"[WebBridge] Rendering resumed: {pausedCameras.Count} camera(s) on");
+            }
+            pausedCameras.Clear();
         }
     }
 

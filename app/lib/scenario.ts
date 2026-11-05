@@ -19,7 +19,9 @@ export type Outside = "flood" | "nodikes";
 export interface WaterInRoom {
   /* water in the living room in m, capped at the room height */
   level: number;
-  /* the same, not capped; can be higher than the room */
+  /* the same, not capped; can be higher than the room. The Unity room gets
+     this one: it caps the water at the ceiling in the room view itself, and
+     shows the full height in the view of the whole house. */
   depth: number;
 }
 

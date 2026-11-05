@@ -131,7 +131,7 @@ export function HuiskamerPanel({
         {/* in info mode the room is dry */}
         <UnityRoom
           active={loadRoom}
-          waterLevel={risk ? r.level : 0}
+          waterLevel={risk ? r.depth : 0}
           view={view}
           fullRequest={fullRequest}
           overlay={

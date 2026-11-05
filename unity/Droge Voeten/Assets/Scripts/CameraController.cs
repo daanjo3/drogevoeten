@@ -3,7 +3,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // Look around without moving: drag with the mouse or a finger, or use the gamepad's right stick.
-// Only active while the player is fullscreen; otherwise the camera eases back to its current view pose.
+// Only active while the player is fullscreen (or the page says it fills the screen, see WebBridge.SetLookEnabled);
+// otherwise the camera eases back to its current view pose.
 // The mouse never locks, so the fullscreen exit button stays clickable.
 // SetView("room" / "house") fades to black, jumps to another view pose and fades back in; looking around works
 // around that pose.
@@ -213,7 +214,8 @@ public class CameraController : MonoBehaviour
             return true;
         }
 
-        return WebBridge.IsFullscreen();
+        // The page can say the room fills the screen, also when that isn't the browser's own fullscreen
+        return WebBridge.PageLookEnabled || WebBridge.IsFullscreen();
     }
 
     // Change in (yaw, pitch) this frame, in degrees

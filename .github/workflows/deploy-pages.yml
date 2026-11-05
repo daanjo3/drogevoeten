@@ -7,10 +7,13 @@
 # > Actions > Variables) to a public HTTPS endpoint; without it the app shows
 # its fallback Rijksmuseum images.
 #
-# The Unity living room (/woonkamer/) is not in git: it comes from the asset
-# woonkamer.tar.gz on a GitHub release (upload it with
-# app/scripts/upload-woonkamer.sh). Without that asset the deploy still runs
-# and the app keeps showing its placeholder render.
+# The Unity living room is not in git. It comes from two assets on a GitHub
+# release (upload them with app/scripts/upload-woonkamer.sh):
+#   woonkamer-desktop.tar.gz  -> /woonkamer-desktop/  desktop build
+#   woonkamer-mobile.tar.gz   -> /woonkamer-mobile/   mobile build
+# The app picks one per device. Without the mobile asset phones get the desktop
+# build; without either the deploy still runs and the app shows its
+# placeholder render.
 
 name: Deploy app to GitHub Pages
 
@@ -18,7 +21,7 @@ on:
   workflow_dispatch:
     inputs:
       woonkamer_release:
-        description: Release tag with the Unity build (woonkamer.tar.gz)
+        description: Release tag with the Unity builds (woonkamer-desktop.tar.gz, woonkamer-mobile.tar.gz)
         default: v0.1.0
 
 permissions:
@@ -58,13 +61,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.woonkamer_release || 'v0.1.0' }}
         run: |
-          if gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern woonkamer.tar.gz --dir "$RUNNER_TEMP"; then
-            mkdir -p public/woonkamer
-            tar -xzf "$RUNNER_TEMP/woonkamer.tar.gz" -C public/woonkamer
-            ls -la public/woonkamer public/woonkamer/Build
-          else
-            echo "::warning::No woonkamer.tar.gz on release $TAG; deploying without the Unity room"
-          fi
+          for build in woonkamer-desktop woonkamer-mobile; do
+            if gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$build.tar.gz" --dir "$RUNNER_TEMP"; then
+              mkdir -p "public/$build"
+              tar -xzf "$RUNNER_TEMP/$build.tar.gz" -C "public/$build"
+              # Pages only serves files everyone can read; tar keeps the modes of the machine that packed it
+              chmod -R a+rX "public/$build"
+              ls -la "public/$build" "public/$build/Build"
+            else
+              echo "::warning::No $build.tar.gz on release $TAG; deploying without that Unity build"
+            fi
+          done
 
       - name: Build
         run: pnpm run build

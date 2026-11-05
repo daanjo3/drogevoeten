@@ -34,9 +34,29 @@ public class FishController : MonoBehaviour
     // Direction the fish is turning to after a bump; zero when it isn't
     private Vector3 bumpHeading;
 
+    // The fish is only drawn while its room's water is (it isn't in the house view)
+    private Renderer[] renderers;
+    private bool shown = true;
+
     private void Awake()
     {
         bodyCollider = GetComponent<Collider>();
+        renderers = GetComponentsInChildren<Renderer>(true);
+    }
+
+    private void LateUpdate()
+    {
+        bool visible = area == null || area.water == null || area.water.IsVisible;
+        if (visible == shown)
+        {
+            return;
+        }
+
+        shown = visible;
+        foreach (Renderer r in renderers)
+        {
+            r.forceRenderingOff = !visible;
+        }
     }
 
 

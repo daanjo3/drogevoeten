@@ -23,7 +23,7 @@ public class DebugSettings : MonoBehaviour
     // Lets CameraController allow looking around outside fullscreen
     public static bool LookAlways { get; private set; }
 
-#if DEVELOPMENT_BUILD && !UNITY_EDITOR
+#if !UNITY_EDITOR
     private static Dictionary<string, string> args = new Dictionary<string, string>();
 
     // Readout, refreshed twice a second
@@ -37,6 +37,12 @@ public class DebugSettings : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void BeforeSceneLoad()
     {
+        // Development builds only; a release build ignores the URL
+        if (!Debug.isDebugBuild)
+        {
+            return;
+        }
+
         args = ParseQuery(Application.absoluteURL);
 
         if (args.TryGetValue("quality", out string quality))
