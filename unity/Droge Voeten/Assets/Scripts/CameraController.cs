@@ -207,6 +207,12 @@ public class CameraController : MonoBehaviour
             return true;
         }
 #endif
+        // Development builds can turn it on from the page URL (look=1), see DebugSettings
+        if (DebugSettings.LookAlways)
+        {
+            return true;
+        }
+
         return WebBridge.IsFullscreen();
     }
 
