@@ -16,6 +16,28 @@ type IconName = Parameters<typeof Icon>[0]["name"];
 
 export const TOUR_STEPS = 4;
 
+/* once the tour is finished or skipped it stays away on this device for an hour;
+   after that it comes back, for the next person on a shared device */
+const TOUR_DONE_KEY = "droge-voeten:tour-done";
+const TOUR_QUIET_MS = 60 * 60 * 1000;
+
+export function tourDue(): boolean {
+  try {
+    const done = Number(localStorage.getItem(TOUR_DONE_KEY));
+    return !done || Date.now() - done >= TOUR_QUIET_MS;
+  } catch {
+    return true;
+  }
+}
+
+export function markTourDone() {
+  try {
+    localStorage.setItem(TOUR_DONE_KEY, String(Date.now()));
+  } catch {
+    /* no storage (private mode): the tour just shows again next time */
+  }
+}
+
 /* the menu button each step lights up; step 4 also pulses Als het misgaat */
 export const TOUR_BUTTONS: (NavButton | undefined)[] = ["huis", "tijd", "buurt", "huis"];
 export const TOUR_PULSE: (NavButton | undefined)[] = [undefined, undefined, undefined, "risk"];

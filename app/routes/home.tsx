@@ -16,7 +16,7 @@ import { RijksTile, worksFor, type RijksWork } from "../components/ImageTile";
 import { FloatingNav, type NavTarget } from "../components/FloatingNav";
 import { MiniMap } from "../components/MiniMap";
 import { AboutCard } from "../components/AboutCard";
-import { Rondleiding, TOUR_BUTTONS, TOUR_PULSE, type TourInset } from "../components/Rondleiding";
+import { Rondleiding, TOUR_BUTTONS, TOUR_PULSE, markTourDone, tourDue, type TourInset } from "../components/Rondleiding";
 import { Icon } from "../components/Icons";
 import { StartScreen, type StartPhase } from "../components/StartScreen";
 import type { SearchBarHandle } from "../components/SearchBar";
@@ -238,8 +238,9 @@ export default function Home() {
   const [fullRequest, setFullRequest] = useState(0);
   const [scenario, setScenario] = useState<Scenario>({ outside: "flood", liwoMap: 5 });
   /* the tour after a search: run is the key (a restart remounts it), step lights up a menu button */
-  /* it always starts: after a search, and when the page opens with an address in the url */
-  const [tour, setTour] = useState<{ run: number; step: number } | null>(id ? { run: 0, step: 0 } : null);
+  /* it starts after a search and when the page opens with an address in the url,
+     unless it was finished or skipped on this device in the last hour (see tourDue) */
+  const [tour, setTour] = useState<{ run: number; step: number } | null>(() => (id && tourDue() ? { run: 0, step: 0 } : null));
   const canvas = useCanvas();
   const woonplaats = locatie?.woonplaatsnaam;
   useEffect(() => {
@@ -247,6 +248,7 @@ export default function Home() {
   }, [woonplaats, steps.length, canvas.measure]);
 
   function startTour() {
+    if (!tourDue()) return;
     setTour({ run: performance.now(), step: 0 });
   }
 
@@ -269,6 +271,7 @@ export default function Home() {
   }
 
   function onTourEnd(how: "skip" | "try") {
+    markTourDone();
     canvas.setInset({ top: 0, bottom: 0 });
     setTour(null);
     setMode(how === "try" ? "risk" : "info");
