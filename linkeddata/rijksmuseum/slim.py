@@ -28,10 +28,10 @@ Subjects keep their Rijksmuseum IRIs, so every fact traces back to the source.
 Idempotent: does nothing if the output is newer than the input (pass --force
 to rebuild anyway). The output is written to a temporary file first.
 
-Run with: python3 -I qlever/rijksmuseum/slim.py [--force]
-          (or as the `data` service in qlever/docker-compose.yml)
-Input:    qlever/data/rijksmuseum-linked-art.nt
-Output:   qlever/data/rijksmuseum-app.nt (served by qlever/, see its Qleverfile)
+Run with: python3 -I linkeddata/rijksmuseum/slim.py [--force]
+          (or `make rijksmuseum` in linkeddata/)
+Input:    linkeddata/build/rijksmuseum/rijksmuseum-linked-art.nt
+Output:   linkeddata/build/rijksmuseum/rijksmuseum-app.nt (served by qlever/, see its Qleverfile)
 """
 
 import argparse
@@ -41,7 +41,7 @@ import urllib.parse
 from collections import defaultdict
 from pathlib import Path
 
-DATA = Path(__file__).resolve().parents[1] / "data"
+DATA = Path(__file__).resolve().parents[1] / "build" / "rijksmuseum"
 IN = DATA / "rijksmuseum-linked-art.nt"
 OUT = DATA / "rijksmuseum-app.nt"
 

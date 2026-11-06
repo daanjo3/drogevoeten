@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Convert the harvested source layers into separate linked datasets plus a catalog.
 
-Reads prototype/data/raw/ (the prototype's harvest) and terms/*.csv; writes to build/:
+Reads raw/ (from harvest.py) and terms/*.csv; writes to build/:
   <slug>.ttl, <slug>.nt   one dataset each: its dataset description + all records (+ the terms they use)
   catalog.ttl/.jsonld     DataCatalog with every dataset description and its downloads
   report.json             counts, skipped values, term review status, self-checks

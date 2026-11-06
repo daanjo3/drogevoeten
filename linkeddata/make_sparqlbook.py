@@ -266,12 +266,12 @@ def run(out, files, cells):
         except Exception as e:  # noqa: BLE001
             ok = False
             print("FOUT", text.splitlines()[0][:70], e)
-        endpoint = "".join(f"# [endpoint=./build/{f}]\n" for f in cell_files)
+        endpoint = "".join(f"# [endpoint=../build/{f}]\n" for f in cell_files)
         nb.append({"kind": 2, "language": "sparql", "value": endpoint + "\n" + q, "metadata": {}})
     if not ok:
         print(f"   niet geschreven: {out} (een query faalt, is leeg of geeft dubbele rijen)")
         return False
-    json.dump(nb, open(os.path.join(HERE, out), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    json.dump(nb, open(os.path.join(HERE, "notebooks", out), "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     print("   geschreven:", out)
     return True
 

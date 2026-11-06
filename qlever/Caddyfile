@@ -1,0 +1,5 @@
+# Gateway of the deployed endpoint. Caddy gets and renews the TLS certificate
+# itself, and redirects port 80 to HTTPS. QLever sets the CORS headers.
+data.drogevoeten.app {
+	reverse_proxy qlever:7001
+}

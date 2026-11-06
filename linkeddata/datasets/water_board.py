@@ -45,7 +45,7 @@ def make_convert(kind):
     coll, otype, noun, _ = KINDS[kind]
 
     def convert(g, terms, dataset):
-        rows = json.load(open(os.path.join(config.RAW2, f"imwa_{coll}.json"), encoding="utf-8"))
+        rows = json.load(open(os.path.join(config.RAW, f"imwa_{coll}.json"), encoding="utf-8"))
         stats = c.new_stats(len(rows))
         keys = c.Keys(f"water-board-{kind}")
         for p in rows:

@@ -1,6 +1,6 @@
 # Linked data (linkeddata/)
 
-Hier worden de bronlagen van het prototype omgezet naar losse linked datasets volgens de NDE-richtlijnen.
+Hier worden de bronlagen geoogst (`harvest.py`) en omgezet naar losse linked datasets volgens de NDE-richtlijnen.
 
 **Lees vóór je iets toevoegt of wijzigt:**
 1. [`DECISIONS.md`](DECISIONS.md): alle ontwerpbeslissingen met hun reden. Deze gelden voor elke dataset.
@@ -22,8 +22,9 @@ Hier worden de bronlagen van het prototype omgezet naar losse linked datasets vo
 - **Gedeelde concepten over datasets heen** worden samengevoegd in `lib/merge.py` (DECISIONS §29); nieuwe velden met hetzelfde begrippenkader horen in `TERM_GROUPS`. Een losse dataset bouwen (`build.py <slug>`) slaat het samenvoegen over; alleen een volledige bouw maakt `droge-voeten` en `concept-merges`.
 - **Verzin niets.** Een onbekende waarde geeft geen statement; een onleesbare waarde wordt gemeld in `report.json`.
 - Python alleen standaardbibliotheek, altijd `python3 -I`. pyshacl en pyoxigraph alleen via `uv` in `make validate` en `make notebook`.
-- Hergebruik helpers uit `prototype/datalayer/build_v3.py` via `lib/source.py`.
-- **Notebookqueries** (`make_sparqlbook.py` voor de gemalen, `notebook_cells.py` voor de rest; één notebook per thema): kies bij elke naam één taal (`FILTER(LANG(?naam) = "nl")`). Eigen termen en termensets hebben een naam in het Nederlands én het Engels (één knoop, twee namen), en zonder filter krijg je dubbele rijen. Volg de gedeelde knopen (bijv. `#location` → woonplaats → provincie), niet de adrestekst. De generator weigert een notebook met lege of dubbele resultaten.
+- Parseerhulpen staan in `lib/source.py`. Een nieuwe bronlaag komt in `harvest.py`.
+- **Notebookqueries** (de notebooks staan in `notebooks/`; `make_sparqlbook.py` voor de gemalen, `notebook_cells.py` voor de rest; één notebook per thema): kies bij elke naam één taal (`FILTER(LANG(?naam) = "nl")`). Eigen termen en termensets hebben een naam in het Nederlands én het Engels (één knoop, twee namen), en zonder filter krijg je dubbele rijen. Volg de gedeelde knopen (bijv. `#location` → woonplaats → provincie), niet de adrestekst. De generator weigert een notebook met lege of dubbele resultaten.
+- **De Rijksmuseum-set** (`rijksmuseum/`, DECISIONS §36) staat los: niet in `droge-voeten` of de catalogus, uitvoer in `build/rijksmuseum/`.
 - Upload niets naar Wikidata of het Datasetregister zonder akkoord van Jari.
 - **Jari wil niet alles zelf verifiëren: neem aannames** in plaats van vragen te stellen, maar maak ze herkenbaar (status `aangenomen`/`afgewezen` met reden en datum) en leg ze vast in DECISIONS §28. Verzin nooit feiten: geen e-mailadressen, geen licenties, geen afgeleide gegevens zonder bron. Controleer een termkandidaat op `scopeNote`/`broader`: een exacte labeltreffer kan een homoniem zijn.
 - Een nieuwe beslissing of een afwijking van het plan: leg die vast in `DECISIONS.md` (met datum) en werk `PLAN.md` bij.

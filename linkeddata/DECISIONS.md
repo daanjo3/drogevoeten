@@ -16,7 +16,7 @@ Normen waarop alles rust:
 
 - **Fase 1:** elke bronlaag apart omzetten naar een eigen linked dataset met een eigen datasetbeschrijving. **Fase 2:** links tussen de datasets, als **aparte linkset-datasets** met methode en herkomst. *Waarom:* de visie wil verrijkingen als losse, herleidbare datasets; zo blijft elke omzetting een getrouwe weergave van één bron.
 - In fase 1 komen alleen koppelingen **binnen** één bron, bijv. molen ↔ droogmakerij via `polderID` in dezelfde RCE-laag.
-- De invoer is de oogst van het prototype (`prototype/data/raw/`). `linkeddata/` oogst niet zelf. *Waarom:* één oogst en één set parseerregels.
+- De invoer is de oogst in `raw/`, van `harvest.py`. *Waarom:* één oogst en één set parseerregels. (Eerst was dit de oogst van `prototype/`; zie §36.)
 
 ## 2. Uitgever, maker en bronhouders (30-10-2026)
 
@@ -237,7 +237,7 @@ Voeg een nieuw predicaat eerst hier toe, en controleer of schema.org er echt nie
 
 - Python, alleen de standaardbibliotheek, altijd `python3 -I` (de oogst is onbetrouwbare invoer). pyshacl en pyoxigraph alleen in de losse ontwikkelstappen (`make validate`, `make notebook`).
 - Eén module per dataset in `datasets/` (Engelse naam). Elke module heeft `META` (beschrijving en bron) en `convert(g, terms, dataset) -> stats`, en registreert zijn termvelden in `FIELDS`. Toevoegen aan `DATASETS` in `build.py`.
-- Helpers uit `prototype/datalayer/build_v3.py` hergebruiken via `lib/source.py`, niet kopiëren.
+- Parseerhulpen staan in `lib/source.py`. (Eerst kwamen ze uit `prototype/datalayer/build_v3.py`; zie §36.)
 
 ## 22. Termensets gelden voor alle datasets (31-10-2026)
 
@@ -449,3 +449,21 @@ Jari wil niet alles zelf verifiëren: "maak maar aannames". Daarom beslist Claud
 - **Anders de bronlaag.** Droogmakerijen, landinrichting, dijken, verdronken dorpen, wielen en geschenkwoningen hebben geen pagina per object; `prov:wasDerivedFrom` wijst naar een WFS-antwoord (XML), niet geschikt voor gebruikers. Die stappen linken naar het record van de bronlaag in het Nationaal Georegister (`schema:isBasedOn`; de API-URL stuurt een browser door naar de leesbare pagina). Het label is "Over deze bron", omdat de pagina over de hele laag gaat, niet over dit object. De 1953-stap linkt zo naar de metadata van de inundatiekaart.
 - **Hoe in de app:** `TimelineStep` heeft een optioneel veld `links` (`label`, `href`); `TijdreisPanel` toont alleen de eerste, als "Link" naast de bronpil, in een nieuw tabblad (op verzoek van Jari). Een gemaal of molen die ook rijksmonument is, linkt dus naar gemalen.nl of allemolens.nl, niet naar het Monumentenregister. Een stap zonder link ("Onbekend") krijgt geen link. `sourceOf` in `app/lib/sparql.ts` geeft nu ook `?srcPage`; `identifier()` haalt een nummer uit `schema:identifier` op `propertyID`.
 - **Getest** tegen het endpoint uit `app/.env` op de zes demo-adressen: elke stap heeft een link, en een steekproef van de pagina's (gemalen.nl, allemolens.nl, Monumentenregister, rapport-pdf, Georegister) geeft HTTP 200.
+
+## 36. De store lokaal bouwen en met Ansible uitrollen (06-11-2026)
+
+**Vraag van Daan:** rol het SPARQL-endpoint uit op een Debian-server met 1 GB geheugen en 1 vCPU. Daar is te weinig ruimte om te indexeren. Haal de datalogica uit `qlever/`.
+
+- **`qlever/` maakt geen data meer.** Daar staan alleen de store-instellingen en de index. `qlever/compose.sh build` indexeert `linkeddata/build/` (de service `index`, met het Compose-profiel `build`). Een kale `docker compose up` start alleen de server. Dit vervangt §31 voor zover daar de VPS zelf oogst en indexeert, en het gzippen.
+- **De Rijksmuseum-set staat nu in `linkeddata/rijksmuseum/`,** met uitvoer in `build/rijksmuseum/` (`make rijksmuseum`).
+- **Niet samengevoegd met `droge-voeten`:** de sets hangen maar losjes samen. De Rijksmuseum-set blijft buiten de catalogus en in de store in eigen named graphs. In een eigen submap, omdat `spot_check.py` `build/*.nt` langsloopt.
+- **`ansible/site.yml` vervangt `qlever/deploy.sh`.** Zie `ansible/README.md`.
+- **Alleen de index gaat naar de server,** niet de brondata: `qlever start` leest die niet. `compose.sh build` weigert te indexeren als `droge-voeten` of de Rijksmuseum-bestanden ontbreken of leeg zijn; ook bij een bestaande index, want dan draait `qlever index` niet.
+- **Inloggen volgens de eigen SSH-config,** dus geen inlognaam in git. Omdat dat root kan zijn, draait QLever als de gebruiker `drogevoeten` en gebruikt de playbook alleen sudo als je niet als root inlogt.
+- **Caddy als gateway** (`https://data.drogevoeten.app`, profiel `server`): de app staat op HTTPS en mag dus geen HTTP-endpoint aanroepen. Caddy regelt het certificaat zelf, certbot is niet nodig. QLevers poort 7001 luistert alleen nog op localhost.
+- **Dezelfde image lokaal en op de server,** zodat de server de index kan lezen.
+- **Kleinere Qleverfile op de server:** 400 MB voor queries, 200 MB cache, 2 threads. De Qleverfile in git houdt de waarden voor lokaal gebruik.
+- **Docker uit de pakketten van Debian 13:** `docker.io` en `docker-compose` (2.26). Debian 12 heeft alleen Compose v1, en `community.docker.docker_compose_v2` heeft minstens 2.18 nodig; daarom eist de playbook Debian 13.
+- **`linkeddata/` hangt niet meer af van `prototype/`** (verwijderd in `34eda84`): een live pipeline mag niet leunen op de git-geschiedenis. `harvest.py` haalt de bronlagen op naar `raw/` en `lib/source.py` heeft de vijf gebruikte hulpfuncties. De code komt uit `fetch_v3.py`, `fetch.py` en `build_v3.py`, zodat de bestanden hetzelfde formaat houden.
+- **Alleen de lagen die een dataset leest worden geoogst.** Niet meer: Rijksmonumenten (SPARQL), Wikidata, Brabant, RWS, BAG-adressen en `fetch_status`. Geen dataset leest die bestanden. Rijksmonumentnummers staan in de WFS-lagen zelf en Wikidata-koppelingen in `terms/*.csv`, allebei ongewijzigd.
+- **Notebooks in `notebooks/`:** de extensie leest een relatief endpoint vanaf de map van de notebook, dus `../build/`.

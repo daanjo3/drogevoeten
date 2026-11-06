@@ -285,7 +285,7 @@ def object_type(g, terms, record, slug):
 
 
 def dating(text):
-    """Source dating text -> (start, end, precision, text), using the prototype's parse_period (never invents a
+    """Source dating text -> (start, end, precision, text), using parse_period (never invents a
     year). end is set when the text names a second year ('1953-1954', '1965 – 1972') or a later century; for
     'voor'/'vóór' the year is the end (latest possible year) and there is no start."""
     from lib.source import parse_period

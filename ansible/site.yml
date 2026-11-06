@@ -1,0 +1,165 @@
+# Build the QLever dataset and index on this machine and serve them from a small
+# Debian 13 server (1 GB of memory, 1 vCPU), which only runs the QLever server.
+# Done when the SPARQL endpoint answers from here. See README.md.
+#
+#   ansible-playbook site.yml
+- name: Build the dataset and index locally
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    repo: "{{ playbook_dir | dirname }}"
+  tasks:
+    # Skips the layers that are already there
+    - name: Harvest the source layers
+      ansible.builtin.command:
+        cmd: make harvest
+        chdir: "{{ repo }}/linkeddata"
+      changed_when: false
+
+    - name: Build the linked data
+      ansible.builtin.command:
+        cmd: make
+        chdir: "{{ repo }}/linkeddata"
+        creates: build/droge-voeten.nt
+
+    # ~10 min the first time; skips what is up to date
+    - name: Harvest the Rijksmuseum set
+      ansible.builtin.command:
+        cmd: make rijksmuseum
+        chdir: "{{ repo }}/linkeddata"
+      changed_when: false
+      register: rijksmuseum
+
+    # A request that keeps failing is skipped, so judge here if the harvest is complete enough
+    - name: Report the Rijksmuseum harvest
+      ansible.builtin.debug:
+        msg: "{{ rijksmuseum.stdout_lines | select('search', '^requests: ') | first }}"
+      when: "rijksmuseum.stdout is search('(?m)^requests: ')"
+
+    - name: Build the index
+      ansible.builtin.command:
+        cmd: ./compose.sh build
+        chdir: "{{ repo }}/qlever"
+      changed_when: false
+
+- name: Serve the index from the server
+  hosts: qlever_server
+  vars:
+    qlever: "{{ playbook_dir | dirname }}/qlever"
+    remote_dir: "{{ server_user.home }}/sparql"
+    # The domain of qlever/Caddyfile
+    endpoint: https://data.drogevoeten.app
+    # Kept in qlever/.access-token (created the first time, not in git)
+    access_token: "{{ lookup('ansible.builtin.password', qlever ~ '/.access-token', chars=['ascii_letters', 'digits'], length=60) }}"
+  tasks:
+    - name: Check the system
+      ansible.builtin.assert:
+        that:
+          # Older Debian has no Compose v2 package
+          - ansible_facts['distribution'] == 'Debian'
+          - ansible_facts['distribution_major_version'] == '13'
+        fail_msg: This playbook needs Debian 13
+
+    - name: Set up the server
+      # Logged in as root there is no need for sudo, which may not be installed
+      become: "{{ ansible_facts['user_id'] != 'root' }}"
+      block:
+        - name: Install Docker
+          ansible.builtin.apt:
+            name: [docker.io, docker-cli, docker-compose]
+            update_cache: true
+            cache_valid_time: 3600
+
+        - name: Start Docker
+          ansible.builtin.service:
+            name: docker
+            state: started
+            enabled: true
+
+        # The login user comes from your SSH config, and QLever must not run as root
+        - name: Create the user that runs QLever
+          ansible.builtin.user:
+            name: drogevoeten
+          register: server_user
+
+        - name: Create the folder
+          ansible.builtin.file:
+            path: "{{ remote_dir }}"
+            state: directory
+            owner: drogevoeten
+            group: "{{ server_user.group }}"
+            mode: "0755"
+
+        - name: Copy the Compose file
+          ansible.builtin.copy:
+            src: "{{ qlever }}/docker-compose.yml"
+            dest: "{{ remote_dir }}/docker-compose.yml"
+            owner: drogevoeten
+            group: "{{ server_user.group }}"
+            mode: "0644"
+          register: compose_file
+
+        - name: Copy the Caddyfile
+          ansible.builtin.copy:
+            src: "{{ qlever }}/Caddyfile"
+            dest: "{{ remote_dir }}/Caddyfile"
+            owner: drogevoeten
+            group: "{{ server_user.group }}"
+            mode: "0644"
+          register: caddyfile
+
+        # Sized for 1 GB of memory and 1 vCPU, with a fresh access token
+        - name: Write the Qleverfile
+          ansible.builtin.copy:
+            content: "{{ lookup('ansible.builtin.file', qlever ~ '/Qleverfile')
+              | regex_replace('(?m)^ACCESS_TOKEN .*$', 'ACCESS_TOKEN = ' ~ access_token)
+              | regex_replace('(?m)^MEMORY_FOR_QUERIES .*$', 'MEMORY_FOR_QUERIES = 400M')
+              | regex_replace('(?m)^CACHE_MAX_SIZE .*$', 'CACHE_MAX_SIZE = 200M')
+              | regex_replace('(?m)^CACHE_MAX_SIZE_SINGLE_ENTRY .*$', 'CACHE_MAX_SIZE_SINGLE_ENTRY = 100M')
+              | regex_replace('(?m)^NUM_THREADS .*$', 'NUM_THREADS = 2') }}\n"
+            dest: "{{ remote_dir }}/Qleverfile"
+            owner: drogevoeten
+            group: "{{ server_user.group }}"
+            mode: "0600"
+          no_log: true
+          register: qleverfile
+
+        - name: Copy the index
+          ansible.builtin.copy:
+            src: "{{ item }}"
+            dest: "{{ remote_dir }}/"
+            owner: drogevoeten
+            group: "{{ server_user.group }}"
+            mode: "0644"
+          loop: "{{ query('ansible.builtin.fileglob', qlever ~ '/rijksmuseum-water.*') | reject('search', '-log\\.txt$') }}"
+          loop_control:
+            label: "{{ item | basename }}"
+          register: index
+
+        - name: Start the QLever server
+          community.docker.docker_compose_v2:
+            project_src: "{{ remote_dir }}"
+            profiles: [server]
+            # A running server keeps its old configuration and index
+            recreate: "{{ 'always' if (compose_file.changed or caddyfile.changed or qleverfile.changed or index.changed) else 'auto' }}"
+          environment:
+            UID: "{{ server_user.uid }}"
+            GID: "{{ server_user.group }}"
+
+    - name: Check that the SPARQL endpoint answers from here
+      ansible.builtin.uri:
+        url: "{{ endpoint }}/?query={{ 'SELECT (COUNT(*) AS ?n) WHERE { ?s ?p ?o }' | urlencode }}"
+        headers:
+          Accept: application/sparql-results+json
+        # A public endpoint: no login, and no failing on the permissions of a local ~/.netrc
+        use_netrc: false
+      delegate_to: localhost
+      register: endpoint_check
+      until: endpoint_check.status == 200 and endpoint_check.json.results.bindings[0].n.value | int > 0
+      retries: 12
+      delay: 10
+
+    - name: Report the endpoint
+      ansible.builtin.debug:
+        msg: "{{ endpoint }} serves {{ endpoint_check.json.results.bindings[0].n.value }} triples"

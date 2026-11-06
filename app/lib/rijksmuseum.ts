@@ -1,5 +1,5 @@
 /* Rijksmuseum images for a location. The data is a slim schema.org view of
-   the harvest, made by qlever/rijksmuseum/slim.py (the Rijksmuseum has no
+   the harvest, made by linkeddata/rijksmuseum/slim.py (the Rijksmuseum has no
    SPARQL endpoint). Two ways to query it with the same SPARQL:
    - our QLever endpoint (qlever/compose.sh), used by the app;
    - Comunica over a local N-Triples file, used by the test page. */

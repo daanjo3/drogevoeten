@@ -3,10 +3,7 @@ import datetime
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
-RAW = os.path.join(REPO, "prototype", "data", "raw", "v3")    # harvest of prototype/datalayer/fetch_v3.py
-RAW2 = os.path.join(REPO, "prototype", "data", "raw")         # older harvests (IMWA, ...)
-DATALAYER = os.path.join(REPO, "prototype", "datalayer")      # helpers we reuse (build_v3.py)
+RAW = os.path.join(HERE, "raw")    # written by harvest.py
 OUT = os.path.join(HERE, "build")
 TERMS = os.path.join(HERE, "terms")
 

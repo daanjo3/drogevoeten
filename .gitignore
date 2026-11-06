@@ -12,7 +12,8 @@ app/public/woonkamer/
 app/public/woonkamer-desktop/
 app/public/woonkamer-mobile/
 
-# Linked-data-omzetting: gegenereerde uitvoer en opgehaalde SHACL-shapes
+# Linked-data-omzetting: oogst, gegenereerde uitvoer en opgehaalde SHACL-shapes
+linkeddata/raw/
 linkeddata/build/
 linkeddata/shapes/*.ttl
 __pycache__/

@@ -1,6 +1,7 @@
 # Droge Voeten: bronlagen als linked data (NDE-Schema.org-toepassingsprofiel).
-# Invoer: de oogst van het prototype in ../prototype/data/raw/ (make restore of make harvest daar).
+#   make harvest    bronlagen ophalen -> raw/   (netwerk; slaat over wat er al is)
 #   make            datasets + catalogus + rapport -> build/   (offline, standaardbibliotheek)
+#   make rijksmuseum  Rijksmuseum-oogst, losse dataset -> build/rijksmuseum/   (~10 min, netwerk; slaat over wat er al is)
 #   make terms      termvoorstellen uit het Termennetwerk -> terms/*.csv   (netwerk)
 #   make shapes     NDE-SHACL-shapes ophalen (vastgepinde versie) -> shapes/
 #   make validate   SHACL-controle met pyshacl via uv (losse ontwikkelstap)
@@ -15,6 +16,13 @@ all: build
 
 build:
 	$(PY) build.py
+
+harvest:
+	$(PY) harvest.py
+
+rijksmuseum:
+	$(PY) rijksmuseum/harvest.py
+	$(PY) rijksmuseum/slim.py
 
 terms: build
 	$(PY) terms_lookup.py $(ARGS)
@@ -41,4 +49,4 @@ notebook: build
 clean:
 	rm -rf build
 
-.PHONY: all build terms assume check shapes validate notebook clean
+.PHONY: all build harvest rijksmuseum terms assume check shapes validate notebook clean

@@ -10,19 +10,23 @@ province.
 
 Idempotent: does nothing if the output already exists (pass --force to harvest
 again). The output is written to a temporary file first, so an interrupted run
-leaves no half-written harvest behind.
+leaves no half-written harvest behind. A request that keeps failing is skipped,
+so the harvest can be incomplete: the last line reports how many failed.
 
-Run with: python3 -I qlever/rijksmuseum/harvest.py [--force]
-          (or as the `data` service in qlever/docker-compose.yml)
-Output:   qlever/data/rijksmuseum-linked-art.nt (served by qlever/, see its Qleverfile)
+Run with: python3 -I linkeddata/rijksmuseum/harvest.py [--force]
+          (or `make rijksmuseum` in linkeddata/)
+Output:   linkeddata/build/rijksmuseum/rijksmuseum-linked-art.nt (served by qlever/, see its Qleverfile)
 """
 
 import argparse
 import concurrent.futures
+import functools
 import json
 import os
 import re
+import socket
 import sys
+import threading
 import time
 import urllib.parse
 import urllib.request
@@ -63,10 +67,24 @@ QUERIES = [
     )
 ]
 
-OUT = Path(__file__).resolve().parents[1] / "data" / "rijksmuseum-linked-art.nt"
+OUT = Path(__file__).resolve().parents[1] / "build" / "rijksmuseum" / "rijksmuseum-linked-art.nt"
 CRM = "http://www.cidoc-crm.org/cidoc-crm/"
 TRIPLE_IRI = re.compile(r"^<([^>]+)> <([^>]+)> <([^>]+)> \.$")
 BNODE = re.compile(r"_:([A-Za-z0-9]+)")
+
+
+# Every request opens a new connection, so look up a host once: thousands of lookups
+# can overwhelm a local DNS server. Failures raise, so they are not cached.
+socket.getaddrinfo = functools.lru_cache(maxsize=None)(socket.getaddrinfo)
+
+# Requests after their retries, for the report at the end. fetch_all runs get() in threads.
+requests = {"succeeded": 0, "failed": 0}
+requests_lock = threading.Lock()
+
+
+def count_request(outcome):
+    with requests_lock:
+        requests[outcome] += 1
 
 
 def get(url, retries=3):
@@ -74,10 +92,13 @@ def get(url, retries=3):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "drogevoeten-hackalod/0.1"})
             with urllib.request.urlopen(req, timeout=60) as resp:
-                return resp.read().decode("utf-8")
+                body = resp.read().decode("utf-8")
+            count_request("succeeded")
+            return body
         except Exception as exc:  # network errors and 5xx: back off and retry
             if attempt == retries - 1:
                 print(f"  failed {url}: {exc}", file=sys.stderr)
+                count_request("failed")
                 return None
             time.sleep(2 * (attempt + 1))
 
@@ -178,6 +199,7 @@ def main():
                 out.write(f'<{iri}> <{HARVEST}matchedSearch> "{hit}" .\n')
     os.replace(tmp, OUT)
     print(f"wrote {len(seen)} triples to {OUT}")
+    print(f"requests: {requests['succeeded']} succeeded, {requests['failed']} failed")
 
 
 if __name__ == "__main__":

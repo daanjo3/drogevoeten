@@ -43,7 +43,7 @@ We houden de datalaag en de presentatielaag gescheiden, volgens de NDE-visie "Va
 |---|---|
 | [`app/`](app/) | De webapp (presentatielaag): React, React Router en Vite, TypeScript, pnpm |
 | [`linkeddata/`](linkeddata/) | De datalaag: de bronlagen omgezet naar linked datasets met datasetbeschrijvingen, validatie en SPARQL-notebooks. Zie de [README daar](linkeddata/README.md) |
-| [`qlever/`](qlever/) | Een QLever-SPARQL-endpoint met de Rijksmuseum-set en onze linked data uit `linkeddata/`, in één store. De app leest daaruit de tijdlijn en de beelden (`VITE_SPARQL_URL`, standaard `http://localhost:7001`). Zonder endpoint valt de app terug op voorbeeldgegevens en vaste beelden |
+| [`qlever/`](qlever/) | Een QLever-SPARQL-endpoint met de datasets uit `linkeddata/` (onze linked data en de Rijksmuseum-set) in één store. Alleen de store en de index; de data wordt in `linkeddata/` gemaakt. De app leest daaruit de tijdlijn en de beelden (`VITE_SPARQL_URL`, standaard `http://localhost:7001`). Zonder endpoint valt de app terug op voorbeeldgegevens en vaste beelden |
 | [`prototype/`](prototype/) | Het webprototype van ronde 3 met de eerste datalaag in Python. Zie [`prototype/CONTEXT.md`](prototype/CONTEXT.md) |
 | [`unity/`](unity/) | Het Unity-project van de 3D-huiskamer |
 | [`design/`](design/) | De ontwerpreferentie: een werkend html-prototype en de ontwerpafspraken |

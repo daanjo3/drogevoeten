@@ -1,6 +1,6 @@
 # Droge Voeten als linked data
 
-Deze map zet de bronlagen die het prototype oogst (molens, gemalen, polders, dijken, ...) om naar losse linked datasets. Elke laag wordt een eigen dataset met een eigen datasetbeschrijving, zo veel mogelijk volgens de NDE-richtlijnen:
+Deze map oogst de bronlagen (molens, gemalen, polders, dijken, ...) en zet ze om naar losse linked datasets. Elke laag wordt een eigen dataset met een eigen datasetbeschrijving, zo veel mogelijk volgens de NDE-richtlijnen:
 - het NDE-Schema.org-toepassingsprofiel;
 - de Requirements for Datasets;
 - de visie "Van data naar dienst".
@@ -16,9 +16,10 @@ Uitgever en maker: **Team De Band (HackaLOD 2026)**. Links tussen de datasets vo
 ## Draaien
 
 ```bash
-cd prototype && make restore SNAPSHOT=<bestand.tar.zst>   # of: make harvest (de invoer staat in prototype/data/raw/)
-cd ../linkeddata
+cd linkeddata
+make harvest              # raw/: de bronlagen ophalen (netwerk; slaat over wat er al is, opnieuw met python3 -I harvest.py --force)
 make                      # build/: datasets, catalogus, rapport (offline, seconden)
+make rijksmuseum          # build/rijksmuseum/: de Rijksmuseum-set, los van de rest (netwerk, ~10 min)
 make terms                # review-tabellen terms/*.csv aanvullen met voorstellen uit het Termennetwerk (netwerk)
 make terms ARGS=--offline # alleen ontbrekende rijen toevoegen, zonder voorstellen
 make validate             # SHACL-controle tegen de NDE-shapes (pyshacl via uv)
@@ -38,8 +39,9 @@ Vereisten: Python 3 (alleen standaardbibliotheek, altijd `python3 -I`). Voor `va
 | `report.json` | Per dataset: bronobjecten tegenover records, wat is overgeslagen of aangepast en waarom, de zelfcontrole, en per veld de reviewstatus van termen en plaatsen |
 | `term-values.json` | Alle bronwaarden per veld (invoer voor `terms_lookup.py`) |
 | `validation.txt` | Uitkomst van `make validate` |
+| `rijksmuseum/` | De Rijksmuseum-set van `make rijksmuseum`. `make clean` gooit ook deze oogst weg |
 
-Voorbeeldqueries voor de VS Code-extensie *SPARQL Notebook* (Zazuko), op de bestanden in `build/`:
+Voorbeeldqueries voor de VS Code-extensie *SPARQL Notebook* (Zazuko), in `notebooks/`, op de bestanden in `build/`:
 
 | Notebook | Datasets |
 |---|---|
@@ -55,13 +57,13 @@ Voorbeeldqueries voor de VS Code-extensie *SPARQL Notebook* (Zazuko), op de best
 
 **Tijdlijn per adres:** `queries/timeline-polder.rq`, `timeline-gemalen.rq` en `timeline-dijken.rq` geven de indijking of droogmaking van de polder waarin een adres ligt, de stichting van de gemalen in de buurt (ca. 3 km) en de aanleg van de dijken in de buurt (ca. 250 m, alleen Zeeland). Vervang de `VALUES`-regel door de coördinaten van het adres. Elke query draait op een paar kleine datasets, in minder dan een tiende seconde (DECISIONS §30).
 
-**In de app:** het gecombineerde `build/droge-voeten.nt` staat ook in de QLever-store van `qlever/` (`./compose.sh` lokaal, `./deploy.sh` naar de VPS). De app vult de tijdlijn met QLever-versies van deze drie queries (`app/lib/timeline.ts`): QLever kent `geof:distance` wel, maar `geof:sfContains` alleen in eenvoudige vorm (DECISIONS §31).
+**In de app:** het gecombineerde `build/droge-voeten.nt` staat ook in de QLever-store van `qlever/` (`./compose.sh` lokaal, [`ansible/site.yml`](../ansible/README.md) naar de server). De app vult de tijdlijn met QLever-versies van deze drie queries (`app/lib/timeline.ts`): QLever kent `geof:distance` wel, maar `geof:sfContains` alleen in eenvoudige vorm (DECISIONS §31).
 
 `make notebook` maakt ze opnieuw en test elke query; de queries staan in `make_sparqlbook.py` (gemalen) en `notebook_cells.py` (de rest).
 
 ## Datasets
 
-Stand op 31-10-2026. Alle datasets komen uit de oogst van het prototype van 28-10-2026; details per dataset staan in [`PLAN.md`](PLAN.md).
+Stand op 31-10-2026. Alle datasets komen uit de oogst van 28-10-2026; details per dataset staan in [`PLAN.md`](PLAN.md).
 
 | Dataset | Bron | Records | Licentie |
 |---|---|---|---|
@@ -94,6 +96,10 @@ Termen, woonplaatsen en gebieden die in meer dan één dataset voorkomen, zijn �
 - het bemalingsgebied "De Beemster" is de droogmakerij.
 
 De regels staan in DECISIONS §29.
+
+## De Rijksmuseum-set
+
+`rijksmuseum/` oogst voorwerpen over overstromingen en waterbouw uit de collectie van het Rijksmuseum (`harvest.py`, Linked Art) en maakt daar een kleine schema.org-versie van voor de app (`slim.py`). De set hangt maar losjes samen met de rest. Hij zit daarom niet in `droge-voeten` of de catalogus en gaat niet door de NDE-controles. In de QLever-store krijgt hij eigen named graphs (zie `qlever/Qleverfile`).
 
 ## Review van termen en plaatsen
 

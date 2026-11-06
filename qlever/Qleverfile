@@ -4,21 +4,19 @@
 # Three named graphs; QLever's default graph is their union, so queries don't
 # need GRAPH clauses:
 #   - linked-art: the harvest in the Rijksmuseum's own model (CIDOC-CRM /
-#     Linked Art), written by rijksmuseum/harvest.py. Used by the notebook
+#     Linked Art), written by linkeddata/rijksmuseum/harvest.py. Used by the notebook
 #     exploration/notebooks/rijksmuseum-water.sparqlbook.
 #   - app: a small schema.org view of the same objects, written by
-#     rijksmuseum/slim.py. Used by app/lib/rijksmuseum.ts.
+#     linkeddata/rijksmuseum/slim.py. Used by app/lib/rijksmuseum.ts.
 #   - droge-voeten: all datasets of linkeddata/ in one file (its combined
-#     build/droge-voeten.nt, with the catalog), gzipped by compose.sh.
+#     build/droge-voeten.nt, with the catalog).
 #     Used by app/lib/timeline.ts. Its IRIs (urn:drogevoeten:...) and its
 #     dv: namespace differ from the Rijksmuseum graphs, so nothing collides.
 #
-# The `data` service in docker-compose.yml makes the Rijksmuseum files.
-# Without Docker (from the repo root; both skip work that is already done):
-#   python3 -I qlever/rijksmuseum/harvest.py   # ~10 min, network
-#   python3 -I qlever/rijksmuseum/slim.py      # seconds
-# The linked data is built locally (`make` in linkeddata/, needs the
-# prototype's harvest), never on the VPS: deploy.sh uploads the .nt.gz.
+# All input comes from linkeddata/build/ (`make` and `make rijksmuseum` there),
+# which docker-compose.yml mounts as /input. The `index` service indexes it on a
+# development machine; the server only gets the result (ansible/site.yml, which
+# also sets its [server] values).
 
 [data]
 NAME         = rijksmuseum-water
@@ -26,11 +24,12 @@ DESCRIPTION  = Rijksmuseum: objects about floods and water infrastructure, harve
 FORMAT       = nt
 
 [index]
-# Required by `qlever index` (it checks the files exist); MULTI_INPUT_JSON reads them
-INPUT_FILES      = data/rijksmuseum-linked-art.nt data/rijksmuseum-app.nt data/droge-voeten.nt.gz
-MULTI_INPUT_JSON = [{ "cmd": "cat data/rijksmuseum-linked-art.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-linked-art" },
-                    { "cmd": "cat data/rijksmuseum-app.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-app" },
-                    { "cmd": "zcat data/droge-voeten.nt.gz", "graph": "https://w3id.org/drogevoeten/graph/droge-voeten" }]
+# Required by `qlever index` (it checks the files exist); MULTI_INPUT_JSON reads them.
+# Relative to /data, because it can't glob absolute paths.
+INPUT_FILES      = ../input/rijksmuseum/rijksmuseum-linked-art.nt ../input/rijksmuseum/rijksmuseum-app.nt ../input/droge-voeten.nt
+MULTI_INPUT_JSON = [{ "cmd": "cat ../input/rijksmuseum/rijksmuseum-linked-art.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-linked-art" },
+                    { "cmd": "cat ../input/rijksmuseum/rijksmuseum-app.nt", "graph": "https://w3id.org/drogevoeten/graph/rijksmuseum-app" },
+                    { "cmd": "cat ../input/droge-voeten.nt", "graph": "https://w3id.org/drogevoeten/graph/droge-voeten" }]
 SETTINGS_JSON    = { "num-triples-per-batch": 1000000 }
 
 [server]
@@ -38,6 +37,8 @@ PORT               = 7001
 ACCESS_TOKEN       = rijksmuseum-water-local
 MEMORY_FOR_QUERIES = 2G
 CACHE_MAX_SIZE     = 1G
+CACHE_MAX_SIZE_SINGLE_ENTRY = 1G
+NUM_THREADS        = 8
 TIMEOUT            = 60s
 
 # native, because docker-compose.yml already runs these commands inside the

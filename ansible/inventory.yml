@@ -1,0 +1,7 @@
+# The server for the SPARQL endpoint. The login user comes from your SSH config.
+all:
+  children:
+    qlever_server:
+      hosts:
+        sparql_drogevoeten_app:
+          ansible_host: 188.166.119.39
